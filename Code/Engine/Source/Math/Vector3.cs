@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 
 namespace Entmoot.Engine
 {
-	public sealed class Entity
+	public struct Vector3
 	{
-		public Vector3 Position;
+		public float X;
+		public float Y;
+		public float Z;
 	}
 }
