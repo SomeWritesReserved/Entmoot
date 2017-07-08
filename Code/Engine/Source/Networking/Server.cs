@@ -10,28 +10,44 @@ namespace Entmoot.Engine.Server
 	{
 		#region Fields
 
-		private int frameTick;
 		private List<ClientConnection> clients = new List<ClientConnection>();
 
 		#endregion Fields
 
 		#region Constructors
 
-		public Server(IEnumerable<INetworkConnection> clientNetworkConnections)
+		public Server(IEnumerable<INetworkConnection> clientNetworkConnections, IEnumerable<Entity> entities)
 		{
 			this.clients = clientNetworkConnections.Select((netConn) => new ClientConnection(netConn)).ToList();
+			this.entities = entities.ToList();
 		}
 
 		#endregion Constructors
 
+		#region Properties
+
+		private int frameTick;
+		public int FrameTick
+		{
+			get { return this.frameTick; }
+		}
+
+		private List<Entity> entities = new List<Entity>();
+		public IList<Entity> Entities
+		{
+			get { return this.entities.AsReadOnly(); }
+		}
+
+		#endregion Properties
+
 		#region Methods
 
-		public void Update(Entity[] entities)
+		public void Update()
 		{
 			StateSnapshot stateSnapshot = new StateSnapshot()
 			{
 				FrameTick = this.frameTick,
-				Entities = entities,
+				Entities = this.Entities.ToArray(),
 			};
 			foreach (ClientConnection client in this.clients)
 			{

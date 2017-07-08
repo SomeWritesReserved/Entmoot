@@ -54,6 +54,7 @@
     <Reference Include="Entmoot.Engine">
       <HintPath>..\Engine\bin\Entmoot.Engine.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />

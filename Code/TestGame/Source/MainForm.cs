@@ -33,13 +33,16 @@ namespace Entmoot.TestGame
 
 			this.serverEntities = new Entity[]
 			{
-				new Entity() { Position = new Vector3(10, 10, 0), },
-				new Entity() { Position = new Vector3(20, 40, 0), },
+				new Entity() { Position = new Vector3(50, 50, 0), },
+				new Entity() { Position = new Vector3(60, 80, 0), },
 			};
 
 			this.clientServerNetworkConnection = new MockNetworkConnection();
 			this.client = new Client(this.clientServerNetworkConnection);
-			this.server = new Server(new[] { this.clientServerNetworkConnection });
+			this.server = new Server(new[] { this.clientServerNetworkConnection }, this.serverEntities);
+
+			this.clientGroupBox.Tag = this.client;
+			this.serverGroupBox.Tag = this.server;
 		}
 
 		#endregion Constructors
@@ -49,13 +52,15 @@ namespace Entmoot.TestGame
 		private void serverTimer_Tick(object sender, EventArgs e)
 		{
 			this.clientServerNetworkConnection.CurrentContext = ClientServerContext.Server;
-			this.server.Update(this.serverEntities);
+			this.server.Update();
+			this.serverGroupBox.Refresh();
 		}
 
 		private void clientTimer_Tick(object sender, EventArgs e)
 		{
 			this.clientServerNetworkConnection.CurrentContext = ClientServerContext.Client;
 			this.client.Update();
+			this.clientGroupBox.Refresh();
 		}
 
 		#endregion Events
@@ -71,6 +76,16 @@ namespace Entmoot.TestGame
 		}
 
 		#endregion Methods
+
+		private void gameGroupBox_Paint(object sender, PaintEventArgs e)
+		{
+			dynamic entityContainer = ((Control)sender).Tag;
+			IList<Entity> entities = entityContainer.Entities;
+			foreach (Entity entity in entities)
+			{
+				e.Graphics.FillRectangle(Brushes.Black, entity.Position.X, entity.Position.Y, 3, 3);
+			}
+		}
 	}
 
 	public class MockNetworkConnection : INetworkConnection

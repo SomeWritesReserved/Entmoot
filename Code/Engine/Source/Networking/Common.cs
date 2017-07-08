@@ -18,6 +18,28 @@ namespace Entmoot.Engine
 
 		#region Methods
 
+		public static StateSnapshot DeserializePacket(byte[] packet)
+		{
+			StateSnapshot stateSnapshot = new StateSnapshot();
+			using (MemoryStream memoryStream = new MemoryStream(packet, 0, packet.Length, false))
+			{
+				using (BinaryReader binaryReader = new BinaryReader(memoryStream))
+				{
+					stateSnapshot.FrameTick = binaryReader.ReadInt32();
+					List<Entity> entities = new List<Entity>(16);
+					while (memoryStream.Position < memoryStream.Length)
+					{
+						entities.Add(new Entity()
+						{
+							Position = new Vector3(binaryReader.ReadSingle(), binaryReader.ReadSingle(), binaryReader.ReadSingle()),
+						});
+					}
+					stateSnapshot.Entities = entities.ToArray();
+				}
+			}
+			return stateSnapshot;
+		}
+
 		public byte[] SerializePacket()
 		{
 			byte[] packet = new byte[sizeof(int) + sizeof(float) * 3 * this.Entities.Length];

@@ -44,6 +44,7 @@
 			this.serverGroupBox.TabIndex = 0;
 			this.serverGroupBox.TabStop = false;
 			this.serverGroupBox.Text = "Server";
+			this.serverGroupBox.Paint += new System.Windows.Forms.PaintEventHandler(this.gameGroupBox_Paint);
 			// 
 			// clientGroupBox
 			// 
@@ -54,6 +55,7 @@
 			this.clientGroupBox.TabIndex = 1;
 			this.clientGroupBox.TabStop = false;
 			this.clientGroupBox.Text = "Client";
+			this.clientGroupBox.Paint += new System.Windows.Forms.PaintEventHandler(this.gameGroupBox_Paint);
 			// 
 			// serverTimer
 			// 
