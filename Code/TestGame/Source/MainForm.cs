@@ -53,8 +53,8 @@ namespace Entmoot.TestGame
 		{
 			this.clientServerNetworkConnection.CurrentContext = ClientServerContext.Server;
 
-			this.serverEntities[0].Position.X = (float)Math.Cos(this.server.FrameTick * 0.15) * 10 + 50;
-			this.serverEntities[0].Position.Y = (float)Math.Sin(this.server.FrameTick * 0.15) * 10 + 50;
+			this.serverEntities[0].Position.X = (float)Math.Cos(this.server.FrameTick * 0.025) * 50 + 100;
+			this.serverEntities[0].Position.Y = (float)Math.Sin(this.server.FrameTick * 0.025) * 50 + 100;
 
 			this.server.Update();
 			this.serverGroupBox.Refresh();
