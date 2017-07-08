@@ -44,14 +44,17 @@ namespace Entmoot.Engine.Server
 
 		public void Update()
 		{
-			StateSnapshot stateSnapshot = new StateSnapshot()
+			if (this.FrameTick % 4 == 0)
 			{
-				FrameTick = this.frameTick,
-				Entities = this.Entities.ToArray(),
-			};
-			foreach (ClientConnection client in this.clients)
-			{
-				client.SendStateSnapshot(stateSnapshot);
+				StateSnapshot stateSnapshot = new StateSnapshot()
+				{
+					FrameTick = this.frameTick,
+					Entities = this.Entities.ToArray(),
+				};
+				foreach (ClientConnection client in this.clients)
+				{
+					client.SendStateSnapshot(stateSnapshot);
+				}
 			}
 			this.frameTick++;
 		}
