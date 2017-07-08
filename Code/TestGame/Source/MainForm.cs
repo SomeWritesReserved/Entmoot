@@ -52,6 +52,10 @@ namespace Entmoot.TestGame
 		private void serverTimer_Tick(object sender, EventArgs e)
 		{
 			this.clientServerNetworkConnection.CurrentContext = ClientServerContext.Server;
+
+			this.serverEntities[0].Position.X = (float)Math.Cos(this.server.FrameTick * 0.15) * 10 + 50;
+			this.serverEntities[0].Position.Y = (float)Math.Sin(this.server.FrameTick * 0.15) * 10 + 50;
+
 			this.server.Update();
 			this.serverGroupBox.Refresh();
 		}
@@ -134,5 +138,17 @@ namespace Entmoot.TestGame
 	{
 		Client,
 		Server,
+	}
+
+	public class DoubleBufferedGroupBox : GroupBox
+	{
+		#region Constructors
+
+		public DoubleBufferedGroupBox()
+		{
+			this.DoubleBuffered = true;
+		}
+
+		#endregion Constructors
 	}
 }

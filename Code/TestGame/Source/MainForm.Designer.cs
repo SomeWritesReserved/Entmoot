@@ -29,8 +29,8 @@
 		private void InitializeComponent()
 		{
 			this.components = new System.ComponentModel.Container();
-			this.serverGroupBox = new System.Windows.Forms.GroupBox();
-			this.clientGroupBox = new System.Windows.Forms.GroupBox();
+			this.serverGroupBox = new Entmoot.TestGame.DoubleBufferedGroupBox();
+			this.clientGroupBox = new Entmoot.TestGame.DoubleBufferedGroupBox();
 			this.serverTimer = new System.Windows.Forms.Timer(this.components);
 			this.clientTimer = new System.Windows.Forms.Timer(this.components);
 			this.SuspendLayout();
@@ -59,10 +59,12 @@
 			// 
 			// serverTimer
 			// 
+			this.serverTimer.Interval = 25;
 			this.serverTimer.Tick += new System.EventHandler(this.serverTimer_Tick);
 			// 
 			// clientTimer
 			// 
+			this.clientTimer.Interval = 25;
 			this.clientTimer.Tick += new System.EventHandler(this.clientTimer_Tick);
 			// 
 			// MainForm
@@ -79,11 +81,10 @@
 		}
 
 		#endregion
-
-		private System.Windows.Forms.GroupBox serverGroupBox;
-		private System.Windows.Forms.GroupBox clientGroupBox;
 		private System.Windows.Forms.Timer serverTimer;
 		private System.Windows.Forms.Timer clientTimer;
+		private DoubleBufferedGroupBox serverGroupBox;
+		private DoubleBufferedGroupBox clientGroupBox;
 	}
 }
 
