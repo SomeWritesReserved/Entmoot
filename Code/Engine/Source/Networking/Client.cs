@@ -11,13 +11,15 @@ namespace Entmoot.Engine.Client
 		#region Fields
 
 		private int frameTick;
+		private INetworkConnection serverNetworkConnection;
 
 		#endregion Fields
 
 		#region Constructors
 
-		public Client()
+		public Client(INetworkConnection serverNetworkConnection)
 		{
+			this.serverNetworkConnection = serverNetworkConnection;
 		}
 
 		#endregion Constructors
