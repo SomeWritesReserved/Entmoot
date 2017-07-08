@@ -14,6 +14,14 @@ namespace Entmoot.Engine.Client
 
 		#endregion Fields
 
+		#region Constructors
+
+		public Client()
+		{
+		}
+
+		#endregion Constructors
+
 		#region Methods
 
 		public void Update()

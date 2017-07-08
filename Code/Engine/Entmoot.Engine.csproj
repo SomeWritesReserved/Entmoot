@@ -42,6 +42,7 @@
     <Compile Include="Source\Core\Entity.cs" />
     <Compile Include="Source\Math\Vector3.cs" />
     <Compile Include="Source\Networking\Client.cs" />
+    <Compile Include="Source\Networking\Common.cs" />
     <Compile Include="Source\Networking\Server.cs" />
   </ItemGroup>
   <ItemGroup />
