@@ -10,7 +10,7 @@ namespace Entmoot.Engine.Client
 	{
 		#region Fields
 
-		private int lastReceivedServerTick = -1;
+		private int lastestReceivedServerPacket = -1;
 		private INetworkConnection serverNetworkConnection;
 
 		#endregion Fields
@@ -47,10 +47,15 @@ namespace Entmoot.Engine.Client
 			while (this.serverNetworkConnection.HasIncomingPackets)
 			{
 				StateSnapshot stateSnapshot = StateSnapshot.DeserializePacket(this.serverNetworkConnection.GetNextIncomingPacket());
-				if (stateSnapshot.FrameTick <= lastReceivedServerTick) { continue; }
+				if (stateSnapshot.FrameTick <= lastestReceivedServerPacket)
+				{
+					LogStats.Client_NumOutOfOrderPackets++;
+					continue;
+				}
 
 				this.entities = stateSnapshot.Entities;
-				this.lastReceivedServerTick = stateSnapshot.FrameTick;
+				this.lastestReceivedServerPacket = stateSnapshot.FrameTick;
+				LogStats.Client_LatestReceivedServerPacket = this.lastestReceivedServerPacket;
 			}
 			this.frameTick++;
 		}
