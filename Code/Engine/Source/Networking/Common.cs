@@ -64,12 +64,6 @@ namespace Entmoot.Engine
 
 	public interface INetworkConnection
 	{
-		#region Properties
-
-		bool HasIncomingPackets { get; }
-
-		#endregion Properties
-
 		#region Methods
 
 		byte[] GetNextIncomingPacket();

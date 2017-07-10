@@ -37,7 +37,12 @@ namespace Entmoot.TestGame
 				new Entity() { Position = new Vector3(60, 80, 0), },
 			};
 
-			this.clientServerNetworkConnection = new MockNetworkConnection();
+			this.clientServerNetworkConnection = new MockNetworkConnection()
+			{
+				SimulatedLatency = 100,
+				SimulatedJitter = 10,
+				SimulatedPacketLoss = 0.05,
+			};
 			this.client = new Client(this.clientServerNetworkConnection);
 			this.server = new Server(new[] { this.clientServerNetworkConnection }, this.serverEntities);
 
@@ -96,8 +101,9 @@ namespace Entmoot.TestGame
 	{
 		#region Fields
 
-		private Queue<byte[]> incomingPacketsForClient = new Queue<byte[]>();
-		private Queue<byte[]> incomingPacketsForServer = new Queue<byte[]>();
+		private Random random = new Random();
+		private List<SentPacket> incomingPacketsForClient = new List<SentPacket>();
+		private List<SentPacket> incomingPacketsForServer = new List<SentPacket>();
 
 		#endregion Fields
 
@@ -105,10 +111,11 @@ namespace Entmoot.TestGame
 
 		public ClientServerContext CurrentContext { get; set; }
 
-		public bool HasIncomingPackets
-		{
-			get { return (this.CurrentContext == ClientServerContext.Client) ? this.incomingPacketsForClient.Any() : this.incomingPacketsForServer.Any(); }
-		}
+		public double SimulatedLatency { get; set; }
+
+		public double SimulatedJitter { get; set; }
+
+		public double SimulatedPacketLoss { get; set; }
 
 		#endregion Properties
 
@@ -116,22 +123,52 @@ namespace Entmoot.TestGame
 
 		public byte[] GetNextIncomingPacket()
 		{
-			return (this.CurrentContext == ClientServerContext.Client) ? this.incomingPacketsForClient.Dequeue() : this.incomingPacketsForServer.Dequeue();
+			return (this.CurrentContext == ClientServerContext.Client) ? this.getArrivedPacket(this.incomingPacketsForClient) : this.getArrivedPacket(this.incomingPacketsForServer);
 		}
 
 		public void SendPacket(byte[] packet)
 		{
+			if (random.NextDouble() < this.SimulatedPacketLoss) { return; }
+
+			int arrivalTick = (int)(Environment.TickCount + this.SimulatedLatency + (this.random.NextDouble() - this.random.NextDouble()) * this.SimulatedJitter);
+			SentPacket sentPacket = new SentPacket() { ArrivalTimeTick = arrivalTick, Data = packet };
 			if (this.CurrentContext == ClientServerContext.Client)
 			{
-				this.incomingPacketsForServer.Enqueue(packet);
+				this.incomingPacketsForServer.Add(sentPacket);
 			}
 			else
 			{
-				this.incomingPacketsForClient.Enqueue(packet);
+				this.incomingPacketsForClient.Add(sentPacket);
 			}
 		}
 
+		private byte[] getArrivedPacket(List<SentPacket> incomingPackets)
+		{
+			int now = Environment.TickCount;
+			SentPacket packet = incomingPackets.SingleOrDefault((p) => p.ArrivalTimeTick <= now);
+			if (packet != null)
+			{
+				incomingPackets.Remove(packet);
+			}
+			return packet?.Data;
+		}
+
 		#endregion Methods
+
+		#region Nested Types
+
+		private class SentPacket
+		{
+			#region Properties
+
+			public int ArrivalTimeTick { get; set; }
+
+			public byte[] Data { get; set; }
+
+			#endregion Properties
+		}
+
+		#endregion Nested Types
 	}
 
 	public enum ClientServerContext

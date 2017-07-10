@@ -44,9 +44,12 @@ namespace Entmoot.Engine.Client
 
 		public void Update()
 		{
-			while (this.serverNetworkConnection.HasIncomingPackets)
+			while (true)
 			{
-				StateSnapshot stateSnapshot = StateSnapshot.DeserializePacket(this.serverNetworkConnection.GetNextIncomingPacket());
+				byte[] packet = this.serverNetworkConnection.GetNextIncomingPacket();
+				if (packet == null) { break; }
+
+				StateSnapshot stateSnapshot = StateSnapshot.DeserializePacket(packet);
 				if (stateSnapshot.FrameTick <= lastestReceivedServerPacket)
 				{
 					LogStats.Client_NumOutOfOrderPackets++;
