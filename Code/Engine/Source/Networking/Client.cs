@@ -12,6 +12,7 @@ namespace Entmoot.Engine.Client
 
 		private int lastestReceivedServerPacket = -1;
 		private INetworkConnection serverNetworkConnection;
+		private SortedList<int, StateSnapshot> receivedStateSnapshots = new SortedList<int, StateSnapshot>(64);
 
 		#endregion Fields
 
@@ -44,23 +45,43 @@ namespace Entmoot.Engine.Client
 
 		public void Update()
 		{
-			while (true)
+			byte[] packet;
+			while ((packet = this.serverNetworkConnection.GetNextIncomingPacket()) != null)
 			{
-				byte[] packet = this.serverNetworkConnection.GetNextIncomingPacket();
-				if (packet == null) { break; }
-
 				StateSnapshot stateSnapshot = StateSnapshot.DeserializePacket(packet);
-				if (stateSnapshot.FrameTick <= lastestReceivedServerPacket)
+				this.receivedStateSnapshots.Add(stateSnapshot.FrameTick, stateSnapshot);
+
+				if (this.lastestReceivedServerPacket < 0)
 				{
-					LogStats.Client_NumOutOfOrderPackets++;
-					continue;
+					this.frameTick = stateSnapshot.FrameTick;
 				}
 
-				this.entities = stateSnapshot.Entities;
 				this.lastestReceivedServerPacket = stateSnapshot.FrameTick;
 				LogStats.Client_LatestReceivedServerPacket = this.lastestReceivedServerPacket;
 			}
 			this.frameTick++;
+
+			int renderFrameTick = this.frameTick - 8;
+			StateSnapshot interpolatedBeginState = null;
+			StateSnapshot interpolatedEndState = null;
+			foreach (var kvp in this.receivedStateSnapshots)
+			{
+				StateSnapshot stateSnapshot = kvp.Value;
+				if (stateSnapshot.FrameTick <= renderFrameTick)
+				{
+					interpolatedBeginState = stateSnapshot;
+				}
+				if (stateSnapshot.FrameTick > renderFrameTick)
+				{
+					interpolatedEndState = stateSnapshot;
+					break;
+				}
+			}
+
+			if (interpolatedBeginState != null && interpolatedEndState != null)
+			{
+				this.entities = StateSnapshot.Interpolate(interpolatedBeginState, interpolatedEndState, renderFrameTick).Entities;
+			}
 		}
 
 		#endregion Methods

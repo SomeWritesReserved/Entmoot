@@ -18,6 +18,25 @@ namespace Entmoot.Engine
 
 		#region Methods
 
+		public static StateSnapshot Interpolate(StateSnapshot stateSnapshotA, StateSnapshot stateSnapshotB, int frameTick)
+		{
+			float amount = ((float)frameTick - stateSnapshotA.FrameTick) / ((float)stateSnapshotB.FrameTick - stateSnapshotA.FrameTick);
+
+			Entity[] interpolatedEntities = new Entity[stateSnapshotA.Entities.Length];
+			foreach (int entityIndex in Enumerable.Range(0, interpolatedEntities.Length))
+			{
+				interpolatedEntities[entityIndex] = new Entity()
+				{
+					Position = Vector3.Interpolate(stateSnapshotA.Entities[entityIndex].Position, stateSnapshotB.Entities[entityIndex].Position, amount),
+				};
+			}
+			return new StateSnapshot()
+			{
+				FrameTick = frameTick,
+				Entities = interpolatedEntities,
+			};
+		}
+
 		public static StateSnapshot DeserializePacket(byte[] packet)
 		{
 			StateSnapshot stateSnapshot = new StateSnapshot();

@@ -26,5 +26,16 @@ namespace Entmoot.Engine
 		}
 
 		#endregion Constructors
+
+		#region Methods
+
+		public static Vector3 Interpolate(Vector3 vectorA, Vector3 vectorB, float amount)
+		{
+			return new Vector3(vectorA.X + (vectorB.X - vectorA.X) * amount,
+				vectorA.Y + (vectorB.Y - vectorA.Y) * amount,
+				vectorA.Z + (vectorB.Z - vectorA.Z) * amount);
+		}
+
+		#endregion Methods
 	}
 }

@@ -40,8 +40,8 @@ namespace Entmoot.TestGame
 			this.clientServerNetworkConnection = new MockNetworkConnection()
 			{
 				SimulatedLatency = 100,
-				SimulatedJitter = 10,
-				SimulatedPacketLoss = 0.05,
+				SimulatedJitter = 0,
+				SimulatedPacketLoss = 0,
 			};
 			this.client = new Client(this.clientServerNetworkConnection);
 			this.server = new Server(new[] { this.clientServerNetworkConnection }, this.serverEntities);
