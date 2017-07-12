@@ -39,6 +39,7 @@ namespace Entmoot.Engine.Client
 			get { return Array.AsReadOnly(this.entities); }
 		}
 
+		public bool ShouldInterpolate { get; set; } = true;
 		public int RenderFrameTick { get; set; } = -8;
 		public int InterpolatedStartTick { get; set; }
 		public int InterpolatedEndTick { get; set; }
@@ -68,35 +69,44 @@ namespace Entmoot.Engine.Client
 			}
 			this.frameTick++;
 
-			// Todo: this delay should be: frame - (updaterate + 1/2latency) * 0.1fudgefactor
-			this.RenderFrameTick = this.frameTick - 10;
-			StateSnapshot interpolatedBeginState = null;
-			StateSnapshot interpolatedEndState = null;
-			foreach (var kvp in this.ReceivedStateSnapshots)
+			if (this.ShouldInterpolate)
 			{
-				StateSnapshot stateSnapshot = kvp.Value;
-				if (stateSnapshot.FrameTick <= this.RenderFrameTick)
+				// Todo: this delay should be: frame - (updaterate + 1/2latency) * 0.1fudgefactor
+				this.RenderFrameTick = this.frameTick - 10;
+				StateSnapshot interpolatedBeginState = null;
+				StateSnapshot interpolatedEndState = null;
+				foreach (var kvp in this.ReceivedStateSnapshots)
 				{
-					interpolatedBeginState = stateSnapshot;
+					StateSnapshot stateSnapshot = kvp.Value;
+					if (stateSnapshot.FrameTick <= this.RenderFrameTick)
+					{
+						interpolatedBeginState = stateSnapshot;
+					}
+					if (stateSnapshot.FrameTick > this.RenderFrameTick)
+					{
+						interpolatedEndState = stateSnapshot;
+						break;
+					}
 				}
-				if (stateSnapshot.FrameTick > this.RenderFrameTick)
+
+				if (interpolatedBeginState != null && interpolatedEndState != null)
 				{
-					interpolatedEndState = stateSnapshot;
-					break;
+					this.InterpolatedStartTick = interpolatedBeginState.FrameTick;
+					this.InterpolatedEndTick = interpolatedEndState.FrameTick;
+					this.entities = StateSnapshot.Interpolate(interpolatedBeginState, interpolatedEndState, this.RenderFrameTick).Entities;
+					this.IsInterpolationValid = true;
 				}
-			}
-
-
-			if (interpolatedBeginState != null && interpolatedEndState != null)
-			{
-				this.InterpolatedStartTick = interpolatedBeginState.FrameTick;
-				this.InterpolatedEndTick = interpolatedEndState.FrameTick;
-				this.entities = StateSnapshot.Interpolate(interpolatedBeginState, interpolatedEndState, this.RenderFrameTick).Entities;
-				this.IsInterpolationValid = true;
+				else
+				{
+					this.IsInterpolationValid = false;
+				}
 			}
 			else
 			{
-				this.IsInterpolationValid = false;
+				if (this.ReceivedStateSnapshots.Any())
+				{
+					this.entities = this.ReceivedStateSnapshots.Last().Value.Entities;
+				}
 			}
 		}
 
