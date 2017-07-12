@@ -54,6 +54,9 @@ namespace Entmoot.TestGame
 
 			this.clientGroupBox.Tag = this.client;
 			this.serverGroupBox.Tag = this.server;
+
+			this.clientPacketTimelineDisplay.NetworkConnection = this.clientServerNetworkConnection;
+			this.clientPacketTimelineDisplay.ClientServerContext = ClientServerContext.Client;
 		}
 
 		#endregion Constructors
@@ -71,6 +74,7 @@ namespace Entmoot.TestGame
 
 			this.server.Update();
 			this.serverGroupBox.Refresh();
+			this.clientPacketTimelineDisplay.Refresh();
 			this.serverStepsRemaining--;
 		}
 
@@ -81,6 +85,7 @@ namespace Entmoot.TestGame
 			this.clientServerNetworkConnection.CurrentContext = ClientServerContext.Client;
 			this.client.Update();
 			this.clientGroupBox.Refresh();
+			this.clientPacketTimelineDisplay.Refresh();
 			this.clientStepsRemaining--;
 		}
 
@@ -111,6 +116,12 @@ namespace Entmoot.TestGame
 			{
 				this.clientStepsRemaining = 0;
 			}
+		}
+
+		private void runBothButton_Click(object sender, EventArgs e)
+		{
+			this.serverStepsRemaining = -1;
+			this.clientStepsRemaining = -1;
 		}
 
 		private void clientStepButton_Click(object sender, EventArgs e)
@@ -149,8 +160,10 @@ namespace Entmoot.TestGame
 		#region Fields
 
 		private Random random = new Random(12345);
-		private List<SentPacket> incomingPacketsForClient = new List<SentPacket>();
-		private List<SentPacket> incomingPacketsForServer = new List<SentPacket>();
+		public List<SentPacket> IncomingPacketsForClient = new List<SentPacket>();
+		public List<SentPacket> IncomingPacketsForServer = new List<SentPacket>();
+		public List<SentPacket> OldPacketsForClient = new List<SentPacket>();
+		public List<SentPacket> OldPacketsForServer = new List<SentPacket>();
 
 		#endregion Fields
 
@@ -177,7 +190,7 @@ namespace Entmoot.TestGame
 
 		public byte[] GetNextIncomingPacket()
 		{
-			return (this.CurrentContext == ClientServerContext.Client) ? this.getArrivedPacket(this.incomingPacketsForClient) : this.getArrivedPacket(this.incomingPacketsForServer);
+			return (this.CurrentContext == ClientServerContext.Client) ? this.getArrivedPacket(this.IncomingPacketsForClient, this.OldPacketsForClient) : this.getArrivedPacket(this.IncomingPacketsForServer, this.OldPacketsForServer);
 		}
 
 		public void SendPacket(byte[] packet)
@@ -193,23 +206,24 @@ namespace Entmoot.TestGame
 			{
 				int arrivalTick = (int)(this.Client.FrameTick + this.SimulatedLatency + (this.random.NextDouble() - this.random.NextDouble()) * this.SimulatedJitter);
 				SentPacket sentPacket = new SentPacket() { ArrivalTick = arrivalTick, Data = packet };
-				this.incomingPacketsForServer.Add(sentPacket);
+				this.IncomingPacketsForServer.Add(sentPacket);
 			}
 			else
 			{
 				int arrivalTick = (int)(this.Server.FrameTick + this.SimulatedLatency + (this.random.NextDouble() - this.random.NextDouble()) * this.SimulatedJitter);
 				SentPacket sentPacket = new SentPacket() { ArrivalTick = arrivalTick, Data = packet };
-				this.incomingPacketsForClient.Add(sentPacket);
+				this.IncomingPacketsForClient.Add(sentPacket);
 			}
 		}
 
-		private byte[] getArrivedPacket(List<SentPacket> incomingPackets)
+		private byte[] getArrivedPacket(List<SentPacket> incomingPackets, List<SentPacket> oldPackets)
 		{
 			int now = (this.CurrentContext == ClientServerContext.Client) ? this.Client.FrameTick : this.Server.FrameTick;
 			SentPacket packet = incomingPackets.FirstOrDefault((p) => p.ArrivalTick <= now);
 			if (packet != null)
 			{
 				incomingPackets.Remove(packet);
+				oldPackets.Add(packet);
 			}
 			return packet?.Data;
 		}
@@ -218,7 +232,7 @@ namespace Entmoot.TestGame
 
 		#region Nested Types
 
-		private class SentPacket
+		public class SentPacket
 		{
 			#region Properties
 
@@ -248,5 +262,62 @@ namespace Entmoot.TestGame
 		}
 
 		#endregion Constructors
+	}
+
+	public class PacketTimelineDisplay : Label
+	{
+		#region Constructors
+
+		public PacketTimelineDisplay()
+		{
+			this.DoubleBuffered = true;
+		}
+
+		#endregion Constructors
+
+		#region Properties
+
+		public MockNetworkConnection NetworkConnection { get; set; }
+
+		public ClientServerContext ClientServerContext { get; set; }
+
+		#endregion Properties
+
+		#region Methods
+
+		protected override void OnPaint(PaintEventArgs e)
+		{
+			if (this.NetworkConnection == null) { return; }
+
+			float centerX = this.Width / 2.0f;
+			float centerY = this.Height / 2.0f;
+			int now = (this.ClientServerContext == ClientServerContext.Client) ? this.NetworkConnection.Client.FrameTick : this.NetworkConnection.Server.FrameTick;
+			var incomingPackets = (this.ClientServerContext == ClientServerContext.Client) ? this.NetworkConnection.IncomingPacketsForClient : this.NetworkConnection.IncomingPacketsForServer;
+			var oldPackets = (this.ClientServerContext == ClientServerContext.Client) ? this.NetworkConnection.OldPacketsForClient : this.NetworkConnection.OldPacketsForServer;
+
+			Func<int, float> timeToX = (time) => time * 12.0f;
+
+			e.Graphics.DrawLine(Pens.Gray, -1000, centerY, 2000, centerY);
+
+			foreach (var incomingPacket in incomingPackets)
+			{
+				var packetTick = StateSnapshot.DeserializePacket(incomingPacket.Data).FrameTick;
+				e.Graphics.DrawLine(Pens.Black, timeToX(incomingPacket.ArrivalTick) - 4, centerY - 4, timeToX(incomingPacket.ArrivalTick), centerY);
+				e.Graphics.DrawLine(Pens.Black, timeToX(incomingPacket.ArrivalTick), centerY, timeToX(incomingPacket.ArrivalTick) + 4, centerY - 4);
+				e.Graphics.DrawString(packetTick.ToString(), this.Font, Brushes.Black, timeToX(incomingPacket.ArrivalTick) - 6, centerY - 20);
+			}
+
+			foreach (var incomingPacket in oldPackets)
+			{
+				var packetTick = StateSnapshot.DeserializePacket(incomingPacket.Data).FrameTick;
+				e.Graphics.DrawLine(Pens.Gray, timeToX(incomingPacket.ArrivalTick) - 4, centerY - 4, timeToX(incomingPacket.ArrivalTick), centerY);
+				e.Graphics.DrawLine(Pens.Gray, timeToX(incomingPacket.ArrivalTick), centerY, timeToX(incomingPacket.ArrivalTick) + 4, centerY - 4);
+				e.Graphics.DrawString(packetTick.ToString(), this.Font, Brushes.Gray, timeToX(incomingPacket.ArrivalTick) - 6, centerY - 20);
+			}
+
+			e.Graphics.DrawLine(Pens.Blue, timeToX(now), 0, timeToX(now), this.Height);
+		}
+
+		#endregion Methods
 	}
 }
