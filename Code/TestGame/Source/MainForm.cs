@@ -346,13 +346,19 @@ namespace Entmoot.TestGame
 			{
 				foreach (var kvp in this.NetworkConnection.Client.ReceivedStateSnapshots)
 				{
+					Pen snapshotPen = Pens.Black;
+					if (this.NetworkConnection.Client.IsInterpolationValid && (this.NetworkConnection.Client.InterpolatedStartTick == kvp.Key ||
+						this.NetworkConnection.Client.InterpolatedEndTick == kvp.Key))
+					{
+						snapshotPen = Pens.Red;
+					}
 					StateSnapshot receivedStateSnapshot = kvp.Value;
-					e.Graphics.DrawLine(Pens.Black, timeToX(receivedStateSnapshot.FrameTick) - 4, centerY + 4, timeToX(receivedStateSnapshot.FrameTick), centerY);
-					e.Graphics.DrawLine(Pens.Black, timeToX(receivedStateSnapshot.FrameTick), centerY, timeToX(receivedStateSnapshot.FrameTick) + 4, centerY + 4);
-					e.Graphics.DrawString(receivedStateSnapshot.FrameTick.ToString(), this.Font, Brushes.Black, timeToX(receivedStateSnapshot.FrameTick) - 6, centerY + 6);
+					e.Graphics.DrawLine(snapshotPen, timeToX(receivedStateSnapshot.FrameTick) - 4, centerY + 4, timeToX(receivedStateSnapshot.FrameTick), centerY);
+					e.Graphics.DrawLine(snapshotPen, timeToX(receivedStateSnapshot.FrameTick), centerY, timeToX(receivedStateSnapshot.FrameTick) + 4, centerY + 4);
+					e.Graphics.DrawString(receivedStateSnapshot.FrameTick.ToString(), this.Font, new SolidBrush(snapshotPen.Color), timeToX(receivedStateSnapshot.FrameTick) - 6, centerY + 6);
 				}
 
-				Pen pen = (this.NetworkConnection.Client.RenderFrameTick < 0) ? Pens.Green : Pens.Red;
+				Pen pen = (this.NetworkConnection.Client.IsInterpolationValid) ? Pens.Red : Pens.Green;
 				e.Graphics.DrawLine(pen, timeToX(this.NetworkConnection.Client.RenderFrameTick), 0, timeToX(this.NetworkConnection.Client.RenderFrameTick), this.Height);
 			}
 			e.Graphics.DrawLine(Pens.Blue, timeToX(now), 0, timeToX(now), this.Height);
