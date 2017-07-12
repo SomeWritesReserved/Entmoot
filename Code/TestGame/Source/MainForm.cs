@@ -118,10 +118,24 @@ namespace Entmoot.TestGame
 			}
 		}
 
-		private void runBothButton_Click(object sender, EventArgs e)
+		private void runPauseBothButton_Click(object sender, EventArgs e)
 		{
-			this.serverStepsRemaining = -1;
-			this.clientStepsRemaining = -1;
+			if (this.serverStepsRemaining == 0)
+			{
+				this.serverStepsRemaining = -1;
+			}
+			else
+			{
+				this.serverStepsRemaining = 0;
+			}
+			if (this.clientStepsRemaining == 0)
+			{
+				this.clientStepsRemaining = -1;
+			}
+			else
+			{
+				this.clientStepsRemaining = 0;
+			}
 		}
 
 		private void clientStepButton_Click(object sender, EventArgs e)
@@ -297,8 +311,8 @@ namespace Entmoot.TestGame
 
 			Func<int, float> timeToX = (time) => time * 12.0f;
 
-			e.Graphics.DrawLine(Pens.Gray, -1000, centerY, 2000, centerY);
-
+			// Make the current tick always centered in the display
+			e.Graphics.TranslateTransform(-timeToX(now) + centerX, 0);
 			foreach (var incomingPacket in incomingPackets)
 			{
 				var packetTick = StateSnapshot.DeserializePacket(incomingPacket.Data).FrameTick;
@@ -306,7 +320,6 @@ namespace Entmoot.TestGame
 				e.Graphics.DrawLine(Pens.Black, timeToX(incomingPacket.ArrivalTick), centerY, timeToX(incomingPacket.ArrivalTick) + 4, centerY - 4);
 				e.Graphics.DrawString(packetTick.ToString(), this.Font, Brushes.Black, timeToX(incomingPacket.ArrivalTick) - 6, centerY - 20);
 			}
-
 			foreach (var incomingPacket in oldPackets)
 			{
 				var packetTick = StateSnapshot.DeserializePacket(incomingPacket.Data).FrameTick;
@@ -314,7 +327,6 @@ namespace Entmoot.TestGame
 				e.Graphics.DrawLine(Pens.Gray, timeToX(incomingPacket.ArrivalTick), centerY, timeToX(incomingPacket.ArrivalTick) + 4, centerY - 4);
 				e.Graphics.DrawString(packetTick.ToString(), this.Font, Brushes.Gray, timeToX(incomingPacket.ArrivalTick) - 6, centerY - 20);
 			}
-
 			e.Graphics.DrawLine(Pens.Blue, timeToX(now), 0, timeToX(now), this.Height);
 		}
 

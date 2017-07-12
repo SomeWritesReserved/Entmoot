@@ -37,7 +37,7 @@
 			this.runPauseClientButton = new System.Windows.Forms.Button();
 			this.clientStepNumberPad = new System.Windows.Forms.NumericUpDown();
 			this.clientStepButton = new System.Windows.Forms.Button();
-			this.runBothButton = new System.Windows.Forms.Button();
+			this.runPauseBothButton = new System.Windows.Forms.Button();
 			this.clientPacketTimelineDisplay = new Entmoot.TestGame.PacketTimelineDisplay();
 			this.clientGroupBox = new Entmoot.TestGame.DoubleBufferedGroupBox();
 			this.serverGroupBox = new Entmoot.TestGame.DoubleBufferedGroupBox();
@@ -139,25 +139,25 @@
 			this.clientStepButton.UseVisualStyleBackColor = true;
 			this.clientStepButton.Click += new System.EventHandler(this.clientStepButton_Click);
 			// 
-			// runBothButton
+			// runPauseBothButton
 			// 
-			this.runBothButton.Location = new System.Drawing.Point(331, 315);
-			this.runBothButton.Name = "runBothButton";
-			this.runBothButton.Size = new System.Drawing.Size(101, 23);
-			this.runBothButton.TabIndex = 5;
-			this.runBothButton.Text = "Run Both";
-			this.runBothButton.UseVisualStyleBackColor = true;
-			this.runBothButton.Click += new System.EventHandler(this.runBothButton_Click);
+			this.runPauseBothButton.Location = new System.Drawing.Point(331, 315);
+			this.runPauseBothButton.Name = "runPauseBothButton";
+			this.runPauseBothButton.Size = new System.Drawing.Size(101, 23);
+			this.runPauseBothButton.TabIndex = 5;
+			this.runPauseBothButton.Text = "Run/Pause Both";
+			this.runPauseBothButton.UseVisualStyleBackColor = true;
+			this.runPauseBothButton.Click += new System.EventHandler(this.runPauseBothButton_Click);
 			// 
 			// clientPacketTimelineDisplay
 			// 
 			this.clientPacketTimelineDisplay.BackColor = System.Drawing.Color.WhiteSmoke;
 			this.clientPacketTimelineDisplay.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
 			this.clientPacketTimelineDisplay.ClientServerContext = Entmoot.TestGame.ClientServerContext.Client;
-			this.clientPacketTimelineDisplay.Location = new System.Drawing.Point(384, 343);
+			this.clientPacketTimelineDisplay.Location = new System.Drawing.Point(12, 343);
 			this.clientPacketTimelineDisplay.Name = "clientPacketTimelineDisplay";
 			this.clientPacketTimelineDisplay.NetworkConnection = null;
-			this.clientPacketTimelineDisplay.Size = new System.Drawing.Size(366, 60);
+			this.clientPacketTimelineDisplay.Size = new System.Drawing.Size(738, 60);
 			this.clientPacketTimelineDisplay.TabIndex = 8;
 			this.clientPacketTimelineDisplay.Text = "packetTimelineDisplay1";
 			// 
@@ -188,7 +188,7 @@
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(762, 412);
-			this.Controls.Add(this.runBothButton);
+			this.Controls.Add(this.runPauseBothButton);
 			this.Controls.Add(this.clientPacketTimelineDisplay);
 			this.Controls.Add(this.runPauseClientButton);
 			this.Controls.Add(this.clientStepNumberPad);
@@ -218,7 +218,7 @@
 		private System.Windows.Forms.NumericUpDown clientStepNumberPad;
 		private System.Windows.Forms.Button clientStepButton;
 		private PacketTimelineDisplay clientPacketTimelineDisplay;
-		private System.Windows.Forms.Button runBothButton;
+		private System.Windows.Forms.Button runPauseBothButton;
 	}
 }
 
