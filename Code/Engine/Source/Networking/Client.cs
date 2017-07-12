@@ -12,7 +12,7 @@ namespace Entmoot.Engine.Client
 
 		private int lastestReceivedServerPacket = -1;
 		private INetworkConnection serverNetworkConnection;
-		private SortedList<int, StateSnapshot> receivedStateSnapshots = new SortedList<int, StateSnapshot>(64);
+		public SortedList<int, StateSnapshot> ReceivedStateSnapshots = new SortedList<int, StateSnapshot>(64);
 
 		#endregion Fields
 
@@ -39,6 +39,11 @@ namespace Entmoot.Engine.Client
 			get { return Array.AsReadOnly(this.entities); }
 		}
 
+		public int RenderFrameTick { get; set; } = -8;
+		public int InterpolatedStartTick { get; set; }
+		public int InterpolatedEndTick { get; set; }
+		public bool IsInterpolationStale { get; set; }
+
 		#endregion Properties
 
 		#region Methods
@@ -49,11 +54,13 @@ namespace Entmoot.Engine.Client
 			while ((packet = this.serverNetworkConnection.GetNextIncomingPacket()) != null)
 			{
 				StateSnapshot stateSnapshot = StateSnapshot.DeserializePacket(packet);
-				this.receivedStateSnapshots.Add(stateSnapshot.FrameTick, stateSnapshot);
+				this.ReceivedStateSnapshots.Add(stateSnapshot.FrameTick, stateSnapshot);
 
 				if (this.lastestReceivedServerPacket < 0)
 				{
-					this.frameTick = stateSnapshot.FrameTick;
+					// Debug: this is commented out since in the test app server/client are synced at zero so this just makes things confusing
+					// Todo: add it back when for real implementation
+					//this.frameTick = stateSnapshot.FrameTick;
 				}
 
 				this.lastestReceivedServerPacket = stateSnapshot.FrameTick;
@@ -61,26 +68,34 @@ namespace Entmoot.Engine.Client
 			}
 			this.frameTick++;
 
-			int renderFrameTick = this.frameTick - 8;
+			this.RenderFrameTick = this.frameTick - 8;
 			StateSnapshot interpolatedBeginState = null;
 			StateSnapshot interpolatedEndState = null;
-			foreach (var kvp in this.receivedStateSnapshots)
+			foreach (var kvp in this.ReceivedStateSnapshots)
 			{
 				StateSnapshot stateSnapshot = kvp.Value;
-				if (stateSnapshot.FrameTick <= renderFrameTick)
+				if (stateSnapshot.FrameTick <= this.RenderFrameTick)
 				{
 					interpolatedBeginState = stateSnapshot;
 				}
-				if (stateSnapshot.FrameTick > renderFrameTick)
+				if (stateSnapshot.FrameTick > this.RenderFrameTick)
 				{
 					interpolatedEndState = stateSnapshot;
 					break;
 				}
 			}
 
+
 			if (interpolatedBeginState != null && interpolatedEndState != null)
 			{
-				this.entities = StateSnapshot.Interpolate(interpolatedBeginState, interpolatedEndState, renderFrameTick).Entities;
+				this.InterpolatedStartTick = interpolatedBeginState.FrameTick;
+				this.InterpolatedEndTick = interpolatedEndState.FrameTick;
+				this.entities = StateSnapshot.Interpolate(interpolatedBeginState, interpolatedEndState, this.RenderFrameTick).Entities;
+				this.IsInterpolationStale = false;
+			}
+			else
+			{
+				this.IsInterpolationStale = true;
 			}
 		}
 

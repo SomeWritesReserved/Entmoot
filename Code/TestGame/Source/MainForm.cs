@@ -327,6 +327,19 @@ namespace Entmoot.TestGame
 				e.Graphics.DrawLine(Pens.Gray, timeToX(incomingPacket.ArrivalTick), centerY, timeToX(incomingPacket.ArrivalTick) + 4, centerY - 4);
 				e.Graphics.DrawString(packetTick.ToString(), this.Font, Brushes.Gray, timeToX(incomingPacket.ArrivalTick) - 6, centerY - 20);
 			}
+			if (this.ClientServerContext == ClientServerContext.Client)
+			{
+				foreach (var kvp in this.NetworkConnection.Client.ReceivedStateSnapshots)
+				{
+					StateSnapshot receivedStateSnapshot = kvp.Value;
+					e.Graphics.DrawLine(Pens.Black, timeToX(receivedStateSnapshot.FrameTick) - 4, centerY + 4, timeToX(receivedStateSnapshot.FrameTick), centerY);
+					e.Graphics.DrawLine(Pens.Black, timeToX(receivedStateSnapshot.FrameTick), centerY, timeToX(receivedStateSnapshot.FrameTick) + 4, centerY + 4);
+					e.Graphics.DrawString(receivedStateSnapshot.FrameTick.ToString(), this.Font, Brushes.Black, timeToX(receivedStateSnapshot.FrameTick) - 6, centerY + 6);
+				}
+
+				Pen pen = (this.NetworkConnection.Client.RenderFrameTick < 0) ? Pens.Green : Pens.Red;
+				e.Graphics.DrawLine(pen, timeToX(this.NetworkConnection.Client.RenderFrameTick), 0, timeToX(this.NetworkConnection.Client.RenderFrameTick), this.Height);
+			}
 			e.Graphics.DrawLine(Pens.Blue, timeToX(now), 0, timeToX(now), this.Height);
 		}
 
