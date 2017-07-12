@@ -52,8 +52,8 @@ namespace Entmoot.TestGame
 			this.clientServerNetworkConnection.Client = this.client;
 			this.clientServerNetworkConnection.Server = this.server;
 
-			this.clientGroupBox.Tag = this.client;
-			this.serverGroupBox.Tag = this.server;
+			this.clientGroupBox.Tag = ClientServerContext.Client;
+			this.serverGroupBox.Tag = ClientServerContext.Server;
 
 			this.clientPacketTimelineDisplay.NetworkConnection = this.clientServerNetworkConnection;
 			this.clientPacketTimelineDisplay.ClientServerContext = ClientServerContext.Client;
@@ -145,9 +145,24 @@ namespace Entmoot.TestGame
 
 		private void gameGroupBox_Paint(object sender, PaintEventArgs e)
 		{
-			dynamic entityContainer = ((Control)sender).Tag;
-			IList<Entity> entities = entityContainer.Entities;
-			e.Graphics.DrawString(entityContainer.FrameTick.ToString(), this.Font, Brushes.Black, 10, 10);
+			ClientServerContext clientServerContext = (ClientServerContext)((Control)sender).Tag;
+			int now = (clientServerContext == ClientServerContext.Client) ? this.client.FrameTick : this.server.FrameTick;
+			IList<Entity> entities = (clientServerContext == ClientServerContext.Client) ? this.client.Entities : this.server.Entities;
+
+			e.Graphics.DrawString(now.ToString(), this.Font, Brushes.Black, 10, 10);
+			if (clientServerContext == ClientServerContext.Client && this.client.IsInterpolationValid)
+			{
+				var interpolationStart = this.client.ReceivedStateSnapshots[this.client.InterpolatedStartTick];
+				var interpolationEnd = this.client.ReceivedStateSnapshots[this.client.InterpolatedEndTick];
+				foreach (Entity entity in interpolationStart.Entities)
+				{
+					e.Graphics.FillRectangle(Brushes.Gainsboro, entity.Position.X, entity.Position.Y, 3, 3);
+				}
+				foreach (Entity entity in interpolationEnd.Entities)
+				{
+					e.Graphics.FillRectangle(Brushes.Gainsboro, entity.Position.X, entity.Position.Y, 3, 3);
+				}
+			}
 			foreach (Entity entity in entities)
 			{
 				e.Graphics.FillRectangle(Brushes.Black, entity.Position.X, entity.Position.Y, 3, 3);

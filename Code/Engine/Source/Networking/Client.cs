@@ -42,7 +42,7 @@ namespace Entmoot.Engine.Client
 		public int RenderFrameTick { get; set; } = -8;
 		public int InterpolatedStartTick { get; set; }
 		public int InterpolatedEndTick { get; set; }
-		public bool IsInterpolationStale { get; set; }
+		public bool IsInterpolationValid { get; set; }
 
 		#endregion Properties
 
@@ -68,7 +68,8 @@ namespace Entmoot.Engine.Client
 			}
 			this.frameTick++;
 
-			this.RenderFrameTick = this.frameTick - 8;
+			// Todo: this delay should be: frame - (updaterate + 1/2latency) * 0.1fudgefactor
+			this.RenderFrameTick = this.frameTick - 10;
 			StateSnapshot interpolatedBeginState = null;
 			StateSnapshot interpolatedEndState = null;
 			foreach (var kvp in this.ReceivedStateSnapshots)
@@ -91,11 +92,11 @@ namespace Entmoot.Engine.Client
 				this.InterpolatedStartTick = interpolatedBeginState.FrameTick;
 				this.InterpolatedEndTick = interpolatedEndState.FrameTick;
 				this.entities = StateSnapshot.Interpolate(interpolatedBeginState, interpolatedEndState, this.RenderFrameTick).Entities;
-				this.IsInterpolationStale = false;
+				this.IsInterpolationValid = true;
 			}
 			else
 			{
-				this.IsInterpolationStale = true;
+				this.IsInterpolationValid = false;
 			}
 		}
 

@@ -82,7 +82,7 @@
 			this.serverStepNumberPad.Size = new System.Drawing.Size(58, 20);
 			this.serverStepNumberPad.TabIndex = 3;
 			this.serverStepNumberPad.Value = new decimal(new int[] {
-            12,
+            16,
             0,
             0,
             0});
