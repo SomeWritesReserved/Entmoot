@@ -184,15 +184,20 @@ namespace Entmoot.TestGame
 		{
 			if (random.NextDouble() < this.SimulatedPacketLoss) { return; }
 
+			// Sent the packet to the other endpoint based on the current context (if client, send to server; vice versa).
+			// Use the current context's tick (instead of the other end point's) because we know we are running and the other
+			// endpoint might be paused. We still want to simulate the other endpoint getting our packets in the future. This
+			// only works because in this test case client and server start at the same time so both ticks start at zero at the
+			// same wall time.
 			if (this.CurrentContext == ClientServerContext.Client)
 			{
-				int arrivalTick = (int)(this.Server.FrameTick + this.SimulatedLatency + (this.random.NextDouble() - this.random.NextDouble()) * this.SimulatedJitter);
+				int arrivalTick = (int)(this.Client.FrameTick + this.SimulatedLatency + (this.random.NextDouble() - this.random.NextDouble()) * this.SimulatedJitter);
 				SentPacket sentPacket = new SentPacket() { ArrivalTick = arrivalTick, Data = packet };
 				this.incomingPacketsForServer.Add(sentPacket);
 			}
 			else
 			{
-				int arrivalTick = (int)(this.Client.FrameTick + this.SimulatedLatency + (this.random.NextDouble() - this.random.NextDouble()) * this.SimulatedJitter);
+				int arrivalTick = (int)(this.Server.FrameTick + this.SimulatedLatency + (this.random.NextDouble() - this.random.NextDouble()) * this.SimulatedJitter);
 				SentPacket sentPacket = new SentPacket() { ArrivalTick = arrivalTick, Data = packet };
 				this.incomingPacketsForClient.Add(sentPacket);
 			}
