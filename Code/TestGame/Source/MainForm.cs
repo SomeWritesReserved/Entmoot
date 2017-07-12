@@ -39,12 +39,15 @@ namespace Entmoot.TestGame
 
 			this.clientServerNetworkConnection = new MockNetworkConnection()
 			{
-				SimulatedLatency = 100,
+				SimulatedLatency = 4,
 				SimulatedJitter = 0,
 				SimulatedPacketLoss = 0,
 			};
 			this.client = new Client(this.clientServerNetworkConnection);
 			this.server = new Server(new[] { this.clientServerNetworkConnection }, this.serverEntities);
+
+			this.clientServerNetworkConnection.Client = this.client;
+			this.clientServerNetworkConnection.Server = this.server;
 
 			this.clientGroupBox.Tag = this.client;
 			this.serverGroupBox.Tag = this.server;
@@ -101,7 +104,7 @@ namespace Entmoot.TestGame
 	{
 		#region Fields
 
-		private Random random = new Random();
+		private Random random = new Random(12345);
 		private List<SentPacket> incomingPacketsForClient = new List<SentPacket>();
 		private List<SentPacket> incomingPacketsForServer = new List<SentPacket>();
 
@@ -109,12 +112,19 @@ namespace Entmoot.TestGame
 
 		#region Properties
 
+		public Client Client { get; set; }
+
+		public Server Server { get; set; }
+
 		public ClientServerContext CurrentContext { get; set; }
 
+		/// <summary>Gets or sets the amount of time it takes to send a packet from endpoint to endpoint, measured in game ticks (not milliseconds).</summary>
 		public double SimulatedLatency { get; set; }
 
+		/// <summary>Gets or sets the amount of random variance in the simulated latency, measured in game ticks (not milliseconds).</summary>
 		public double SimulatedJitter { get; set; }
 
+		/// <summary>Gets or sets the percent chance that a packet may be dropped, from [0, 1].</summary>
 		public double SimulatedPacketLoss { get; set; }
 
 		#endregion Properties
@@ -130,22 +140,24 @@ namespace Entmoot.TestGame
 		{
 			if (random.NextDouble() < this.SimulatedPacketLoss) { return; }
 
-			int arrivalTick = (int)(Environment.TickCount + this.SimulatedLatency + (this.random.NextDouble() - this.random.NextDouble()) * this.SimulatedJitter);
-			SentPacket sentPacket = new SentPacket() { ArrivalTimeTick = arrivalTick, Data = packet };
 			if (this.CurrentContext == ClientServerContext.Client)
 			{
+				int arrivalTick = (int)(this.Server.FrameTick + this.SimulatedLatency + (this.random.NextDouble() - this.random.NextDouble()) * this.SimulatedJitter);
+				SentPacket sentPacket = new SentPacket() { ArrivalTick = arrivalTick, Data = packet };
 				this.incomingPacketsForServer.Add(sentPacket);
 			}
 			else
 			{
+				int arrivalTick = (int)(this.Client.FrameTick + this.SimulatedLatency + (this.random.NextDouble() - this.random.NextDouble()) * this.SimulatedJitter);
+				SentPacket sentPacket = new SentPacket() { ArrivalTick = arrivalTick, Data = packet };
 				this.incomingPacketsForClient.Add(sentPacket);
 			}
 		}
 
 		private byte[] getArrivedPacket(List<SentPacket> incomingPackets)
 		{
-			int now = Environment.TickCount;
-			SentPacket packet = incomingPackets.SingleOrDefault((p) => p.ArrivalTimeTick <= now);
+			int now = (this.CurrentContext == ClientServerContext.Client) ? this.Client.FrameTick : this.Server.FrameTick;
+			SentPacket packet = incomingPackets.FirstOrDefault((p) => p.ArrivalTick <= now);
 			if (packet != null)
 			{
 				incomingPackets.Remove(packet);
@@ -161,7 +173,7 @@ namespace Entmoot.TestGame
 		{
 			#region Properties
 
-			public int ArrivalTimeTick { get; set; }
+			public int ArrivalTick { get; set; }
 
 			public byte[] Data { get; set; }
 
