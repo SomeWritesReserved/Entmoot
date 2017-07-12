@@ -23,6 +23,9 @@ namespace Entmoot.TestGame
 		private MockNetworkConnection clientServerNetworkConnection;
 		private Entity[] serverEntities;
 
+		private int serverStepsRemaining = 0;
+		private int clientStepsRemaining = 0;
+
 		#endregion Fields
 
 		#region Constructors
@@ -59,6 +62,8 @@ namespace Entmoot.TestGame
 
 		private void serverTimer_Tick(object sender, EventArgs e)
 		{
+			if (this.serverStepsRemaining == 0) { return; }
+
 			this.clientServerNetworkConnection.CurrentContext = ClientServerContext.Server;
 
 			this.serverEntities[0].Position.X = (float)Math.Cos(this.server.FrameTick * 0.025) * 50 + 100;
@@ -66,13 +71,62 @@ namespace Entmoot.TestGame
 
 			this.server.Update();
 			this.serverGroupBox.Refresh();
+			this.serverStepsRemaining--;
 		}
 
 		private void clientTimer_Tick(object sender, EventArgs e)
 		{
+			if (this.clientStepsRemaining == 0) { return; }
+
 			this.clientServerNetworkConnection.CurrentContext = ClientServerContext.Client;
 			this.client.Update();
 			this.clientGroupBox.Refresh();
+			this.clientStepsRemaining--;
+		}
+
+		private void runPauseServerButton_Click(object sender, EventArgs e)
+		{
+			if (this.serverStepsRemaining == 0)
+			{
+				this.serverStepsRemaining = -1;
+			}
+			else
+			{
+				this.serverStepsRemaining = 0;
+			}
+		}
+
+		private void serverStepButton_Click(object sender, EventArgs e)
+		{
+			this.serverStepsRemaining = (int)this.serverStepNumberPad.Value;
+		}
+
+		private void runPauseClientButton_Click(object sender, EventArgs e)
+		{
+			if (this.clientStepsRemaining == 0)
+			{
+				this.clientStepsRemaining = -1;
+			}
+			else
+			{
+				this.clientStepsRemaining = 0;
+			}
+		}
+
+		private void clientStepButton_Click(object sender, EventArgs e)
+		{
+			this.clientStepsRemaining = (int)this.clientStepNumberPad.Value;
+		}
+
+		private void gameGroupBox_Paint(object sender, PaintEventArgs e)
+		{
+			dynamic entityContainer = ((Control)sender).Tag;
+			IList<Entity> entities = entityContainer.Entities;
+			e.Graphics.DrawString(entityContainer.FrameTick.ToString(), this.Font, Brushes.Black, 10, 10);
+			foreach (Entity entity in entities)
+			{
+				e.Graphics.FillRectangle(Brushes.Black, entity.Position.X, entity.Position.Y, 3, 3);
+			}
 		}
 
 		#endregion Events
@@ -88,16 +142,6 @@ namespace Entmoot.TestGame
 		}
 
 		#endregion Methods
-
-		private void gameGroupBox_Paint(object sender, PaintEventArgs e)
-		{
-			dynamic entityContainer = ((Control)sender).Tag;
-			IList<Entity> entities = entityContainer.Entities;
-			foreach (Entity entity in entities)
-			{
-				e.Graphics.FillRectangle(Brushes.Black, entity.Position.X, entity.Position.Y, 3, 3);
-			}
-		}
 	}
 
 	public class MockNetworkConnection : INetworkConnection
