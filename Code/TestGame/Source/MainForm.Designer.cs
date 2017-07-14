@@ -151,13 +151,13 @@
 			// 
 			// clientPacketTimelineDisplay
 			// 
-			this.clientPacketTimelineDisplay.BackColor = System.Drawing.Color.WhiteSmoke;
+			this.clientPacketTimelineDisplay.BackColor = System.Drawing.Color.White;
 			this.clientPacketTimelineDisplay.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
 			this.clientPacketTimelineDisplay.ClientServerContext = Entmoot.TestGame.ClientServerContext.Client;
 			this.clientPacketTimelineDisplay.Location = new System.Drawing.Point(12, 343);
 			this.clientPacketTimelineDisplay.Name = "clientPacketTimelineDisplay";
 			this.clientPacketTimelineDisplay.NetworkConnection = null;
-			this.clientPacketTimelineDisplay.Size = new System.Drawing.Size(738, 74);
+			this.clientPacketTimelineDisplay.Size = new System.Drawing.Size(738, 94);
 			this.clientPacketTimelineDisplay.TabIndex = 8;
 			this.clientPacketTimelineDisplay.Text = "packetTimelineDisplay1";
 			// 
@@ -187,7 +187,7 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(762, 426);
+			this.ClientSize = new System.Drawing.Size(762, 446);
 			this.Controls.Add(this.runPauseBothButton);
 			this.Controls.Add(this.clientPacketTimelineDisplay);
 			this.Controls.Add(this.runPauseClientButton);

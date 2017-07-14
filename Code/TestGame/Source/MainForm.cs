@@ -69,8 +69,8 @@ namespace Entmoot.TestGame
 
 			this.clientServerNetworkConnection.CurrentContext = ClientServerContext.Server;
 
-			this.serverEntities[0].Position.X = (float)Math.Cos(this.server.FrameTick * 0.025) * 50 + 100;
-			this.serverEntities[0].Position.Y = (float)Math.Sin(this.server.FrameTick * 0.025) * 50 + 100;
+			this.serverEntities[0].Position.X = (float)Math.Cos(this.server.FrameTick * 0.065) * 50 + 100;
+			this.serverEntities[0].Position.Y = (float)Math.Sin(this.server.FrameTick * 0.065) * 50 + 100;
 
 			this.server.Update();
 			this.serverGroupBox.Refresh();
@@ -295,11 +295,21 @@ namespace Entmoot.TestGame
 
 	public class PacketTimelineDisplay : Label
 	{
+		#region Fields
+
+		private Pen tickLinePen;
+
+		#endregion Fields
+
 		#region Constructors
 
 		public PacketTimelineDisplay()
 		{
 			this.DoubleBuffered = true;
+			this.tickLinePen = new Pen(Color.Gainsboro)
+			{
+				DashStyle = System.Drawing.Drawing2D.DashStyle.Dash,
+			};
 		}
 
 		#endregion Constructors
@@ -326,8 +336,23 @@ namespace Entmoot.TestGame
 
 			Func<int, float> timeToX = (time) => time * 12.0f;
 
+			// Shade the "past" side of the timeline display
+			e.Graphics.FillRectangle(Brushes.WhiteSmoke, 0, 0, this.Width / 2.0f, this.Height);
+
 			// Make the current tick always centered in the display
 			e.Graphics.TranslateTransform(-timeToX(now) + centerX, 0);
+			foreach (var tick in Enumerable.Range(now - 30, 60))
+			{
+				if ((Math.Abs(now - tick) % 5) == 0)
+				{
+					e.Graphics.DrawLine(Pens.LightGray, timeToX(tick), 0, timeToX(tick), this.Height - 17);
+					e.Graphics.DrawString(tick.ToString(), this.Font, Brushes.LightGray, timeToX(tick) - 10, this.Height - 16);
+				}
+				else
+				{
+					e.Graphics.DrawLine(this.tickLinePen, timeToX(tick), 0, timeToX(tick), this.Height);
+				}
+			}
 			foreach (var incomingPacket in incomingPackets)
 			{
 				var packetTick = StateSnapshot.DeserializePacket(incomingPacket.Data).FrameTick;
@@ -347,15 +372,17 @@ namespace Entmoot.TestGame
 				foreach (var kvp in this.NetworkConnection.Client.ReceivedStateSnapshots)
 				{
 					Pen snapshotPen = Pens.Black;
+					Brush snapshotBrush = Brushes.Black;
 					if (this.NetworkConnection.Client.IsInterpolationValid && (this.NetworkConnection.Client.InterpolatedStartTick == kvp.Key ||
 						this.NetworkConnection.Client.InterpolatedEndTick == kvp.Key))
 					{
 						snapshotPen = Pens.Red;
+						snapshotBrush = Brushes.Red;
 					}
 					StateSnapshot receivedStateSnapshot = kvp.Value;
 					e.Graphics.DrawLine(snapshotPen, timeToX(receivedStateSnapshot.FrameTick) - 4, centerY + 4, timeToX(receivedStateSnapshot.FrameTick), centerY);
 					e.Graphics.DrawLine(snapshotPen, timeToX(receivedStateSnapshot.FrameTick), centerY, timeToX(receivedStateSnapshot.FrameTick) + 4, centerY + 4);
-					e.Graphics.DrawString(receivedStateSnapshot.FrameTick.ToString(), this.Font, new SolidBrush(snapshotPen.Color), timeToX(receivedStateSnapshot.FrameTick) - 6, centerY + 6);
+					e.Graphics.DrawString(receivedStateSnapshot.FrameTick.ToString(), this.Font, snapshotBrush, timeToX(receivedStateSnapshot.FrameTick) - 6, centerY + 6);
 				}
 
 				Pen pen = (this.NetworkConnection.Client.IsInterpolationValid) ? Pens.Red : Pens.Green;
