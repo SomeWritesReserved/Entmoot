@@ -342,7 +342,8 @@ namespace Entmoot.TestGame
 
 			// Make the current tick always centered in the display
 			e.Graphics.TranslateTransform(-timeToX(now) + centerX, 0);
-			foreach (var tick in Enumerable.Range(now - 30, 60))
+			int numberOfTicksToDraw = this.Width / 12;
+			foreach (var tick in Enumerable.Range(now - numberOfTicksToDraw / 2, numberOfTicksToDraw))
 			{
 				if ((Math.Abs(now - tick) % 5) == 0)
 				{

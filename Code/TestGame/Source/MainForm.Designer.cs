@@ -38,11 +38,13 @@
 			this.clientStepNumberPad = new System.Windows.Forms.NumericUpDown();
 			this.clientStepButton = new System.Windows.Forms.Button();
 			this.runPauseBothButton = new System.Windows.Forms.Button();
-			this.clientPacketTimelineDisplay = new Entmoot.TestGame.PacketTimelineDisplay();
-			this.clientGroupBox = new Entmoot.TestGame.DoubleBufferedGroupBox();
+			this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
 			this.serverGroupBox = new Entmoot.TestGame.DoubleBufferedGroupBox();
+			this.clientGroupBox = new Entmoot.TestGame.DoubleBufferedGroupBox();
+			this.clientPacketTimelineDisplay = new Entmoot.TestGame.PacketTimelineDisplay();
 			((System.ComponentModel.ISupportInitialize)(this.serverStepNumberPad)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.clientStepNumberPad)).BeginInit();
+			this.tableLayoutPanel1.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// serverTimer
@@ -57,7 +59,8 @@
 			// 
 			// serverStepButton
 			// 
-			this.serverStepButton.Location = new System.Drawing.Point(206, 318);
+			this.serverStepButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.serverStepButton.Location = new System.Drawing.Point(206, 316);
 			this.serverStepButton.Name = "serverStepButton";
 			this.serverStepButton.Size = new System.Drawing.Size(75, 23);
 			this.serverStepButton.TabIndex = 4;
@@ -67,7 +70,8 @@
 			// 
 			// serverStepNumberPad
 			// 
-			this.serverStepNumberPad.Location = new System.Drawing.Point(142, 319);
+			this.serverStepNumberPad.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.serverStepNumberPad.Location = new System.Drawing.Point(142, 317);
 			this.serverStepNumberPad.Maximum = new decimal(new int[] {
             1000,
             0,
@@ -89,7 +93,8 @@
 			// 
 			// runPauseServerButton
 			// 
-			this.runPauseServerButton.Location = new System.Drawing.Point(35, 318);
+			this.runPauseServerButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.runPauseServerButton.Location = new System.Drawing.Point(35, 316);
 			this.runPauseServerButton.Name = "runPauseServerButton";
 			this.runPauseServerButton.Size = new System.Drawing.Size(101, 23);
 			this.runPauseServerButton.TabIndex = 2;
@@ -99,7 +104,8 @@
 			// 
 			// runPauseClientButton
 			// 
-			this.runPauseClientButton.Location = new System.Drawing.Point(480, 317);
+			this.runPauseClientButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this.runPauseClientButton.Location = new System.Drawing.Point(480, 316);
 			this.runPauseClientButton.Name = "runPauseClientButton";
 			this.runPauseClientButton.Size = new System.Drawing.Size(101, 23);
 			this.runPauseClientButton.TabIndex = 6;
@@ -109,7 +115,8 @@
 			// 
 			// clientStepNumberPad
 			// 
-			this.clientStepNumberPad.Location = new System.Drawing.Point(587, 318);
+			this.clientStepNumberPad.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this.clientStepNumberPad.Location = new System.Drawing.Point(587, 317);
 			this.clientStepNumberPad.Maximum = new decimal(new int[] {
             1000,
             0,
@@ -131,7 +138,8 @@
 			// 
 			// clientStepButton
 			// 
-			this.clientStepButton.Location = new System.Drawing.Point(651, 317);
+			this.clientStepButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this.clientStepButton.Location = new System.Drawing.Point(651, 316);
 			this.clientStepButton.Name = "clientStepButton";
 			this.clientStepButton.Size = new System.Drawing.Size(75, 23);
 			this.clientStepButton.TabIndex = 8;
@@ -141,7 +149,8 @@
 			// 
 			// runPauseBothButton
 			// 
-			this.runPauseBothButton.Location = new System.Drawing.Point(331, 315);
+			this.runPauseBothButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+			this.runPauseBothButton.Location = new System.Drawing.Point(331, 316);
 			this.runPauseBothButton.Name = "runPauseBothButton";
 			this.runPauseBothButton.Size = new System.Drawing.Size(101, 23);
 			this.runPauseBothButton.TabIndex = 5;
@@ -149,8 +158,51 @@
 			this.runPauseBothButton.UseVisualStyleBackColor = true;
 			this.runPauseBothButton.Click += new System.EventHandler(this.runPauseBothButton_Click);
 			// 
+			// tableLayoutPanel1
+			// 
+			this.tableLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.tableLayoutPanel1.ColumnCount = 2;
+			this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+			this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+			this.tableLayoutPanel1.Controls.Add(this.serverGroupBox, 0, 0);
+			this.tableLayoutPanel1.Controls.Add(this.clientGroupBox, 1, 0);
+			this.tableLayoutPanel1.Location = new System.Drawing.Point(12, 12);
+			this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+			this.tableLayoutPanel1.RowCount = 1;
+			this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+			this.tableLayoutPanel1.Size = new System.Drawing.Size(738, 297);
+			this.tableLayoutPanel1.TabIndex = 9;
+			// 
+			// serverGroupBox
+			// 
+			this.serverGroupBox.BackColor = System.Drawing.Color.White;
+			this.serverGroupBox.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.serverGroupBox.Location = new System.Drawing.Point(3, 3);
+			this.serverGroupBox.Name = "serverGroupBox";
+			this.serverGroupBox.Size = new System.Drawing.Size(363, 291);
+			this.serverGroupBox.TabIndex = 0;
+			this.serverGroupBox.TabStop = false;
+			this.serverGroupBox.Text = "Server";
+			this.serverGroupBox.Paint += new System.Windows.Forms.PaintEventHandler(this.gameGroupBox_Paint);
+			// 
+			// clientGroupBox
+			// 
+			this.clientGroupBox.BackColor = System.Drawing.Color.White;
+			this.clientGroupBox.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.clientGroupBox.Location = new System.Drawing.Point(372, 3);
+			this.clientGroupBox.Name = "clientGroupBox";
+			this.clientGroupBox.Size = new System.Drawing.Size(363, 291);
+			this.clientGroupBox.TabIndex = 1;
+			this.clientGroupBox.TabStop = false;
+			this.clientGroupBox.Text = "Client";
+			this.clientGroupBox.Paint += new System.Windows.Forms.PaintEventHandler(this.gameGroupBox_Paint);
+			// 
 			// clientPacketTimelineDisplay
 			// 
+			this.clientPacketTimelineDisplay.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
 			this.clientPacketTimelineDisplay.BackColor = System.Drawing.Color.White;
 			this.clientPacketTimelineDisplay.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
 			this.clientPacketTimelineDisplay.ClientServerContext = Entmoot.TestGame.ClientServerContext.Client;
@@ -161,33 +213,12 @@
 			this.clientPacketTimelineDisplay.TabIndex = 8;
 			this.clientPacketTimelineDisplay.Text = "packetTimelineDisplay1";
 			// 
-			// clientGroupBox
-			// 
-			this.clientGroupBox.BackColor = System.Drawing.Color.White;
-			this.clientGroupBox.Location = new System.Drawing.Point(384, 11);
-			this.clientGroupBox.Name = "clientGroupBox";
-			this.clientGroupBox.Size = new System.Drawing.Size(366, 300);
-			this.clientGroupBox.TabIndex = 1;
-			this.clientGroupBox.TabStop = false;
-			this.clientGroupBox.Text = "Client";
-			this.clientGroupBox.Paint += new System.Windows.Forms.PaintEventHandler(this.gameGroupBox_Paint);
-			// 
-			// serverGroupBox
-			// 
-			this.serverGroupBox.BackColor = System.Drawing.Color.White;
-			this.serverGroupBox.Location = new System.Drawing.Point(12, 12);
-			this.serverGroupBox.Name = "serverGroupBox";
-			this.serverGroupBox.Size = new System.Drawing.Size(366, 300);
-			this.serverGroupBox.TabIndex = 0;
-			this.serverGroupBox.TabStop = false;
-			this.serverGroupBox.Text = "Server";
-			this.serverGroupBox.Paint += new System.Windows.Forms.PaintEventHandler(this.gameGroupBox_Paint);
-			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(762, 446);
+			this.Controls.Add(this.tableLayoutPanel1);
 			this.Controls.Add(this.runPauseBothButton);
 			this.Controls.Add(this.clientPacketTimelineDisplay);
 			this.Controls.Add(this.runPauseClientButton);
@@ -196,12 +227,11 @@
 			this.Controls.Add(this.runPauseServerButton);
 			this.Controls.Add(this.serverStepNumberPad);
 			this.Controls.Add(this.serverStepButton);
-			this.Controls.Add(this.clientGroupBox);
-			this.Controls.Add(this.serverGroupBox);
 			this.Name = "MainForm";
 			this.Text = "Entmoot Test Game";
 			((System.ComponentModel.ISupportInitialize)(this.serverStepNumberPad)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.clientStepNumberPad)).EndInit();
+			this.tableLayoutPanel1.ResumeLayout(false);
 			this.ResumeLayout(false);
 
 		}
@@ -219,6 +249,7 @@
 		private System.Windows.Forms.Button clientStepButton;
 		private PacketTimelineDisplay clientPacketTimelineDisplay;
 		private System.Windows.Forms.Button runPauseBothButton;
+		private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
 	}
 }
 
