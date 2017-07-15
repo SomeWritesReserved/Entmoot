@@ -44,6 +44,7 @@ namespace Entmoot.Engine.Client
 		public int InterpolatedStartTick { get; set; } = -1;
 		public int InterpolatedEndTick { get; set; } = -1;
 		public bool IsInterpolationValid { get; set; } = false;
+		public int NumberOfInvalidInterpolations { get; set; } = 0;
 
 		#endregion Properties
 
@@ -62,6 +63,7 @@ namespace Entmoot.Engine.Client
 				if (this.lastestReceivedServerPacket < 0)
 				{
 					this.frameTick = stateSnapshot.FrameTick;
+					this.NumberOfInvalidInterpolations = 0;
 				}
 
 				this.lastestReceivedServerPacket = stateSnapshot.FrameTick;
@@ -100,6 +102,7 @@ namespace Entmoot.Engine.Client
 				else
 				{
 					this.IsInterpolationValid = false;
+					this.NumberOfInvalidInterpolations++;
 				}
 			}
 			else

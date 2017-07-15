@@ -345,6 +345,7 @@ namespace Entmoot.TestGame
 
 			// Shade the "past" side of the timeline display
 			e.Graphics.FillRectangle(Brushes.WhiteSmoke, 0, 0, this.Width / 2.0f, this.Height);
+			e.Graphics.DrawString(this.NetworkConnection.Client.NumberOfInvalidInterpolations.ToString(), this.Font, Brushes.Black, 0, 0);
 
 			// Make the current tick always centered in the display
 			e.Graphics.TranslateTransform(-timeToX(now) + centerX, 0);
