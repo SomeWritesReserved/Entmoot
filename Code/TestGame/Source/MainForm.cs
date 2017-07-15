@@ -150,7 +150,8 @@ namespace Entmoot.TestGame
 			IList<Entity> entities = (clientServerContext == ClientServerContext.Client) ? this.client.Entities : this.server.Entities;
 
 			e.Graphics.DrawString(now.ToString(), this.Font, Brushes.Black, 10, 10);
-			if (clientServerContext == ClientServerContext.Client && this.client.InterpolatedStartTick >= 0 && this.client.InterpolatedEndTick >= 0)
+			if (this.drawInterpolationCheckBox.Checked && clientServerContext == ClientServerContext.Client &&
+				this.client.InterpolatedStartTick >= 0 && this.client.InterpolatedEndTick >= 0)
 			{
 				Brush color = this.client.IsInterpolationValid ? Brushes.Gainsboro : Brushes.LightCoral;
 				var interpolationStart = this.client.ReceivedStateSnapshots[this.client.InterpolatedStartTick];
@@ -168,6 +169,11 @@ namespace Entmoot.TestGame
 			{
 				e.Graphics.FillRectangle(Brushes.Black, entity.Position.X, entity.Position.Y, 3, 3);
 			}
+		}
+
+		private void drawInterpolationCheckBox_CheckedChanged(object sender, EventArgs e)
+		{
+			this.clientGroupBox.Refresh();
 		}
 
 		#endregion Events
