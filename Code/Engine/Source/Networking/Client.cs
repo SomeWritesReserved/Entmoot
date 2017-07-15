@@ -61,9 +61,7 @@ namespace Entmoot.Engine.Client
 
 				if (this.lastestReceivedServerPacket < 0)
 				{
-					// Debug: this is commented out since in the test app server/client are synced at zero so this just makes things confusing
-					// Todo: add it back when for real implementation
-					//this.frameTick = stateSnapshot.FrameTick;
+					this.frameTick = stateSnapshot.FrameTick;
 				}
 
 				this.lastestReceivedServerPacket = stateSnapshot.FrameTick;
