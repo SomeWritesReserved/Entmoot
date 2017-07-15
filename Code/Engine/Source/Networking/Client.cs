@@ -27,7 +27,7 @@ namespace Entmoot.Engine.Client
 
 		#region Properties
 
-		private int frameTick;
+		private int frameTick = 0;
 		public int FrameTick
 		{
 			get { return this.frameTick; }
@@ -51,6 +51,8 @@ namespace Entmoot.Engine.Client
 
 		public void Update()
 		{
+			this.frameTick++;
+
 			byte[] packet;
 			while ((packet = this.serverNetworkConnection.GetNextIncomingPacket()) != null)
 			{
@@ -67,7 +69,6 @@ namespace Entmoot.Engine.Client
 				this.lastestReceivedServerPacket = stateSnapshot.FrameTick;
 				LogStats.Client_LatestReceivedServerPacket = this.lastestReceivedServerPacket;
 			}
-			this.frameTick++;
 
 			if (this.ShouldInterpolate)
 			{

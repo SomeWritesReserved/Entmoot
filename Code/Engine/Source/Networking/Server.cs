@@ -26,7 +26,7 @@ namespace Entmoot.Engine.Server
 
 		#region Properties
 
-		private int frameTick;
+		private int frameTick = 0;
 		public int FrameTick
 		{
 			get { return this.frameTick; }
@@ -44,6 +44,7 @@ namespace Entmoot.Engine.Server
 
 		public void Update()
 		{
+			this.frameTick++;
 			if (this.FrameTick % 4 == 0)
 			{
 				StateSnapshot stateSnapshot = new StateSnapshot()
@@ -56,7 +57,6 @@ namespace Entmoot.Engine.Server
 					client.SendStateSnapshot(stateSnapshot);
 				}
 			}
-			this.frameTick++;
 		}
 
 		#endregion Methods
