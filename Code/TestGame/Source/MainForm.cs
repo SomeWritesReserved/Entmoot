@@ -150,17 +150,18 @@ namespace Entmoot.TestGame
 			IList<Entity> entities = (clientServerContext == ClientServerContext.Client) ? this.client.Entities : this.server.Entities;
 
 			e.Graphics.DrawString(now.ToString(), this.Font, Brushes.Black, 10, 10);
-			if (clientServerContext == ClientServerContext.Client && this.client.IsInterpolationValid)
+			if (clientServerContext == ClientServerContext.Client && this.client.InterpolatedStartTick >= 0 && this.client.InterpolatedEndTick >= 0)
 			{
+				Brush color = this.client.IsInterpolationValid ? Brushes.Gainsboro : Brushes.LightCoral;
 				var interpolationStart = this.client.ReceivedStateSnapshots[this.client.InterpolatedStartTick];
 				var interpolationEnd = this.client.ReceivedStateSnapshots[this.client.InterpolatedEndTick];
 				foreach (Entity entity in interpolationStart.Entities)
 				{
-					e.Graphics.FillRectangle(Brushes.Gainsboro, entity.Position.X, entity.Position.Y, 3, 3);
+					e.Graphics.FillRectangle(color, entity.Position.X, entity.Position.Y, 3, 3);
 				}
 				foreach (Entity entity in interpolationEnd.Entities)
 				{
-					e.Graphics.FillRectangle(Brushes.Gainsboro, entity.Position.X, entity.Position.Y, 3, 3);
+					e.Graphics.FillRectangle(color, entity.Position.X, entity.Position.Y, 3, 3);
 				}
 			}
 			foreach (Entity entity in entities)

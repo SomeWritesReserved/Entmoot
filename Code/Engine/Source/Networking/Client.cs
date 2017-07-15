@@ -41,9 +41,9 @@ namespace Entmoot.Engine.Client
 
 		public bool ShouldInterpolate { get; set; } = true;
 		public int RenderFrameTick { get; set; } = -8;
-		public int InterpolatedStartTick { get; set; }
-		public int InterpolatedEndTick { get; set; }
-		public bool IsInterpolationValid { get; set; }
+		public int InterpolatedStartTick { get; set; } = -1;
+		public int InterpolatedEndTick { get; set; } = -1;
+		public bool IsInterpolationValid { get; set; } = false;
 
 		#endregion Properties
 
@@ -78,6 +78,8 @@ namespace Entmoot.Engine.Client
 				foreach (var kvp in this.ReceivedStateSnapshots)
 				{
 					StateSnapshot stateSnapshot = kvp.Value;
+					// Todo: these should be more intelligent and grab the closest packets in either direction
+					// Todo: make sure we can grab the end packet on the last frame of the interpolation range
 					if (stateSnapshot.FrameTick <= this.RenderFrameTick)
 					{
 						interpolatedBeginState = stateSnapshot;
