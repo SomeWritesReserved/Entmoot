@@ -176,6 +176,11 @@ namespace Entmoot.TestGame
 			this.clientGroupBox.Refresh();
 		}
 
+		private void dropPacketsCheckBox_CheckedChanged(object sender, EventArgs e)
+		{
+			this.clientServerNetworkConnection.DropAllPackets = this.dropPacketsCheckBox.Checked;
+		}
+
 		#endregion Events
 
 		#region Methods
@@ -220,6 +225,9 @@ namespace Entmoot.TestGame
 		/// <summary>Gets or sets the percent chance that a packet may be dropped, from [0, 1].</summary>
 		public double SimulatedPacketLoss { get; set; }
 
+		/// <summary>Gets or sets whether all simulated packets should be dropped.</summary>
+		public bool DropAllPackets { get; set; }
+
 		#endregion Properties
 
 		#region Methods
@@ -231,7 +239,7 @@ namespace Entmoot.TestGame
 
 		public void SendPacket(byte[] packet)
 		{
-			if (random.NextDouble() < this.SimulatedPacketLoss) { return; }
+			if (random.NextDouble() < this.SimulatedPacketLoss || this.DropAllPackets) { return; }
 
 			// Sent the packet to the other endpoint based on the current context (if client, send to server; vice versa).
 			// Use the current context's tick (instead of the other end point's) because we know we are running and the other

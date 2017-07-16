@@ -41,8 +41,9 @@
 			this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
 			this.serverGroupBox = new Entmoot.TestGame.DoubleBufferedGroupBox();
 			this.clientGroupBox = new Entmoot.TestGame.DoubleBufferedGroupBox();
-			this.clientPacketTimelineDisplay = new Entmoot.TestGame.PacketTimelineDisplay();
+			this.dropPacketsCheckBox = new System.Windows.Forms.CheckBox();
 			this.drawInterpolationCheckBox = new System.Windows.Forms.CheckBox();
+			this.clientPacketTimelineDisplay = new Entmoot.TestGame.PacketTimelineDisplay();
 			((System.ComponentModel.ISupportInitialize)(this.serverStepNumberPad)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.clientStepNumberPad)).BeginInit();
 			this.tableLayoutPanel1.SuspendLayout();
@@ -88,7 +89,7 @@
 			this.serverStepNumberPad.Size = new System.Drawing.Size(58, 20);
 			this.serverStepNumberPad.TabIndex = 3;
 			this.serverStepNumberPad.Value = new decimal(new int[] {
-            16,
+            1,
             0,
             0,
             0});
@@ -192,6 +193,7 @@
 			// clientGroupBox
 			// 
 			this.clientGroupBox.BackColor = System.Drawing.Color.White;
+			this.clientGroupBox.Controls.Add(this.dropPacketsCheckBox);
 			this.clientGroupBox.Controls.Add(this.drawInterpolationCheckBox);
 			this.clientGroupBox.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.clientGroupBox.Location = new System.Drawing.Point(372, 3);
@@ -201,6 +203,30 @@
 			this.clientGroupBox.TabStop = false;
 			this.clientGroupBox.Text = "Client";
 			this.clientGroupBox.Paint += new System.Windows.Forms.PaintEventHandler(this.gameGroupBox_Paint);
+			// 
+			// dropPacketsCheckBox
+			// 
+			this.dropPacketsCheckBox.AutoSize = true;
+			this.dropPacketsCheckBox.Location = new System.Drawing.Point(251, 33);
+			this.dropPacketsCheckBox.Name = "dropPacketsCheckBox";
+			this.dropPacketsCheckBox.Size = new System.Drawing.Size(90, 17);
+			this.dropPacketsCheckBox.TabIndex = 1;
+			this.dropPacketsCheckBox.Text = "Drop packets";
+			this.dropPacketsCheckBox.UseVisualStyleBackColor = true;
+			this.dropPacketsCheckBox.CheckedChanged += new System.EventHandler(this.dropPacketsCheckBox_CheckedChanged);
+			// 
+			// drawInterpolationCheckBox
+			// 
+			this.drawInterpolationCheckBox.AutoSize = true;
+			this.drawInterpolationCheckBox.Checked = true;
+			this.drawInterpolationCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.drawInterpolationCheckBox.Location = new System.Drawing.Point(251, 10);
+			this.drawInterpolationCheckBox.Name = "drawInterpolationCheckBox";
+			this.drawInterpolationCheckBox.Size = new System.Drawing.Size(111, 17);
+			this.drawInterpolationCheckBox.TabIndex = 0;
+			this.drawInterpolationCheckBox.Text = "Draw interpolation";
+			this.drawInterpolationCheckBox.UseVisualStyleBackColor = true;
+			this.drawInterpolationCheckBox.CheckedChanged += new System.EventHandler(this.drawInterpolationCheckBox_CheckedChanged);
 			// 
 			// clientPacketTimelineDisplay
 			// 
@@ -215,19 +241,6 @@
 			this.clientPacketTimelineDisplay.Size = new System.Drawing.Size(738, 94);
 			this.clientPacketTimelineDisplay.TabIndex = 8;
 			this.clientPacketTimelineDisplay.Text = "packetTimelineDisplay1";
-			// 
-			// drawInterpolationCheckBox
-			// 
-			this.drawInterpolationCheckBox.AutoSize = true;
-			this.drawInterpolationCheckBox.Checked = true;
-			this.drawInterpolationCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.drawInterpolationCheckBox.Location = new System.Drawing.Point(251, 10);
-			this.drawInterpolationCheckBox.Name = "drawInterpolationCheckBox";
-			this.drawInterpolationCheckBox.Size = new System.Drawing.Size(111, 17);
-			this.drawInterpolationCheckBox.TabIndex = 0;
-			this.drawInterpolationCheckBox.Text = "Draw interpolation";
-			this.drawInterpolationCheckBox.UseVisualStyleBackColor = true;
-			this.drawInterpolationCheckBox.CheckedChanged += new System.EventHandler(this.drawInterpolationCheckBox_CheckedChanged);
 			// 
 			// MainForm
 			// 
@@ -269,6 +282,7 @@
 		private System.Windows.Forms.Button runPauseBothButton;
 		private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
 		private System.Windows.Forms.CheckBox drawInterpolationCheckBox;
+		private System.Windows.Forms.CheckBox dropPacketsCheckBox;
 	}
 }
 
