@@ -10,7 +10,6 @@ namespace Entmoot.Engine.Client
 	{
 		#region Fields
 
-		private int lastestReceivedServerPacket = -1;
 		private INetworkConnection serverNetworkConnection;
 		public SortedList<int, StateSnapshot> ReceivedStateSnapshots = new SortedList<int, StateSnapshot>(64);
 
@@ -27,24 +26,17 @@ namespace Entmoot.Engine.Client
 
 		#region Properties
 
-		private int frameTick = 0;
-		public int FrameTick
-		{
-			get { return this.frameTick; }
-		}
-
-		private Entity[] entities = new Entity[0];
-		public IList<Entity> Entities
-		{
-			get { return Array.AsReadOnly(this.entities); }
-		}
-
 		public bool ShouldInterpolate { get; set; } = true;
-		public int RenderFrameTick { get; set; } = -8;
-		public int InterpolatedStartTick { get; set; } = -1;
-		public int InterpolatedEndTick { get; set; } = -1;
-		public bool IsInterpolationValid { get; set; } = false;
-		public int NumberOfInvalidInterpolations { get; set; } = 0;
+
+		public int FrameTick { get; private set; }
+		public int LastestReceivedServerTick { get; private set; } = -1;
+
+		public bool IsInterpolationValid { get { return (this.InterpolationStartState != null && this.InterpolationEndState != null); } }
+		public int NumberOfInvalidInterpolations { get; private set; }
+
+		public StateSnapshot InterpolationStartState { get; private set; }
+		public StateSnapshot InterpolationEndState { get; private set; }
+		public StateSnapshot RenderedState { get; private set; }
 
 		#endregion Properties
 
@@ -52,7 +44,7 @@ namespace Entmoot.Engine.Client
 
 		public void Update()
 		{
-			this.frameTick++;
+			this.FrameTick++;
 
 			byte[] packet;
 			while ((packet = this.serverNetworkConnection.GetNextIncomingPacket()) != null)
@@ -60,56 +52,75 @@ namespace Entmoot.Engine.Client
 				StateSnapshot stateSnapshot = StateSnapshot.DeserializePacket(packet);
 				this.ReceivedStateSnapshots.Add(stateSnapshot.FrameTick, stateSnapshot);
 
-				if (this.lastestReceivedServerPacket < 0)
+				if (this.LastestReceivedServerTick < 0)
 				{
-					this.frameTick = stateSnapshot.FrameTick;
+					this.FrameTick = stateSnapshot.FrameTick;
 					this.NumberOfInvalidInterpolations = 0;
 				}
 
-				this.lastestReceivedServerPacket = stateSnapshot.FrameTick;
-				LogStats.Client_LatestReceivedServerPacket = this.lastestReceivedServerPacket;
+				this.LastestReceivedServerTick = stateSnapshot.FrameTick;
 			}
 
 			if (this.ShouldInterpolate)
 			{
 				// Todo: this delay should be: frame - (updaterate + 1/2latency) * 0.1fudgefactor
-				this.RenderFrameTick = this.frameTick - 10;
-				StateSnapshot interpolatedBeginState = null;
-				StateSnapshot interpolatedEndState = null;
-				foreach (var kvp in this.ReceivedStateSnapshots)
-				{
-					StateSnapshot stateSnapshot = kvp.Value;
-					// Todo: these should be more intelligent and grab the closest packets in either direction
-					// Todo: make sure we can grab the end packet on the last frame of the interpolation range
-					if (stateSnapshot.FrameTick <= this.RenderFrameTick)
-					{
-						interpolatedBeginState = stateSnapshot;
-					}
-					if (stateSnapshot.FrameTick > this.RenderFrameTick)
-					{
-						interpolatedEndState = stateSnapshot;
-						break;
-					}
-				}
+				int renderedFrameTick = this.FrameTick - 10;
 
-				if (interpolatedBeginState != null && interpolatedEndState != null)
+				if (!this.IsInterpolationValid)
 				{
-					this.InterpolatedStartTick = interpolatedBeginState.FrameTick;
-					this.InterpolatedEndTick = interpolatedEndState.FrameTick;
-					this.entities = StateSnapshot.Interpolate(interpolatedBeginState, interpolatedEndState, this.RenderFrameTick).Entities;
-					this.IsInterpolationValid = true;
+					StateSnapshot interpolationStartState = null;
+					StateSnapshot interpolationEndState = null;
+					foreach (var kvp in this.ReceivedStateSnapshots)
+					{
+						StateSnapshot stateSnapshot = kvp.Value;
+						// Todo: these should be more intelligent and grab the closest packets in either direction
+						// Todo: make sure we can grab the end packet on the last frame of the interpolation range
+						if (stateSnapshot.FrameTick <= renderedFrameTick)
+						{
+							interpolationStartState = stateSnapshot;
+						}
+						if (stateSnapshot.FrameTick > renderedFrameTick)
+						{
+							interpolationEndState = stateSnapshot;
+							break;
+						}
+					}
+					if (interpolationStartState != null && interpolationEndState != null)
+					{
+						this.InterpolationStartState = interpolationStartState;
+						this.InterpolationEndState = interpolationEndState;
+					}
 				}
 				else
 				{
-					this.IsInterpolationValid = false;
-					this.NumberOfInvalidInterpolations++;
+					if (renderedFrameTick > this.InterpolationEndState.FrameTick)
+					{
+						// Find the next closest state snapshot to start interpolating to
+						StateSnapshot closestSnapshot = null;
+						foreach (var kvp in this.ReceivedStateSnapshots)
+						{
+							StateSnapshot stateSnapshot = kvp.Value;
+							if (stateSnapshot.FrameTick >= renderedFrameTick && (closestSnapshot == null || closestSnapshot.FrameTick > stateSnapshot.FrameTick))
+							{
+								closestSnapshot = stateSnapshot;
+							}
+						}
+
+						if (closestSnapshot != null)
+						{
+							this.InterpolationStartState = this.RenderedState;
+							this.InterpolationEndState = closestSnapshot;
+						}
+					}
+
+					this.RenderedState = StateSnapshot.Interpolate(this.InterpolationStartState, this.InterpolationEndState, renderedFrameTick);
 				}
 			}
 			else
 			{
 				if (this.ReceivedStateSnapshots.Any())
 				{
-					this.entities = this.ReceivedStateSnapshots.Last().Value.Entities;
+					this.RenderedState = this.ReceivedStateSnapshots.Last().Value;
 				}
 			}
 		}

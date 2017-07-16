@@ -147,27 +147,28 @@ namespace Entmoot.TestGame
 		{
 			ClientServerContext clientServerContext = (ClientServerContext)((Control)sender).Tag;
 			int now = (clientServerContext == ClientServerContext.Client) ? this.client.FrameTick : this.server.FrameTick;
-			IList<Entity> entities = (clientServerContext == ClientServerContext.Client) ? this.client.Entities : this.server.Entities;
+			IList<Entity> entities = (clientServerContext == ClientServerContext.Client) ? this.client.RenderedState?.Entities : this.server.Entities;
 
 			e.Graphics.DrawString(now.ToString(), this.Font, Brushes.Black, 10, 10);
 			if (this.drawInterpolationCheckBox.Checked && clientServerContext == ClientServerContext.Client &&
-				this.client.InterpolatedStartTick >= 0 && this.client.InterpolatedEndTick >= 0)
+				this.client.InterpolationStartState != null && this.client.InterpolationEndState != null)
 			{
 				Brush color = this.client.IsInterpolationValid ? Brushes.Gainsboro : Brushes.LightCoral;
-				var interpolationStart = this.client.ReceivedStateSnapshots[this.client.InterpolatedStartTick];
-				var interpolationEnd = this.client.ReceivedStateSnapshots[this.client.InterpolatedEndTick];
-				foreach (Entity entity in interpolationStart.Entities)
+				foreach (Entity entity in this.client.InterpolationStartState.Entities)
 				{
 					e.Graphics.FillRectangle(color, entity.Position.X, entity.Position.Y, 3, 3);
 				}
-				foreach (Entity entity in interpolationEnd.Entities)
+				foreach (Entity entity in this.client.InterpolationEndState.Entities)
 				{
 					e.Graphics.FillRectangle(color, entity.Position.X, entity.Position.Y, 3, 3);
 				}
 			}
-			foreach (Entity entity in entities)
+			if (entities != null)
 			{
-				e.Graphics.FillRectangle(Brushes.Black, entity.Position.X, entity.Position.Y, 3, 3);
+				foreach (Entity entity in entities)
+				{
+					e.Graphics.FillRectangle(Brushes.Black, entity.Position.X, entity.Position.Y, 3, 3);
+				}
 			}
 		}
 
@@ -390,8 +391,8 @@ namespace Entmoot.TestGame
 				{
 					Pen snapshotPen = Pens.Black;
 					Brush snapshotBrush = Brushes.Black;
-					if (this.NetworkConnection.Client.IsInterpolationValid && (this.NetworkConnection.Client.InterpolatedStartTick == kvp.Key ||
-						this.NetworkConnection.Client.InterpolatedEndTick == kvp.Key))
+					if (this.NetworkConnection.Client.IsInterpolationValid && (this.NetworkConnection.Client.InterpolationStartState.FrameTick == kvp.Key ||
+						this.NetworkConnection.Client.InterpolationEndState.FrameTick == kvp.Key))
 					{
 						snapshotPen = Pens.Red;
 						snapshotBrush = Brushes.Red;
@@ -403,7 +404,10 @@ namespace Entmoot.TestGame
 				}
 
 				Pen pen = (this.NetworkConnection.Client.IsInterpolationValid) ? Pens.Red : Pens.Green;
-				e.Graphics.DrawLine(pen, timeToX(this.NetworkConnection.Client.RenderFrameTick), 0, timeToX(this.NetworkConnection.Client.RenderFrameTick), this.Height);
+				if (this.NetworkConnection.Client.RenderedState != null)
+				{
+					e.Graphics.DrawLine(pen, timeToX(this.NetworkConnection.Client.RenderedState.FrameTick), 0, timeToX(this.NetworkConnection.Client.RenderedState.FrameTick), this.Height);
+				}
 			}
 			e.Graphics.DrawLine(Pens.Blue, timeToX(now), 0, timeToX(now), this.Height);
 		}
