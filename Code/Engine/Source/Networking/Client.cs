@@ -27,12 +27,14 @@ namespace Entmoot.Engine.Client
 		#region Properties
 
 		public bool ShouldInterpolate { get; set; } = true;
+		public int MaxExtrapolationTicks { get; set; } = 10;
 
 		public int FrameTick { get; private set; }
 		public int LastestReceivedServerTick { get; private set; } = -1;
 
-		public bool IsInterpolationValid { get { return (this.InterpolationStartState != null && this.InterpolationEndState != null); } }
-		public int NumberOfInvalidInterpolations { get; private set; }
+		public bool HasInterpolationStarted { get { return (this.InterpolationStartState != null && this.InterpolationEndState != null); } }
+		public int NumberOfExtrapolatedFrames { get; private set; }
+		public int NumberOfNoInterpolationFrames { get; private set; }
 
 		public StateSnapshot InterpolationStartState { get; private set; }
 		public StateSnapshot InterpolationEndState { get; private set; }
@@ -55,7 +57,6 @@ namespace Entmoot.Engine.Client
 				if (this.LastestReceivedServerTick < 0)
 				{
 					this.FrameTick = stateSnapshot.FrameTick;
-					this.NumberOfInvalidInterpolations = 0;
 				}
 
 				this.LastestReceivedServerTick = stateSnapshot.FrameTick;
@@ -66,7 +67,7 @@ namespace Entmoot.Engine.Client
 				// Todo: this delay should be: frame - (updaterate + 1/2latency) * 0.1fudgefactor
 				int renderedFrameTick = this.FrameTick - 10;
 
-				if (!this.IsInterpolationValid)
+				if (!this.HasInterpolationStarted)
 				{
 					StateSnapshot interpolationStartState = null;
 					StateSnapshot interpolationEndState = null;
@@ -113,7 +114,16 @@ namespace Entmoot.Engine.Client
 						}
 					}
 
-					this.RenderedState = StateSnapshot.Interpolate(this.InterpolationStartState, this.InterpolationEndState, renderedFrameTick);
+					if (renderedFrameTick - this.InterpolationEndState.FrameTick < this.MaxExtrapolationTicks)
+					{
+						this.RenderedState = StateSnapshot.Interpolate(this.InterpolationStartState, this.InterpolationEndState, renderedFrameTick);
+						if (this.InterpolationEndState.FrameTick < renderedFrameTick) { this.NumberOfExtrapolatedFrames++; }
+					}
+					else
+					{
+						this.RenderedState.FrameTick = renderedFrameTick;
+						this.NumberOfNoInterpolationFrames++;
+					}
 				}
 			}
 			else

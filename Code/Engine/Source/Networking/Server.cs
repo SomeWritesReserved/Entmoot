@@ -45,7 +45,7 @@ namespace Entmoot.Engine.Server
 		public void Update()
 		{
 			this.frameTick++;
-			if (this.FrameTick % 4 == 0)
+			if (this.FrameTick % 3 == 0)
 			{
 				StateSnapshot stateSnapshot = new StateSnapshot()
 				{
