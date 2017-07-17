@@ -131,6 +131,9 @@ namespace Entmoot.Engine.Client
 					}
 					else
 					{
+						// Even though we aren't changing the state of the rendered frame, we still need to update its tick number since we are actively
+						// deciding it is current. If we don't then when we go to interpolate away from this frame then it could be far in the past leading
+						// to jumpy transitions.
 						this.RenderedState.FrameTick = renderedFrameTick;
 						this.NumberOfNoInterpolationFrames++;
 					}
