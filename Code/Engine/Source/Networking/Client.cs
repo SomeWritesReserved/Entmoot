@@ -26,18 +26,28 @@ namespace Entmoot.Engine.Client
 
 		#region Properties
 
+		/// <summary>Gets or sets whether the client should interpolate sent server state for a smoother rendered experience.</summary>
 		public bool ShouldInterpolate { get; set; } = true;
+		/// <summary>Gets or sets the maximum number of ticks that the client can extrapolate for (in the event of packet loss).</summary>
 		public int MaxExtrapolationTicks { get; set; } = 10;
 
+		/// <summary>Gets the current frame tick of the client (which may or may not be ahead of the tick that is currently being rendered).</summary>
 		public int FrameTick { get; private set; }
+		/// <summary>Gets the last server tick that was actually received from the server.</summary>
 		public int LastestReceivedServerTick { get; private set; } = -1;
 
+		/// <summary>Gets whether or not the client has enough data from the server to start interpolation and that indeed interpolation has begun.</summary>
 		public bool HasInterpolationStarted { get { return (this.InterpolationStartState != null && this.InterpolationEndState != null); } }
+		/// <summary>Gets the number of total frames (over the course of the entire session) that had to be extrapolated (instead of interpolated) due to packet loss.</summary>
 		public int NumberOfExtrapolatedFrames { get; private set; }
+		/// <summary>Gets the number of total frames (over the course of the entire session) that had no interpolation or extrapolation due to severe packet loss and <see cref="MaxExtrapolationTicks"/>.</summary>
 		public int NumberOfNoInterpolationFrames { get; private set; }
 
+		/// <summary>Gets the <see cref="StateSnapshot"/> that is currently being used as the starting interpolation tick (where we are coming from).</summary>
 		public StateSnapshot InterpolationStartState { get; private set; }
+		/// <summary>Gets the <see cref="StateSnapshot"/> that is currently being used as the ending interpolation tick (where we are going to).</summary>
 		public StateSnapshot InterpolationEndState { get; private set; }
+		/// <summary>Gets the <see cref="StateSnapshot"/> that is currently the actively rendered state.</summary>
 		public StateSnapshot RenderedState { get; private set; }
 
 		#endregion Properties
