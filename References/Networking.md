@@ -1,6 +1,6 @@
 # Game Networking
 
-## General Knowledge or Articles
+## General Knowledge
 
 * [Gaffer on Games](http://gafferongames.com/2009/01/25/game-networking-resources/)
 * [IT Hare](http://ithare.com/category/network-programming/)
@@ -22,5 +22,10 @@
   * [Tim Sweeney, Unreal Netcode](https://docs.google.com/document/d/1KGLbEfHsWANTTgUqfK6rkpFYDGvnZYj-BN18sxq6LPY)
 * [Torque Game Engine](http://docs.garagegames.com/tgea/official/content/documentation/Engine%20Overview/Networking.html)
 * [Tribes Game Engine](http://gamedevs.org/uploads/tribes-networking-model.pdf)
-* [Halo Reach Networking GDC](http://www.gdcvault.com/play/1014345/I-Shot-You-First-Networking)
+
+## Talks
+
+* [Halo Reach Networking @ GDC11](http://www.gdcvault.com/play/1014345/I-Shot-You-First-Networking)
   * [Halo Networking Highlights (post-GDC writeup)](http://blog.wolfire.com/2011/03/GDC-Session-Summary-Halo-networking)
+* [Networking for Physics Programmers @ GDC15](http://www.gdcvault.com/play/1022195/Physics-for-Game-Programmers-Networking)
+* [Call of Duty Networking @ GDC16](http://www.gdcvault.com/play/1023220/Fighting-Latency-on-Call-of)
