@@ -12,6 +12,7 @@ namespace Entmoot.Engine.Client
 
 		private INetworkConnection serverNetworkConnection;
 		public SortedList<int, StateSnapshot> ReceivedStateSnapshots = new SortedList<int, StateSnapshot>(64);
+		public List<ClientCommand> SentClientCommands = new List<ClientCommand>(64);
 
 		#endregion Fields
 
@@ -34,7 +35,9 @@ namespace Entmoot.Engine.Client
 		/// <summary>Gets the current frame tick of the client (which may or may not be ahead of the tick that is currently being rendered).</summary>
 		public int FrameTick { get; private set; }
 		/// <summary>Gets the last server tick that was actually received from the server.</summary>
-		public int LastestReceivedServerTick { get; private set; } = -1;
+		public int LatestReceivedServerTick { get; private set; } = -1;
+		/// <summary>Gets the last client tick that was acknowledged by the server.</summary>
+		public int LatestServerAcknowledgedTick { get; private set; } = -1;
 
 		/// <summary>Gets whether or not the client has enough data from the server to start interpolation and that indeed interpolation has begun.</summary>
 		public bool HasInterpolationStarted { get { return (this.InterpolationStartState != null && this.InterpolationEndState != null); } }
@@ -54,7 +57,7 @@ namespace Entmoot.Engine.Client
 
 		#region Methods
 
-		public void Update()
+		public void Update(CommandKeys activeCommandKeys)
 		{
 			this.FrameTick++;
 
@@ -62,15 +65,19 @@ namespace Entmoot.Engine.Client
 			while ((packet = this.serverNetworkConnection.GetNextIncomingPacket()) != null)
 			{
 				StateSnapshot stateSnapshot = StateSnapshot.DeserializePacket(packet);
-				this.ReceivedStateSnapshots.Add(stateSnapshot.FrameTick, stateSnapshot);
+				this.ReceivedStateSnapshots.Add(stateSnapshot.ServerFrameTick, stateSnapshot);
 
-				if (this.LastestReceivedServerTick < 0)
+				if (this.LatestReceivedServerTick < 0)
 				{
-					this.FrameTick = stateSnapshot.FrameTick;
+					this.FrameTick = stateSnapshot.ServerFrameTick;
 				}
 
-				this.LastestReceivedServerTick = stateSnapshot.FrameTick;
+				this.LatestReceivedServerTick = stateSnapshot.ServerFrameTick;
 			}
+
+			//ClientCommand frameCommand = new ClientCommand() { CommandKeys = activeCommandKeys };
+			//this.SentClientCommands.Add(frameCommand);
+			//this.serverNetworkConnection.SendPacket(frameCommand.SerializeCommand());
 
 			if (this.ShouldInterpolate)
 			{
@@ -86,11 +93,11 @@ namespace Entmoot.Engine.Client
 						StateSnapshot stateSnapshot = kvp.Value;
 						// Todo: these should be more intelligent and grab the closest packets in either direction
 						// Todo: make sure we can grab the end packet on the last frame of the interpolation range
-						if (stateSnapshot.FrameTick <= renderedFrameTick)
+						if (stateSnapshot.ServerFrameTick <= renderedFrameTick)
 						{
 							interpolationStartState = stateSnapshot;
 						}
-						if (stateSnapshot.FrameTick > renderedFrameTick)
+						if (stateSnapshot.ServerFrameTick > renderedFrameTick)
 						{
 							interpolationEndState = stateSnapshot;
 							break;
@@ -104,14 +111,14 @@ namespace Entmoot.Engine.Client
 				}
 				else
 				{
-					if (renderedFrameTick > this.InterpolationEndState.FrameTick)
+					if (renderedFrameTick > this.InterpolationEndState.ServerFrameTick)
 					{
 						// Find the next closest state snapshot to start interpolating to
 						StateSnapshot closestSnapshot = null;
 						foreach (var kvp in this.ReceivedStateSnapshots)
 						{
 							StateSnapshot stateSnapshot = kvp.Value;
-							if (stateSnapshot.FrameTick >= renderedFrameTick && (closestSnapshot == null || closestSnapshot.FrameTick > stateSnapshot.FrameTick))
+							if (stateSnapshot.ServerFrameTick >= renderedFrameTick && (closestSnapshot == null || closestSnapshot.ServerFrameTick > stateSnapshot.ServerFrameTick))
 							{
 								closestSnapshot = stateSnapshot;
 							}
@@ -124,17 +131,17 @@ namespace Entmoot.Engine.Client
 						}
 					}
 
-					if (renderedFrameTick - this.InterpolationEndState.FrameTick < this.MaxExtrapolationTicks)
+					if (renderedFrameTick - this.InterpolationEndState.ServerFrameTick < this.MaxExtrapolationTicks)
 					{
 						this.RenderedState = StateSnapshot.Interpolate(this.InterpolationStartState, this.InterpolationEndState, renderedFrameTick);
-						if (this.InterpolationEndState.FrameTick < renderedFrameTick) { this.NumberOfExtrapolatedFrames++; }
+						if (this.InterpolationEndState.ServerFrameTick < renderedFrameTick) { this.NumberOfExtrapolatedFrames++; }
 					}
 					else
 					{
 						// Even though we aren't changing the state of the rendered frame, we still need to update its tick number since we are actively
 						// deciding it is current. If we don't then when we go to interpolate away from this frame then it could be far in the past leading
 						// to jumpy transitions.
-						this.RenderedState.FrameTick = renderedFrameTick;
+						this.RenderedState.ServerFrameTick = renderedFrameTick;
 						this.NumberOfNoInterpolationFrames++;
 					}
 				}

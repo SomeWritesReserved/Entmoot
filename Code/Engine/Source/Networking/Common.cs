@@ -11,7 +11,8 @@ namespace Entmoot.Engine
 	{
 		#region Fields
 
-		public int FrameTick;
+		public int ServerFrameTick = -1;
+		public int AcknowledgedClientTick = -1;
 		public Entity[] Entities;
 
 		#endregion Fields
@@ -20,7 +21,7 @@ namespace Entmoot.Engine
 
 		public static StateSnapshot Interpolate(StateSnapshot stateSnapshotA, StateSnapshot stateSnapshotB, int frameTick)
 		{
-			float amount = ((float)frameTick - stateSnapshotA.FrameTick) / ((float)stateSnapshotB.FrameTick - stateSnapshotA.FrameTick);
+			float amount = ((float)frameTick - stateSnapshotA.ServerFrameTick) / ((float)stateSnapshotB.ServerFrameTick - stateSnapshotA.ServerFrameTick);
 
 			Entity[] interpolatedEntities = new Entity[stateSnapshotA.Entities.Length];
 			foreach (int entityIndex in Enumerable.Range(0, interpolatedEntities.Length))
@@ -32,7 +33,7 @@ namespace Entmoot.Engine
 			}
 			return new StateSnapshot()
 			{
-				FrameTick = frameTick,
+				ServerFrameTick = frameTick,
 				Entities = interpolatedEntities,
 			};
 		}
@@ -44,7 +45,8 @@ namespace Entmoot.Engine
 			{
 				using (BinaryReader binaryReader = new BinaryReader(memoryStream))
 				{
-					stateSnapshot.FrameTick = binaryReader.ReadInt32();
+					stateSnapshot.ServerFrameTick = binaryReader.ReadInt32();
+					stateSnapshot.AcknowledgedClientTick = binaryReader.ReadInt32();
 					List<Entity> entities = new List<Entity>(16);
 					while (memoryStream.Position < memoryStream.Length)
 					{
@@ -61,12 +63,13 @@ namespace Entmoot.Engine
 
 		public byte[] SerializePacket()
 		{
-			byte[] packet = new byte[sizeof(int) + sizeof(float) * 3 * this.Entities.Length];
+			byte[] packet = new byte[sizeof(int) + sizeof(int) + sizeof(float) * 3 * this.Entities.Length];
 			using (MemoryStream memoryStream = new MemoryStream(packet, 0, packet.Length, true))
 			{
 				using (BinaryWriter binaryWriter = new BinaryWriter(memoryStream))
 				{
-					binaryWriter.Write(this.FrameTick);
+					binaryWriter.Write(this.ServerFrameTick);
+					binaryWriter.Write(this.AcknowledgedClientTick);
 					foreach (Entity entity in this.Entities)
 					{
 						binaryWriter.Write(entity.Position.X);
@@ -90,5 +93,68 @@ namespace Entmoot.Engine
 		void SendPacket(byte[] packet);
 
 		#endregion Methods
+	}
+
+	public class ClientCommand
+	{
+		#region Fields
+
+		public int ClientFrameTick = -1;
+		public int AcknowledgedServerTick = -1;
+		public CommandKeys CommandKeys;
+
+		#endregion Fields
+
+		#region Methods
+
+		public static ClientCommand[] DeserializeCommands(byte[] packet)
+		{
+			using (MemoryStream memoryStream = new MemoryStream(packet, 0, packet.Length, false))
+			{
+				using (BinaryReader binaryReader = new BinaryReader(memoryStream))
+				{
+					List<ClientCommand> commands = new List<ClientCommand>(32);
+					while (memoryStream.Position < memoryStream.Length)
+					{
+						commands.Add(new ClientCommand()
+						{
+							ClientFrameTick = binaryReader.ReadInt32(),
+							AcknowledgedServerTick = binaryReader.ReadInt32(),
+							CommandKeys = (CommandKeys)binaryReader.ReadByte(),
+						});
+					}
+					return commands.ToArray();
+				}
+			}
+		}
+
+		public static byte[] SerializeCommands(ClientCommand[] commands)
+		{
+			byte[] packet = new byte[(sizeof(int) + sizeof(int) + sizeof(byte)) * commands.Length];
+			using (MemoryStream memoryStream = new MemoryStream(packet, 0, packet.Length, true))
+			{
+				using (BinaryWriter binaryWriter = new BinaryWriter(memoryStream))
+				{
+					foreach (ClientCommand command in commands)
+					{
+						binaryWriter.Write(command.ClientFrameTick);
+						binaryWriter.Write(command.AcknowledgedServerTick);
+						binaryWriter.Write((byte)command.CommandKeys);
+					}
+				}
+			}
+			return packet;
+		}
+
+		#endregion Methods
+	}
+
+	public enum CommandKeys : byte
+	{
+		None = 0,
+		MoveForward = 1,
+		MoveBackward = 2,
+		MoveLeft = 4,
+		MoveRight = 8,
 	}
 }

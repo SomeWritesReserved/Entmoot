@@ -83,7 +83,7 @@ namespace Entmoot.TestGame
 			if (this.clientStepsRemaining == 0) { return; }
 
 			this.clientServerNetworkConnection.CurrentContext = ClientServerContext.Client;
-			this.client.Update();
+			this.client.Update(CommandKeys.None);
 			this.clientGroupBox.Refresh();
 			this.clientPacketTimelineDisplay.Refresh();
 			this.clientStepsRemaining--;
@@ -372,14 +372,14 @@ namespace Entmoot.TestGame
 			}
 			foreach (var incomingPacket in incomingPackets)
 			{
-				var packetTick = StateSnapshot.DeserializePacket(incomingPacket.Data).FrameTick;
+				var packetTick = StateSnapshot.DeserializePacket(incomingPacket.Data).ServerFrameTick;
 				e.Graphics.DrawLine(Pens.Black, timeToX(incomingPacket.ArrivalTick) - 4, centerY - 4, timeToX(incomingPacket.ArrivalTick), centerY);
 				e.Graphics.DrawLine(Pens.Black, timeToX(incomingPacket.ArrivalTick), centerY, timeToX(incomingPacket.ArrivalTick) + 4, centerY - 4);
 				e.Graphics.DrawString(packetTick.ToString(), this.Font, Brushes.Black, timeToX(incomingPacket.ArrivalTick) - 6, centerY - 20);
 			}
 			foreach (var incomingPacket in oldPackets)
 			{
-				var packetTick = StateSnapshot.DeserializePacket(incomingPacket.Data).FrameTick;
+				var packetTick = StateSnapshot.DeserializePacket(incomingPacket.Data).ServerFrameTick;
 				e.Graphics.DrawLine(Pens.Gray, timeToX(incomingPacket.ArrivalTick) - 4, centerY - 4, timeToX(incomingPacket.ArrivalTick), centerY);
 				e.Graphics.DrawLine(Pens.Gray, timeToX(incomingPacket.ArrivalTick), centerY, timeToX(incomingPacket.ArrivalTick) + 4, centerY - 4);
 				e.Graphics.DrawString(packetTick.ToString(), this.Font, Brushes.Gray, timeToX(incomingPacket.ArrivalTick) - 6, centerY - 20);
@@ -391,20 +391,20 @@ namespace Entmoot.TestGame
 					Pen snapshotPen = Pens.Black;
 					Brush snapshotBrush = Brushes.Black;
 					if (this.NetworkConnection.Client.HasInterpolationStarted &&
-						(this.NetworkConnection.Client.InterpolationStartState.FrameTick == kvp.Key || this.NetworkConnection.Client.InterpolationEndState.FrameTick == kvp.Key))
+						(this.NetworkConnection.Client.InterpolationStartState.ServerFrameTick == kvp.Key || this.NetworkConnection.Client.InterpolationEndState.ServerFrameTick == kvp.Key))
 					{
 						snapshotPen = Pens.Red;
 						snapshotBrush = Brushes.Red;
 					}
 					StateSnapshot receivedStateSnapshot = kvp.Value;
-					e.Graphics.DrawLine(snapshotPen, timeToX(receivedStateSnapshot.FrameTick) - 4, centerY + 4, timeToX(receivedStateSnapshot.FrameTick), centerY);
-					e.Graphics.DrawLine(snapshotPen, timeToX(receivedStateSnapshot.FrameTick), centerY, timeToX(receivedStateSnapshot.FrameTick) + 4, centerY + 4);
-					e.Graphics.DrawString(receivedStateSnapshot.FrameTick.ToString(), this.Font, snapshotBrush, timeToX(receivedStateSnapshot.FrameTick) - 6, centerY + 6);
+					e.Graphics.DrawLine(snapshotPen, timeToX(receivedStateSnapshot.ServerFrameTick) - 4, centerY + 4, timeToX(receivedStateSnapshot.ServerFrameTick), centerY);
+					e.Graphics.DrawLine(snapshotPen, timeToX(receivedStateSnapshot.ServerFrameTick), centerY, timeToX(receivedStateSnapshot.ServerFrameTick) + 4, centerY + 4);
+					e.Graphics.DrawString(receivedStateSnapshot.ServerFrameTick.ToString(), this.Font, snapshotBrush, timeToX(receivedStateSnapshot.ServerFrameTick) - 6, centerY + 6);
 				}
 				
 				if (this.NetworkConnection.Client.RenderedState != null)
 				{
-					e.Graphics.DrawLine(Pens.Red, timeToX(this.NetworkConnection.Client.RenderedState.FrameTick), 0, timeToX(this.NetworkConnection.Client.RenderedState.FrameTick), this.Height);
+					e.Graphics.DrawLine(Pens.Red, timeToX(this.NetworkConnection.Client.RenderedState.ServerFrameTick), 0, timeToX(this.NetworkConnection.Client.RenderedState.ServerFrameTick), this.Height);
 				}
 			}
 			e.Graphics.DrawLine(Pens.Blue, timeToX(now), 0, timeToX(now), this.Height);

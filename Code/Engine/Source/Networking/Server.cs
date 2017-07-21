@@ -49,7 +49,7 @@ namespace Entmoot.Engine.Server
 			{
 				StateSnapshot stateSnapshot = new StateSnapshot()
 				{
-					FrameTick = this.frameTick,
+					ServerFrameTick = this.frameTick,
 					Entities = this.Entities.ToArray(),
 				};
 				foreach (ClientConnection client in this.clients)
