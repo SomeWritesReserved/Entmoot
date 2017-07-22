@@ -142,13 +142,25 @@ namespace Entmoot.Engine.Client
 							this.InterpolationStartState = this.RenderedState;
 							this.InterpolationEndState = closestSnapshot;
 
-							this.InterpolationStartState.Entities[0].Position = this.InterpolationEndState.Entities[0].Position;
+							Vector3 truePosition = this.InterpolationEndState.Entities[0].Position;
+							this.InterpolationStartState.Entities[0].Position = truePosition;
 							if (this.predictedPositions.ContainsKey(this.InterpolationEndState.AcknowledgedClientTick))
 							{
 								Vector3 predictedPosition = this.predictedPositions[this.InterpolationEndState.AcknowledgedClientTick];
 								if (this.InterpolationStartState.Entities[0].Position != predictedPosition)
 								{
 									this.InterpolationStartState.Entities[0].Position = predictedPosition;
+
+									// Recalculate all the subsequent predictions since they were wrong
+									Entity predictionEnt = new Entity() { Position = truePosition };
+									foreach (ClientCommand clientCommand in this.SentClientCommands.Where((cmd) => cmd.ClientFrameTick > this.InterpolationEndState.AcknowledgedClientTick))
+									{
+										clientCommand.RunOnEntity(predictionEnt);
+										if (this.predictedPositions.ContainsKey(clientCommand.ClientFrameTick))
+										{
+											this.predictedPositions[clientCommand.ClientFrameTick] = predictionEnt.Position;
+										}
+									}
 								}
 							}
 							else
@@ -184,10 +196,7 @@ namespace Entmoot.Engine.Client
 			// Client side prediction
 			if (this.RenderedState != null)
 			{
-				Entity predictionEnt = new Entity()
-				{
-					Position = this.InterpolationEndState.Entities[0].Position,
-				};
+				Entity predictionEnt = new Entity() { Position = this.InterpolationEndState.Entities[0].Position };
 				foreach (ClientCommand clientCommandNotAckedByServer in this.SentClientCommands.Where((cmd) => cmd.ClientFrameTick > this.InterpolationEndState.AcknowledgedClientTick))
 				{
 					clientCommandNotAckedByServer.RunOnEntity(predictionEnt);
