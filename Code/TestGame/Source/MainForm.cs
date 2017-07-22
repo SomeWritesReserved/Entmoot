@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Input;
 using Entmoot.Engine;
 using Entmoot.Engine.Client;
 using Entmoot.Engine.Server;
@@ -36,8 +37,8 @@ namespace Entmoot.TestGame
 
 			this.serverEntities = new Entity[]
 			{
-				new Entity() { Position = new Vector3(50, 50, 0), },
 				new Entity() { Position = new Vector3(60, 80, 0), },
+				new Entity() { Position = new Vector3(50, 50, 0), },
 			};
 
 			this.clientServerNetworkConnection = new MockNetworkConnection()
@@ -69,8 +70,8 @@ namespace Entmoot.TestGame
 
 			this.clientServerNetworkConnection.CurrentContext = ClientServerContext.Server;
 
-			this.serverEntities[0].Position.X = (float)Math.Cos(this.server.FrameTick * 0.065) * 50 + 100;
-			this.serverEntities[0].Position.Y = (float)Math.Sin(this.server.FrameTick * 0.065) * 50 + 100;
+			this.serverEntities[1].Position.X = (float)Math.Cos(this.server.FrameTick * 0.065) * 50 + 100;
+			this.serverEntities[1].Position.Y = (float)Math.Sin(this.server.FrameTick * 0.065) * 50 + 100;
 
 			this.server.Update();
 			this.serverGroupBox.Refresh();
@@ -82,8 +83,14 @@ namespace Entmoot.TestGame
 		{
 			if (this.clientStepsRemaining == 0) { return; }
 
+			CommandKeys currentCommandKeys = CommandKeys.None;
+			if (Keyboard.IsKeyDown(Key.W)) { currentCommandKeys |= CommandKeys.MoveForward; }
+			if (Keyboard.IsKeyDown(Key.S)) { currentCommandKeys |= CommandKeys.MoveBackward; }
+			if (Keyboard.IsKeyDown(Key.A)) { currentCommandKeys |= CommandKeys.MoveLeft; }
+			if (Keyboard.IsKeyDown(Key.D)) { currentCommandKeys |= CommandKeys.MoveRight; }
+
 			this.clientServerNetworkConnection.CurrentContext = ClientServerContext.Client;
-			this.client.Update(CommandKeys.None);
+			this.client.Update(currentCommandKeys);
 			this.clientGroupBox.Refresh();
 			this.clientPacketTimelineDisplay.Refresh();
 			this.clientStepsRemaining--;
@@ -401,7 +408,7 @@ namespace Entmoot.TestGame
 					e.Graphics.DrawLine(snapshotPen, timeToX(receivedStateSnapshot.ServerFrameTick), centerY, timeToX(receivedStateSnapshot.ServerFrameTick) + 4, centerY + 4);
 					e.Graphics.DrawString(receivedStateSnapshot.ServerFrameTick.ToString(), this.Font, snapshotBrush, timeToX(receivedStateSnapshot.ServerFrameTick) - 6, centerY + 6);
 				}
-				
+
 				if (this.NetworkConnection.Client.RenderedState != null)
 				{
 					e.Graphics.DrawLine(Pens.Red, timeToX(this.NetworkConnection.Client.RenderedState.ServerFrameTick), 0, timeToX(this.NetworkConnection.Client.RenderedState.ServerFrameTick), this.Height);

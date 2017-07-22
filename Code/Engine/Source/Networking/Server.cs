@@ -17,9 +17,9 @@ namespace Entmoot.Engine.Server
 
 		#region Constructors
 
-		public Server(IEnumerable<INetworkConnection> clientNetworkConnections, IEnumerable<Entity> entities)
+		public Server(IEnumerable<INetworkConnection> clientNetworkConnections, Entity[] entities)
 		{
-			this.clients = clientNetworkConnections.Select((netConn) => new ClientConnection(netConn)).ToList();
+			this.clients = clientNetworkConnections.Select((netConn, index) => new ClientConnection(netConn, entities[index])).ToList();
 			this.entities = entities.ToArray();
 		}
 
@@ -69,14 +69,16 @@ namespace Entmoot.Engine.Server
 		#region Fields
 
 		private INetworkConnection clientNetworkConnection;
+		private Entity ownedEntity;
 
 		#endregion Fields
 
 		#region Constructors
 
-		public ClientConnection(INetworkConnection clientCetworkConnection)
+		public ClientConnection(INetworkConnection clientCetworkConnection, Entity ownedEntity)
 		{
 			this.clientNetworkConnection = clientCetworkConnection;
+			this.ownedEntity = ownedEntity;
 		}
 
 		#endregion Constructors
@@ -105,10 +107,24 @@ namespace Entmoot.Engine.Server
 			byte[] packet;
 			while ((packet = this.clientNetworkConnection.GetNextIncomingPacket()) != null)
 			{
-				ClientCommand[] clientCommands = ClientCommand.DeserializePacket(packet);
+				ClientCommand[] clientCommands = ClientCommand.DeserializePacket(packet)
+					.Where((cmd) => cmd.ClientFrameTick > this.LatestReceivedClientTick)
+					.ToArray();
 
-				this.LatestReceivedClientTick = clientCommands.Max((cmd) => cmd.ClientFrameTick);
+				foreach (ClientCommand clientCommand in clientCommands)
+				{
+					this.runClientCommand(clientCommand);
+					if (this.LatestReceivedClientTick < clientCommand.ClientFrameTick) { this.LatestReceivedClientTick = clientCommand.ClientFrameTick; }
+				}
 			}
+		}
+
+		private void runClientCommand(ClientCommand clientCommand)
+		{
+			if ((clientCommand.CommandKeys & CommandKeys.MoveForward) != 0) { this.ownedEntity.Position.Y -= 1; }
+			if ((clientCommand.CommandKeys & CommandKeys.MoveBackward) != 0) { this.ownedEntity.Position.Y += 1; }
+			if ((clientCommand.CommandKeys & CommandKeys.MoveLeft) != 0) { this.ownedEntity.Position.X -= 1; }
+			if ((clientCommand.CommandKeys & CommandKeys.MoveRight) != 0) { this.ownedEntity.Position.X += 1; }
 		}
 
 		#endregion Methods
