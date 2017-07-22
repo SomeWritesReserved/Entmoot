@@ -33,6 +33,8 @@ namespace Entmoot.Engine.Server
 		/// <summary>Gets the <see cref="StateSnapshot"/> that is currently the most up-to-date state.</summary>
 		public StateSnapshot CurrentState { get; private set; }
 
+		private int snapFrames = 4;
+
 		#endregion Properties
 
 		#region Methods
@@ -51,6 +53,8 @@ namespace Entmoot.Engine.Server
 				ServerFrameTick = this.FrameTick,
 				Entities = this.entities,
 			};
+
+			if (this.entities[0].Position.X > 100 && this.snapFrames != 0) { this.entities[0].Position.X = 100; this.snapFrames--; }
 
 			if (this.FrameTick % 3 == 0)
 			{

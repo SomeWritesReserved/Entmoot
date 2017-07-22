@@ -37,7 +37,7 @@ namespace Entmoot.TestGame
 
 			this.serverEntities = new Entity[]
 			{
-				new Entity() { Position = new Vector3(60, 80, 0), },
+				new Entity() { Position = new Vector3(100, 80, 0), },
 				new Entity() { Position = new Vector3(50, 50, 0), },
 			};
 
@@ -255,13 +255,13 @@ namespace Entmoot.TestGame
 			// same wall time.
 			if (this.CurrentContext == ClientServerContext.Client)
 			{
-				int arrivalTick = (int)(this.Client.FrameTick + this.SimulatedLatency + (this.random.NextDouble() - this.random.NextDouble()) * this.SimulatedJitter);
+				int arrivalTick = (int)(this.Server.FrameTick + this.SimulatedLatency + (this.random.NextDouble() - this.random.NextDouble()) * this.SimulatedJitter);
 				SentPacket sentPacket = new SentPacket() { ArrivalTick = arrivalTick, Data = packet };
 				this.IncomingPacketsForServer.Add(sentPacket);
 			}
 			else
 			{
-				int arrivalTick = (int)(this.Server.FrameTick + this.SimulatedLatency + (this.random.NextDouble() - this.random.NextDouble()) * this.SimulatedJitter);
+				int arrivalTick = (int)(this.Client.FrameTick + this.SimulatedLatency + (this.random.NextDouble() - this.random.NextDouble()) * this.SimulatedJitter);
 				SentPacket sentPacket = new SentPacket() { ArrivalTick = arrivalTick, Data = packet };
 				this.IncomingPacketsForClient.Add(sentPacket);
 			}
