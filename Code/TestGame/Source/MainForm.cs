@@ -147,7 +147,7 @@ namespace Entmoot.TestGame
 		{
 			ClientServerContext clientServerContext = (ClientServerContext)((Control)sender).Tag;
 			int now = (clientServerContext == ClientServerContext.Client) ? this.client.FrameTick : this.server.FrameTick;
-			IList<Entity> entities = (clientServerContext == ClientServerContext.Client) ? this.client.RenderedState?.Entities : this.server.Entities;
+			IList<Entity> entities = (clientServerContext == ClientServerContext.Client) ? this.client.RenderedState?.Entities : this.server.CurrentState?.Entities;
 
 			e.Graphics.DrawString(now.ToString(), this.Font, Brushes.Black, 10, 10);
 			if (this.drawInterpolationCheckBox.Checked && clientServerContext == ClientServerContext.Client &&

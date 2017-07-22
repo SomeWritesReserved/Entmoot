@@ -10,7 +10,8 @@ namespace Entmoot.Engine.Server
 	{
 		#region Fields
 
-		private List<ClientConnection> clients = new List<ClientConnection>();
+		private readonly List<ClientConnection> clients = new List<ClientConnection>();
+		private readonly Entity[] entities;
 
 		#endregion Fields
 
@@ -19,24 +20,18 @@ namespace Entmoot.Engine.Server
 		public Server(IEnumerable<INetworkConnection> clientNetworkConnections, IEnumerable<Entity> entities)
 		{
 			this.clients = clientNetworkConnections.Select((netConn) => new ClientConnection(netConn)).ToList();
-			this.entities = entities.ToList();
+			this.entities = entities.ToArray();
 		}
 
 		#endregion Constructors
 
 		#region Properties
 
-		private int frameTick = 0;
-		public int FrameTick
-		{
-			get { return this.frameTick; }
-		}
+		/// <summary>Gets the current frame tick of the server.</summary>
+		public int FrameTick { get; private set; }
 
-		private List<Entity> entities = new List<Entity>();
-		public IList<Entity> Entities
-		{
-			get { return this.entities.AsReadOnly(); }
-		}
+		/// <summary>Gets the <see cref="StateSnapshot"/> that is currently the most up-to-date state.</summary>
+		public StateSnapshot CurrentState { get; private set; }
 
 		#endregion Properties
 
@@ -44,17 +39,19 @@ namespace Entmoot.Engine.Server
 
 		public void Update()
 		{
-			this.frameTick++;
+			this.FrameTick++;
+
+			this.CurrentState = new StateSnapshot()
+			{
+				ServerFrameTick = this.FrameTick,
+				Entities = this.entities,
+			};
+
 			if (this.FrameTick % 3 == 0)
 			{
-				StateSnapshot stateSnapshot = new StateSnapshot()
-				{
-					ServerFrameTick = this.frameTick,
-					Entities = this.Entities.ToArray(),
-				};
 				foreach (ClientConnection client in this.clients)
 				{
-					client.SendStateSnapshot(stateSnapshot);
+					client.SendStateSnapshot(this.CurrentState);
 				}
 			}
 		}

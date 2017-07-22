@@ -37,7 +37,7 @@ namespace Entmoot.Engine.Client
 		/// <summary>Gets the last server tick that was actually received from the server.</summary>
 		public int LatestReceivedServerTick { get; private set; } = -1;
 		/// <summary>Gets the last client tick that was acknowledged by the server.</summary>
-		public int LatestServerAcknowledgedTick { get; private set; } = -1;
+		public int LatestTickAcknowledgedByServer { get; private set; } = -1;
 
 		/// <summary>Gets whether or not the client has enough data from the server to start interpolation and that indeed interpolation has begun.</summary>
 		public bool HasInterpolationStarted { get { return (this.InterpolationStartState != null && this.InterpolationEndState != null); } }
@@ -77,7 +77,7 @@ namespace Entmoot.Engine.Client
 
 			//ClientCommand frameCommand = new ClientCommand() { CommandKeys = activeCommandKeys };
 			//this.SentClientCommands.Add(frameCommand);
-			//this.serverNetworkConnection.SendPacket(frameCommand.SerializeCommand());
+			//this.serverNetworkConnection.SendPacket(ClientCommand.SerializeCommands(this.SentClientCommands.Where((cmd) => cmd.ClientFrameTick > this.LatestTickAcknowledgedByServer).ToArray()));
 
 			if (this.ShouldInterpolate)
 			{
