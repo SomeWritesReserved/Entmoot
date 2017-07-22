@@ -36,6 +36,20 @@ namespace Entmoot.Engine
 				vectorA.Z + (vectorB.Z - vectorA.Z) * amount);
 		}
 
+		public static bool operator ==(Vector3 a, Vector3 b)
+		{
+			return (a.X == b.X &&
+				a.Y == b.Y &&
+				a.Z == b.Z);
+		}
+
+		public static bool operator !=(Vector3 a, Vector3 b)
+		{
+			return (a.X != b.X ||
+				a.Y != b.Y ||
+				a.Z != b.Z);
+		}
+
 		#endregion Methods
 	}
 }
