@@ -13,6 +13,8 @@ namespace Entmoot.Engine.Client
 		private INetworkConnection serverNetworkConnection;
 		public SortedList<int, StateSnapshot> ReceivedStateSnapshots = new SortedList<int, StateSnapshot>(64);
 		public List<ClientCommand> SentClientCommands = new List<ClientCommand>(64);
+		private SortedList<int, Vector3> predictedPositions = new SortedList<int, Vector3>();
+		private SortedList<int, Vector3> predictedPositionsRendered = new SortedList<int, Vector3>();
 
 		#endregion Fields
 
@@ -140,6 +142,21 @@ namespace Entmoot.Engine.Client
 						{
 							this.InterpolationStartState = this.RenderedState;
 							this.InterpolationEndState = closestSnapshot;
+
+							this.InterpolationStartState.Entities[0].Position = this.InterpolationEndState.Entities[0].Position;
+							if (this.predictedPositions.ContainsKey(this.InterpolationEndState.AcknowledgedClientTick))
+							{
+								Vector3 predictedPosition = this.predictedPositions[this.InterpolationEndState.AcknowledgedClientTick];
+								Vector3 predictedPositionRendered = this.predictedPositionsRendered[this.InterpolationEndState.AcknowledgedClientTick];
+								if (this.InterpolationStartState.Entities[0].Position != predictedPosition)
+								{
+									this.InterpolationStartState.Entities[0].Position = predictedPositionRendered;
+								}
+							}
+							else
+							{
+								this.NumberOfNoInterpolationFrames++;
+							}
 						}
 					}
 
@@ -169,11 +186,18 @@ namespace Entmoot.Engine.Client
 			// Client side prediction
 			if (this.RenderedState != null)
 			{
-				this.RenderedState.Entities[0].Position = this.InterpolationEndState.Entities[0].Position;
+				Entity predictionEnt = new Entity()
+				{
+					Position = this.InterpolationEndState.Entities[0].Position,
+				};
 				foreach (ClientCommand clientCommandNotAckedByServer in this.SentClientCommands.Where((cmd) => cmd.ClientFrameTick > this.InterpolationEndState.AcknowledgedClientTick))
 				{
+					clientCommandNotAckedByServer.RunOnEntity(predictionEnt);
 					clientCommandNotAckedByServer.RunOnEntity(this.RenderedState.Entities[0]);
 				}
+
+				this.predictedPositions.Add(this.FrameTick, predictionEnt.Position);
+				this.predictedPositionsRendered.Add(this.FrameTick, this.RenderedState.Entities[0].Position);
 			}
 		}
 

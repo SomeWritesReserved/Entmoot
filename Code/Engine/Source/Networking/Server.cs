@@ -33,7 +33,7 @@ namespace Entmoot.Engine.Server
 		/// <summary>Gets the <see cref="StateSnapshot"/> that is currently the most up-to-date state.</summary>
 		public StateSnapshot CurrentState { get; private set; }
 
-		private int snapFrames = 4;
+		private int snapFrames = -1;
 
 		#endregion Properties
 
