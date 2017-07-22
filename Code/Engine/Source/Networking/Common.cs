@@ -146,6 +146,14 @@ namespace Entmoot.Engine
 			return packet;
 		}
 
+		public void RunOnEntity(Entity entity)
+		{
+			if ((this.CommandKeys & CommandKeys.MoveForward) != 0) { entity.Position.Y -= 10; }
+			if ((this.CommandKeys & CommandKeys.MoveBackward) != 0) { entity.Position.Y += 10; }
+			if ((this.CommandKeys & CommandKeys.MoveLeft) != 0) { entity.Position.X -= 10; }
+			if ((this.CommandKeys & CommandKeys.MoveRight) != 0) { entity.Position.X += 10; }
+		}
+
 		#endregion Methods
 	}
 

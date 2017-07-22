@@ -113,18 +113,10 @@ namespace Entmoot.Engine.Server
 
 				foreach (ClientCommand clientCommand in clientCommands)
 				{
-					this.runClientCommand(clientCommand);
+					clientCommand.RunOnEntity(this.ownedEntity);
 					if (this.LatestReceivedClientTick < clientCommand.ClientFrameTick) { this.LatestReceivedClientTick = clientCommand.ClientFrameTick; }
 				}
 			}
-		}
-
-		private void runClientCommand(ClientCommand clientCommand)
-		{
-			if ((clientCommand.CommandKeys & CommandKeys.MoveForward) != 0) { this.ownedEntity.Position.Y -= 1; }
-			if ((clientCommand.CommandKeys & CommandKeys.MoveBackward) != 0) { this.ownedEntity.Position.Y += 1; }
-			if ((clientCommand.CommandKeys & CommandKeys.MoveLeft) != 0) { this.ownedEntity.Position.X -= 1; }
-			if ((clientCommand.CommandKeys & CommandKeys.MoveRight) != 0) { this.ownedEntity.Position.X += 1; }
 		}
 
 		#endregion Methods
