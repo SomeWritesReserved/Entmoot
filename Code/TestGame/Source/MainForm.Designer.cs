@@ -218,8 +218,6 @@
 			// drawInterpolationCheckBox
 			// 
 			this.drawInterpolationCheckBox.AutoSize = true;
-			this.drawInterpolationCheckBox.Checked = true;
-			this.drawInterpolationCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.drawInterpolationCheckBox.Location = new System.Drawing.Point(251, 10);
 			this.drawInterpolationCheckBox.Name = "drawInterpolationCheckBox";
 			this.drawInterpolationCheckBox.Size = new System.Drawing.Size(111, 17);
