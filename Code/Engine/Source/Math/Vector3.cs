@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Entmoot.Engine
 {
+	[DebuggerDisplay("({X}, {Y}, {Z})")]
 	public struct Vector3
 	{
 		#region Fields
@@ -48,6 +50,11 @@ namespace Entmoot.Engine
 			return (a.X != b.X ||
 				a.Y != b.Y ||
 				a.Z != b.Z);
+		}
+
+		public override string ToString()
+		{
+			return string.Format("({0}, {1}, {2})", this.X, this.Y, this.Z);
 		}
 
 		#endregion Methods
