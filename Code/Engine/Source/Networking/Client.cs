@@ -69,15 +69,20 @@ namespace Entmoot.Engine.Client
 
 				if (this.LatestReceivedServerTick < 0)
 				{
+					// Sync our ticks with the server's ticks once we start getting some data from the server
 					this.FrameTick = stateSnapshot.ServerFrameTick;
 				}
 
 				this.LatestReceivedServerTick = stateSnapshot.ServerFrameTick;
 			}
 
-			//ClientCommand frameCommand = new ClientCommand() { CommandKeys = activeCommandKeys };
-			//this.SentClientCommands.Add(frameCommand);
-			//this.serverNetworkConnection.SendPacket(ClientCommand.SerializeCommands(this.SentClientCommands.Where((cmd) => cmd.ClientFrameTick > this.LatestTickAcknowledgedByServer).ToArray()));
+			this.SentClientCommands.Add(new ClientCommand()
+			{
+				ClientFrameTick = this.FrameTick,
+				AcknowledgedServerTick = this.LatestReceivedServerTick,
+				CommandKeys = activeCommandKeys,
+			});
+			this.serverNetworkConnection.SendPacket(ClientCommand.SerializeCommands(this.SentClientCommands.Where((cmd) => cmd.ClientFrameTick > this.LatestTickAcknowledgedByServer).ToArray()));
 
 			if (this.ShouldInterpolate)
 			{

@@ -41,6 +41,11 @@ namespace Entmoot.Engine.Server
 		{
 			this.FrameTick++;
 
+			foreach (ClientConnection client in this.clients)
+			{
+				client.RecieveClientCommands();
+			}
+
 			this.CurrentState = new StateSnapshot()
 			{
 				ServerFrameTick = this.FrameTick,
@@ -76,12 +81,34 @@ namespace Entmoot.Engine.Server
 
 		#endregion Constructors
 
+		#region Properties
+
+		/// <summary>Gets the last client tick that was actually received from the client.</summary>
+		public int LatestReceivedClientTick { get; private set; } = -1;
+		/// <summary>Gets the last server tick that was acknowledged by the client.</summary>
+		public int LatestTickAcknowledgedByClient { get; private set; } = -1;
+
+		#endregion Properties
+
 		#region Methods
 
 		public void SendStateSnapshot(StateSnapshot stateSnapshot)
 		{
+			// Overwrite the state's acked client tick since each client will have a different number here
+			stateSnapshot.AcknowledgedClientTick = this.LatestReceivedClientTick;
 			byte[] packet = stateSnapshot.SerializePacket();
 			this.clientNetworkConnection.SendPacket(packet);
+		}
+
+		public void RecieveClientCommands()
+		{
+			byte[] packet;
+			while ((packet = this.clientNetworkConnection.GetNextIncomingPacket()) != null)
+			{
+				ClientCommand[] clientCommands = ClientCommand.DeserializePacket(packet);
+
+				this.LatestReceivedClientTick = clientCommands.Max((cmd) => cmd.ClientFrameTick);
+			}
 		}
 
 		#endregion Methods

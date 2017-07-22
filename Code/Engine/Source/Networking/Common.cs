@@ -107,39 +107,39 @@ namespace Entmoot.Engine
 
 		#region Methods
 
-		public static ClientCommand[] DeserializeCommands(byte[] packet)
+		public static ClientCommand[] DeserializePacket(byte[] packet)
 		{
 			using (MemoryStream memoryStream = new MemoryStream(packet, 0, packet.Length, false))
 			{
 				using (BinaryReader binaryReader = new BinaryReader(memoryStream))
 				{
-					List<ClientCommand> commands = new List<ClientCommand>(32);
+					List<ClientCommand> clientCommands = new List<ClientCommand>(32);
 					while (memoryStream.Position < memoryStream.Length)
 					{
-						commands.Add(new ClientCommand()
+						clientCommands.Add(new ClientCommand()
 						{
 							ClientFrameTick = binaryReader.ReadInt32(),
 							AcknowledgedServerTick = binaryReader.ReadInt32(),
 							CommandKeys = (CommandKeys)binaryReader.ReadByte(),
 						});
 					}
-					return commands.ToArray();
+					return clientCommands.ToArray();
 				}
 			}
 		}
 
-		public static byte[] SerializeCommands(ClientCommand[] commands)
+		public static byte[] SerializeCommands(ClientCommand[] clientCommands)
 		{
-			byte[] packet = new byte[(sizeof(int) + sizeof(int) + sizeof(byte)) * commands.Length];
+			byte[] packet = new byte[(sizeof(int) + sizeof(int) + sizeof(byte)) * clientCommands.Length];
 			using (MemoryStream memoryStream = new MemoryStream(packet, 0, packet.Length, true))
 			{
 				using (BinaryWriter binaryWriter = new BinaryWriter(memoryStream))
 				{
-					foreach (ClientCommand command in commands)
+					foreach (ClientCommand clientCommand in clientCommands)
 					{
-						binaryWriter.Write(command.ClientFrameTick);
-						binaryWriter.Write(command.AcknowledgedServerTick);
-						binaryWriter.Write((byte)command.CommandKeys);
+						binaryWriter.Write(clientCommand.ClientFrameTick);
+						binaryWriter.Write(clientCommand.AcknowledgedServerTick);
+						binaryWriter.Write((byte)clientCommand.CommandKeys);
 					}
 				}
 			}
