@@ -165,6 +165,16 @@ namespace Entmoot.Engine.Client
 					this.RenderedState = this.ReceivedStateSnapshots.Last().Value;
 				}
 			}
+
+			// Client side prediction
+			if (this.RenderedState != null)
+			{
+				this.RenderedState.Entities[0].Position = this.InterpolationEndState.Entities[0].Position;
+				foreach (ClientCommand clientCommandNotAckedByServer in this.SentClientCommands.Where((cmd) => cmd.ClientFrameTick > this.InterpolationEndState.AcknowledgedClientTick))
+				{
+					clientCommandNotAckedByServer.RunOnEntity(this.RenderedState.Entities[0]);
+				}
+			}
 		}
 
 		#endregion Methods
