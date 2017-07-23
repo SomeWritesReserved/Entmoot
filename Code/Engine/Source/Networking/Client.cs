@@ -74,14 +74,10 @@ namespace Entmoot.Engine.Client
 					this.FrameTick = stateSnapshot.ServerFrameTick;
 				}
 
-				foreach (ClientCommand clientCommand in this.SentClientCommands.Where((cmd) => cmd.ClientFrameTick > stateSnapshot.AcknowledgedClientTick))
+				if (this.LatestReceivedServerTick < stateSnapshot.ServerFrameTick)
 				{
-					// Client-side prediction here: the snapshot we just got is older due to latency, so apply any of the client commands
-					// we've since sent to the server to this snapshot
-					//clientCommand.RunOnEntity(stateSnapshot.Entities[0]);
+					this.LatestReceivedServerTick = stateSnapshot.ServerFrameTick;
 				}
-
-				this.LatestReceivedServerTick = stateSnapshot.ServerFrameTick;
 			}
 
 			this.SentClientCommands.Add(new ClientCommand()
