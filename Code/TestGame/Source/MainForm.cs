@@ -10,8 +10,6 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
 using Entmoot.Engine;
-using Entmoot.Engine.Client;
-using Entmoot.Engine.Server;
 
 namespace Entmoot.TestGame
 {

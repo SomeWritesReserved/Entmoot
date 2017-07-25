@@ -95,6 +95,15 @@ namespace Entmoot.Engine
 		#endregion Methods
 	}
 
+	public interface ISystem
+	{
+		#region Properties
+
+		int FrameTick { get; }
+
+		#endregion Properties
+	}
+
 	public class ClientCommand
 	{
 		#region Fields

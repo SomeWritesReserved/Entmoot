@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Entmoot.Engine.Server
+namespace Entmoot.Engine
 {
-	public class Server
+	public class Server : ISystem
 	{
 		#region Fields
 
