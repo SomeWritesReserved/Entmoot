@@ -19,7 +19,7 @@ namespace Entmoot.TestGame
 
 		private Client client;
 		private Server server;
-		private MockNetworkConnection clientServerNetworkConnection;
+		private TestNetworkConnection clientServerNetworkConnection;
 		private Entity[] serverEntities;
 
 		private int serverStepsRemaining = 0;
@@ -39,7 +39,7 @@ namespace Entmoot.TestGame
 				new Entity() { Position = new Vector3(50, 50, 0), },
 			};
 
-			this.clientServerNetworkConnection = new MockNetworkConnection()
+			this.clientServerNetworkConnection = new TestNetworkConnection()
 			{
 				SimulatedLatency = 4,
 				SimulatedJitter = 0,
@@ -201,7 +201,7 @@ namespace Entmoot.TestGame
 		#endregion Methods
 	}
 
-	public class MockNetworkConnection : INetworkConnection
+	public class TestNetworkConnection : INetworkConnection
 	{
 		#region Fields
 
@@ -331,7 +331,7 @@ namespace Entmoot.TestGame
 
 		#region Properties
 
-		public MockNetworkConnection NetworkConnection { get; set; }
+		public TestNetworkConnection NetworkConnection { get; set; }
 
 		public ClientServerContext ClientServerContext { get; set; }
 
