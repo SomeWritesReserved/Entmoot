@@ -92,114 +92,7 @@ namespace Entmoot.Engine
 			});
 			this.serverNetworkConnection.SendPacket(ClientCommand.SerializeCommands(this.SentClientCommands.Where((cmd) => cmd.ClientFrameTick > this.LatestTickAcknowledgedByServer).ToArray()));
 
-			if (this.ShouldInterpolate)
-			{
-				// Todo: this delay should be: frame - (updaterate + 1/2latency) * 0.1fudgefactor
-				int renderedFrameTick = this.FrameTick - this.InterpolationRenderDelay;
-
-				if (!this.HasInterpolationStarted)
-				{
-					StateSnapshot interpolationStartState = null;
-					StateSnapshot interpolationEndState = null;
-					foreach (var kvp in this.ReceivedStateSnapshots)
-					{
-						StateSnapshot stateSnapshot = kvp.Value;
-						// Todo: these should be more intelligent and grab the closest packets in either direction
-						// Todo: make sure we can grab the end packet on the last frame of the interpolation range
-						if (stateSnapshot.ServerFrameTick <= renderedFrameTick)
-						{
-							interpolationStartState = stateSnapshot;
-						}
-						if (stateSnapshot.ServerFrameTick > renderedFrameTick)
-						{
-							interpolationEndState = stateSnapshot;
-							break;
-						}
-					}
-					if (interpolationStartState != null && interpolationEndState != null)
-					{
-						this.InterpolationStartState = interpolationStartState;
-						this.InterpolationEndState = interpolationEndState;
-					}
-				}
-
-				if (this.HasInterpolationStarted)
-				{
-					if (renderedFrameTick > this.InterpolationEndState.ServerFrameTick)
-					{
-						// Find the next closest state snapshot to start interpolating to
-						StateSnapshot closestSnapshot = null;
-						foreach (var kvp in this.ReceivedStateSnapshots)
-						{
-							StateSnapshot stateSnapshot = kvp.Value;
-							if (stateSnapshot.ServerFrameTick >= renderedFrameTick && (closestSnapshot == null || closestSnapshot.ServerFrameTick > stateSnapshot.ServerFrameTick))
-							{
-								closestSnapshot = stateSnapshot;
-							}
-						}
-
-						if (closestSnapshot != null)
-						{
-							this.InterpolationStartState = this.RenderedState;
-							this.InterpolationEndState = closestSnapshot;
-
-							if (this.ShouldPredictInput)
-							{
-								// Since the client's entity is predicted, don't interpolate it just snap it to the end position because
-								// later we'll reapply all the commands we've issued since then to get back to where we are
-								Vector3 truePosition = this.InterpolationEndState.Entities[0].Position;
-								this.InterpolationStartState.Entities[0].Position = truePosition;
-#if PREDICTION_SMOOTH_CORRECTIONS
-								if (this.predictedPositions.ContainsKey(this.InterpolationEndState.AcknowledgedClientTick))
-								{
-									Vector3 predictedPosition = this.predictedPositions[this.InterpolationEndState.AcknowledgedClientTick];
-									if (this.InterpolationStartState.Entities[0].Position != predictedPosition)
-									{
-										this.InterpolationStartState.Entities[0].Position = predictedPosition;
-
-										// Recalculate all the subsequent predictions since they were wrong
-										Entity predictionEnt = new Entity() { Position = truePosition };
-										foreach (ClientCommand clientCommand in this.SentClientCommands.Where((cmd) => cmd.ClientFrameTick > this.InterpolationEndState.AcknowledgedClientTick))
-										{
-											clientCommand.RunOnEntity(predictionEnt);
-											if (this.predictedPositions.ContainsKey(clientCommand.ClientFrameTick))
-											{
-												this.predictedPositions[clientCommand.ClientFrameTick] = predictionEnt.Position;
-											}
-										}
-									}
-								}
-								else
-								{
-									this.NumberOfNoInterpolationFrames++;
-								}
-#endif
-							}
-						}
-					}
-
-					if (renderedFrameTick - this.InterpolationEndState.ServerFrameTick <= this.MaxExtrapolationTicks)
-					{
-						this.RenderedState = StateSnapshot.Interpolate(this.InterpolationStartState, this.InterpolationEndState, renderedFrameTick);
-						if (this.InterpolationEndState.ServerFrameTick < renderedFrameTick) { this.NumberOfExtrapolatedFrames++; }
-					}
-					else
-					{
-						// Even though we aren't changing the state of the rendered frame, we still need to update its tick number since we are actively
-						// deciding it is current. If we don't then when we go to interpolate away from this frame then it could be far in the past leading
-						// to jumpy transitions.
-						this.RenderedState.ServerFrameTick = renderedFrameTick;
-						this.NumberOfNoInterpolationFrames++;
-					}
-				}
-			}
-			else
-			{
-				if (this.ReceivedStateSnapshots.Any())
-				{
-					this.RenderedState = this.ReceivedStateSnapshots.Last().Value;
-				}
-			}
+			this.setupRenderSnapshot();
 
 			// Client side prediction
 			if (this.ShouldPredictInput && this.RenderedState != null)
@@ -214,6 +107,119 @@ namespace Entmoot.Engine
 				}
 
 				this.predictedPositions.Add(this.FrameTick, predictionEnt.Position);
+			}
+		}
+
+		private void setupRenderSnapshot()
+		{
+			// Todo: this delay should be: frame - (updaterate + 1/2latency) * 0.1fudgefactor
+			int renderedFrameTick = this.FrameTick - this.InterpolationRenderDelay;
+
+			if (!this.HasInterpolationStarted)
+			{
+				// We haven't received enough data from the server yet to start interpolation rendering,
+				// so keep polling until we get enough data, once we have enough data we can begin rendering.
+				StateSnapshot interpolationStartState = null;
+				StateSnapshot interpolationEndState = null;
+				foreach (var kvp in this.ReceivedStateSnapshots)
+				{
+					StateSnapshot stateSnapshot = kvp.Value;
+					// Todo: these should be more intelligent and grab the closest packets in either direction
+					// Todo: make sure we can grab the end packet on the last frame of the interpolation range
+					if (stateSnapshot.ServerFrameTick <= renderedFrameTick)
+					{
+						interpolationStartState = stateSnapshot;
+					}
+					if (stateSnapshot.ServerFrameTick > renderedFrameTick)
+					{
+						interpolationEndState = stateSnapshot;
+						break;
+					}
+				}
+				if (interpolationStartState != null && interpolationEndState != null)
+				{
+					this.InterpolationStartState = interpolationStartState;
+					this.InterpolationEndState = interpolationEndState;
+				}
+			}
+
+			// Even after polling this frame we still don't have enough data so exit without setting a render snapshot
+			if (!this.HasInterpolationStarted) { return; }
+
+			if (renderedFrameTick > this.InterpolationEndState.ServerFrameTick)
+			{
+				// Find the next closest state snapshot to start interpolating to
+				StateSnapshot closestSnapshot = null;
+				foreach (var kvp in this.ReceivedStateSnapshots)
+				{
+					StateSnapshot stateSnapshot = kvp.Value;
+					if (stateSnapshot.ServerFrameTick >= renderedFrameTick && (closestSnapshot == null || closestSnapshot.ServerFrameTick > stateSnapshot.ServerFrameTick))
+					{
+						closestSnapshot = stateSnapshot;
+					}
+				}
+
+				if (closestSnapshot != null)
+				{
+					this.InterpolationStartState = this.RenderedState;
+					this.InterpolationEndState = closestSnapshot;
+
+					if (this.ShouldPredictInput)
+					{
+						// Since the client's entity is predicted, don't interpolate it just snap it to the end position because
+						// later we'll reapply all the commands we've issued since then to get back to where we are
+						Vector3 truePosition = this.InterpolationEndState.Entities[0].Position;
+						this.InterpolationStartState.Entities[0].Position = truePosition;
+#if PREDICTION_SMOOTH_CORRECTIONS
+						if (this.predictedPositions.ContainsKey(this.InterpolationEndState.AcknowledgedClientTick))
+						{
+							Vector3 predictedPosition = this.predictedPositions[this.InterpolationEndState.AcknowledgedClientTick];
+							if (this.InterpolationStartState.Entities[0].Position != predictedPosition)
+							{
+								this.InterpolationStartState.Entities[0].Position = predictedPosition;
+
+								// Recalculate all the subsequent predictions since they were wrong
+								Entity predictionEnt = new Entity() { Position = truePosition };
+								foreach (ClientCommand clientCommand in this.SentClientCommands.Where((cmd) => cmd.ClientFrameTick > this.InterpolationEndState.AcknowledgedClientTick))
+								{
+									clientCommand.RunOnEntity(predictionEnt);
+									if (this.predictedPositions.ContainsKey(clientCommand.ClientFrameTick))
+									{
+										this.predictedPositions[clientCommand.ClientFrameTick] = predictionEnt.Position;
+									}
+								}
+							}
+						}
+						else
+						{
+							this.NumberOfNoInterpolationFrames++;
+						}
+#endif
+					}
+				}
+			}
+
+			if (this.ShouldInterpolate)
+			{
+				if (renderedFrameTick - this.InterpolationEndState.ServerFrameTick <= this.MaxExtrapolationTicks)
+				{
+					this.RenderedState = StateSnapshot.Interpolate(this.InterpolationStartState, this.InterpolationEndState, renderedFrameTick);
+					if (this.InterpolationEndState.ServerFrameTick < renderedFrameTick) { this.NumberOfExtrapolatedFrames++; }
+				}
+				else
+				{
+					// Even though we aren't changing the state of the rendered frame, we still need to update its tick number since we are actively
+					// deciding it is current. If we don't then when we go to interpolate away from this frame then it could be far in the past leading
+					// to jumpy transitions.
+					this.RenderedState.ServerFrameTick = renderedFrameTick;
+					this.NumberOfNoInterpolationFrames++;
+				}
+			}
+			else
+			{
+				// Even though we aren't interpolating, we still want to use whatever the user picked as the render delay so
+				// use the end interpolation state and just snap to it
+				this.RenderedState = this.InterpolationEndState;
 			}
 		}
 
