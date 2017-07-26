@@ -120,7 +120,8 @@ namespace Entmoot.Engine
 						this.InterpolationEndState = interpolationEndState;
 					}
 				}
-				else
+				
+				if (this.HasInterpolationStarted)
 				{
 					if (renderedFrameTick > this.InterpolationEndState.ServerFrameTick)
 					{
