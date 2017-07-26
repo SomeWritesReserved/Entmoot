@@ -55,6 +55,43 @@ namespace Entmoot.UnitTests
 			NetworkClientTests.updateClientAndAssertState(client, 30, 16, true, 40.0f, extrapolatedFrames: 3, noInterpFrames: 3);
 		}
 
+		[Test]
+		public void Client_RenderStateNoInterpolation()
+		{
+			Client client = NetworkClientTests.createDefaultTestCase();
+			client.ShouldInterpolate = false;
+			NetworkClientTests.updateClientAndAssertState(client, 1, 1, false, null);
+			NetworkClientTests.updateClientAndAssertState(client, 2, 1, false, null);
+			NetworkClientTests.updateClientAndAssertState(client, 3, 1, false, null);
+			NetworkClientTests.updateClientAndAssertState(client, 4, 4, false, null);
+			NetworkClientTests.updateClientAndAssertState(client, 5, 4, false, null);
+			NetworkClientTests.updateClientAndAssertState(client, 6, 4, false, null);
+			NetworkClientTests.updateClientAndAssertState(client, 7, 7, false, null);
+			NetworkClientTests.updateClientAndAssertState(client, 8, 7, false, null);
+			NetworkClientTests.updateClientAndAssertState(client, 9, 7, true, 10.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 10, 10, true, 10.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 11, 10, true, 10.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 12, 10, true, 10.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 13, 13, true, 10.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 14, 13, true, 10.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 15, 13, true, 10.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 16, 16, true, 20.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 17, 16, true, 20.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 18, 16, true, 20.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 19, 16, true, 30.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 20, 16, true, 30.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 21, 16, true, 30.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 22, 16, true, 35.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 23, 16, true, 35.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 24, 16, true, 35.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 25, 16, true, 35.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 26, 16, true, 35.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 27, 16, true, 35.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 28, 16, true, 35.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 29, 16, true, 35.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 30, 16, true, 35.0f);
+		}
+
 		#endregion Tests
 
 		#region Helpers
