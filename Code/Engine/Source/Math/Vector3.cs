@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Entmoot.Engine
 {
 	[DebuggerDisplay("({X}, {Y}, {Z})")]
-	public struct Vector3
+	public struct Vector3 : IEquatable<Vector3>
 	{
 		#region Fields
 
@@ -50,6 +50,22 @@ namespace Entmoot.Engine
 			return (a.X != b.X ||
 				a.Y != b.Y ||
 				a.Z != b.Z);
+		}
+
+		public override bool Equals(object obj)
+		{
+			if (!(obj is Vector3)) { return false; }
+			return this.Equals((Vector3)obj);
+		}
+
+		public bool Equals(Vector3 other)
+		{
+			return (this == other);
+		}
+
+		public override int GetHashCode()
+		{
+			return base.GetHashCode();
 		}
 
 		public override string ToString()
