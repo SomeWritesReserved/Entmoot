@@ -30,6 +30,8 @@ namespace Entmoot.Engine
 
 		/// <summary>Gets or sets whether the client should interpolate sent server state for a smoother rendered experience.</summary>
 		public bool ShouldInterpolate { get; set; } = true;
+		/// <summary>Gets or sets whether to perform client-side prediction on the user's input.</summary>
+		public bool ShouldPredictInput { get; set; } = true;
 		/// <summary>Gets or sets the delay in frames that the client will use to render interpolated data. This should be at least as large as the server's update rate plus client latency.</summary>
 		public int InterpolationRenderBuffer { get; set; } = 10;
 		/// <summary>Gets or sets the maximum number of ticks that the client can extrapolate for (in the event of packet loss).</summary>
@@ -120,7 +122,7 @@ namespace Entmoot.Engine
 						this.InterpolationEndState = interpolationEndState;
 					}
 				}
-				
+
 				if (this.HasInterpolationStarted)
 				{
 					if (renderedFrameTick > this.InterpolationEndState.ServerFrameTick)
@@ -141,35 +143,38 @@ namespace Entmoot.Engine
 							this.InterpolationStartState = this.RenderedState;
 							this.InterpolationEndState = closestSnapshot;
 
-							// Since the client's entity is predicted, don't interpolate it just snap it to the end position because
-							// later we'll reapply all the commands we've issued since then to get back to where we are
-							Vector3 truePosition = this.InterpolationEndState.Entities[0].Position;
-							this.InterpolationStartState.Entities[0].Position = truePosition;
-#if PREDICTION_SMOOTH_CORRECTIONS
-							if (this.predictedPositions.ContainsKey(this.InterpolationEndState.AcknowledgedClientTick))
+							if (this.ShouldPredictInput)
 							{
-								Vector3 predictedPosition = this.predictedPositions[this.InterpolationEndState.AcknowledgedClientTick];
-								if (this.InterpolationStartState.Entities[0].Position != predictedPosition)
+								// Since the client's entity is predicted, don't interpolate it just snap it to the end position because
+								// later we'll reapply all the commands we've issued since then to get back to where we are
+								Vector3 truePosition = this.InterpolationEndState.Entities[0].Position;
+								this.InterpolationStartState.Entities[0].Position = truePosition;
+#if PREDICTION_SMOOTH_CORRECTIONS
+								if (this.predictedPositions.ContainsKey(this.InterpolationEndState.AcknowledgedClientTick))
 								{
-									this.InterpolationStartState.Entities[0].Position = predictedPosition;
-
-									// Recalculate all the subsequent predictions since they were wrong
-									Entity predictionEnt = new Entity() { Position = truePosition };
-									foreach (ClientCommand clientCommand in this.SentClientCommands.Where((cmd) => cmd.ClientFrameTick > this.InterpolationEndState.AcknowledgedClientTick))
+									Vector3 predictedPosition = this.predictedPositions[this.InterpolationEndState.AcknowledgedClientTick];
+									if (this.InterpolationStartState.Entities[0].Position != predictedPosition)
 									{
-										clientCommand.RunOnEntity(predictionEnt);
-										if (this.predictedPositions.ContainsKey(clientCommand.ClientFrameTick))
+										this.InterpolationStartState.Entities[0].Position = predictedPosition;
+
+										// Recalculate all the subsequent predictions since they were wrong
+										Entity predictionEnt = new Entity() { Position = truePosition };
+										foreach (ClientCommand clientCommand in this.SentClientCommands.Where((cmd) => cmd.ClientFrameTick > this.InterpolationEndState.AcknowledgedClientTick))
 										{
-											this.predictedPositions[clientCommand.ClientFrameTick] = predictionEnt.Position;
+											clientCommand.RunOnEntity(predictionEnt);
+											if (this.predictedPositions.ContainsKey(clientCommand.ClientFrameTick))
+											{
+												this.predictedPositions[clientCommand.ClientFrameTick] = predictionEnt.Position;
+											}
 										}
 									}
 								}
-							}
-							else
-							{
-								this.NumberOfNoInterpolationFrames++;
-							}
+								else
+								{
+									this.NumberOfNoInterpolationFrames++;
+								}
 #endif
+							}
 						}
 					}
 
@@ -197,7 +202,7 @@ namespace Entmoot.Engine
 			}
 
 			// Client side prediction
-			if (this.RenderedState != null)
+			if (this.ShouldPredictInput && this.RenderedState != null)
 			{
 				Entity predictionEnt = new Entity() { Position = this.InterpolationEndState.Entities[0].Position };
 				foreach (ClientCommand clientCommandNotAckedByServer in this.SentClientCommands.Where((cmd) => cmd.ClientFrameTick > this.InterpolationEndState.AcknowledgedClientTick))
