@@ -178,7 +178,7 @@ namespace Entmoot.Engine
 						}
 					}
 
-					if (renderedFrameTick - this.InterpolationEndState.ServerFrameTick < this.MaxExtrapolationTicks)
+					if (renderedFrameTick - this.InterpolationEndState.ServerFrameTick <= this.MaxExtrapolationTicks)
 					{
 						this.RenderedState = StateSnapshot.Interpolate(this.InterpolationStartState, this.InterpolationEndState, renderedFrameTick);
 						if (this.InterpolationEndState.ServerFrameTick < renderedFrameTick) { this.NumberOfExtrapolatedFrames++; }
