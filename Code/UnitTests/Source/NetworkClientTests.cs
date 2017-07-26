@@ -114,6 +114,9 @@ namespace Entmoot.UnitTests
 			}
 		}
 
+		/// <summary>
+		/// Creates and returns a standard test case of incoming packets; simulates 2 tick latecy to server , 3 tick server network update rate, .
+		/// </summary>
 		private static MockClient createTestCase1()
 		{
 			MockClient client = MockClient.CreateMockClient();

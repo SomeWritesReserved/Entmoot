@@ -27,13 +27,14 @@ namespace Entmoot.Engine
 
 		#region Properties
 
+		/// <summary>Gets or sets the rate at which the server will send updates to the clients (i.e. every Nth frame updates will be sent).</summary>
+		public int NetworkSendRate { get; set; } = 3;
+
 		/// <summary>Gets the current frame tick of the server.</summary>
 		public int FrameTick { get; private set; }
 
 		/// <summary>Gets the <see cref="StateSnapshot"/> that is currently the most up-to-date state.</summary>
 		public StateSnapshot CurrentState { get; private set; }
-
-		private int snapFrames = -1;
 
 		#endregion Properties
 
@@ -54,9 +55,7 @@ namespace Entmoot.Engine
 				Entities = this.entities,
 			};
 
-			if (this.entities[0].Position.X > 100 && this.snapFrames != 0) { this.entities[0].Position.X = 100; this.snapFrames--; }
-
-			if (this.FrameTick % 3 == 0)
+			if (this.FrameTick % this.NetworkSendRate == 0)
 			{
 				foreach (ClientConnection client in this.clients)
 				{
