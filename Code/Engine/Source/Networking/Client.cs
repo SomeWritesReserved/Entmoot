@@ -33,7 +33,7 @@ namespace Entmoot.Engine
 		/// <summary>Gets or sets whether to perform client-side prediction on the user's input.</summary>
 		public bool ShouldPredictInput { get; set; } = true;
 		/// <summary>Gets or sets the delay in frames that the client will use to render interpolated data. This should be at least as large as the server's update rate plus client latency.</summary>
-		public int InterpolationRenderBuffer { get; set; } = 10;
+		public int InterpolationRenderDelay { get; set; } = 10;
 		/// <summary>Gets or sets the maximum number of ticks that the client can extrapolate for (in the event of packet loss).</summary>
 		public int MaxExtrapolationTicks { get; set; } = 10;
 
@@ -95,7 +95,7 @@ namespace Entmoot.Engine
 			if (this.ShouldInterpolate)
 			{
 				// Todo: this delay should be: frame - (updaterate + 1/2latency) * 0.1fudgefactor
-				int renderedFrameTick = this.FrameTick - this.InterpolationRenderBuffer;
+				int renderedFrameTick = this.FrameTick - this.InterpolationRenderDelay;
 
 				if (!this.HasInterpolationStarted)
 				{

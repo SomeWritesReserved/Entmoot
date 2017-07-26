@@ -86,7 +86,7 @@ namespace Entmoot.UnitTests
 			networkConnection.SimulateTick(13, new Vector3(30, 0, 0));
 			networkConnection.SimulateTick(16, new Vector3(35, 0, 0));
 			Client client = new Client(networkConnection);
-			client.InterpolationRenderBuffer = 8;
+			client.InterpolationRenderDelay = 8;
 			client.MaxExtrapolationTicks = 3;
 			client.ShouldPredictInput = false;
 			networkConnection.OwnerClient = client;
