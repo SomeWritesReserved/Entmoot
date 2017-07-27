@@ -16,6 +16,37 @@ namespace Entmoot.UnitTests
 		[Test]
 		public void Client_FirstConnect()
 		{
+			MockClient client = NetworkClientTests.createTestCase0();
+			client.EngineClient.ShouldInterpolate = true;
+			client.EngineClient.InterpolationRenderDelay = 5;
+			NetworkClientTests.updateClientAndAssertState(client, 0, -1, false, null);
+			NetworkClientTests.updateClientAndAssertState(client, 0, -1, false, null);
+			NetworkClientTests.updateClientAndAssertState(client, 0, -1, false, null);
+			NetworkClientTests.updateClientAndAssertState(client, 64, 64, false, null);
+			NetworkClientTests.updateClientAndAssertState(client, 65, 64, false, null);
+			NetworkClientTests.updateClientAndAssertState(client, 66, 64, false, null);
+			NetworkClientTests.updateClientAndAssertState(client, 67, 67, false, null);
+			NetworkClientTests.updateClientAndAssertState(client, 68, 67, false, null);
+			NetworkClientTests.updateClientAndAssertState(client, 69, 67, true, 10.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 70, 70, true, 13.3333f);
+			NetworkClientTests.updateClientAndAssertState(client, 71, 70, true, 16.6666f);
+			NetworkClientTests.updateClientAndAssertState(client, 72, 70, true, 20.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 73, 73, true, 23.3333f);
+			NetworkClientTests.updateClientAndAssertState(client, 74, 73, true, 26.6666f);
+			NetworkClientTests.updateClientAndAssertState(client, 75, 73, true, 30.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 76, 76, true, 33.3333f);
+			NetworkClientTests.updateClientAndAssertState(client, 77, 76, true, 36.6666f);
+			NetworkClientTests.updateClientAndAssertState(client, 78, 76, true, 40.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 79, 76, true, 43.3333f);
+			NetworkClientTests.updateClientAndAssertState(client, 80, 76, true, 46.6666f);
+			NetworkClientTests.updateClientAndAssertState(client, 81, 76, true, 50.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 82, 76, true, 53.3333f, extrapolatedFrames: 1);
+			NetworkClientTests.updateClientAndAssertState(client, 83, 76, true, 56.6666f, extrapolatedFrames: 2);
+			NetworkClientTests.updateClientAndAssertState(client, 84, 76, true, 60.0f, extrapolatedFrames: 3);
+			NetworkClientTests.updateClientAndAssertState(client, 85, 76, true, 63.3333f, extrapolatedFrames: 4);
+			NetworkClientTests.updateClientAndAssertState(client, 86, 76, true, 66.6666f, extrapolatedFrames: 5);
+			NetworkClientTests.updateClientAndAssertState(client, 87, 76, true, 66.6666f, extrapolatedFrames: 5, noInterpFrames:1);
+			NetworkClientTests.updateClientAndAssertState(client, 88, 76, true, 66.6666f, extrapolatedFrames: 5, noInterpFrames:2);
 		}
 
 		[Test]
@@ -23,6 +54,7 @@ namespace Entmoot.UnitTests
 		{
 			MockClient client = NetworkClientTests.createTestCase1();
 			client.EngineClient.ShouldInterpolate = true;
+			client.EngineClient.InterpolationRenderDelay = 8;
 			NetworkClientTests.updateClientAndAssertState(client, 1, 1, false, null);
 			NetworkClientTests.updateClientAndAssertState(client, 2, 1, false, null);
 			NetworkClientTests.updateClientAndAssertState(client, 3, 1, false, null);
@@ -60,6 +92,7 @@ namespace Entmoot.UnitTests
 		{
 			MockClient client = NetworkClientTests.createTestCase1();
 			client.EngineClient.ShouldInterpolate = false;
+			client.EngineClient.InterpolationRenderDelay = 8;
 			NetworkClientTests.updateClientAndAssertState(client, 1, 1, false, null);
 			NetworkClientTests.updateClientAndAssertState(client, 2, 1, false, null);
 			NetworkClientTests.updateClientAndAssertState(client, 3, 1, false, null);
@@ -100,22 +133,40 @@ namespace Entmoot.UnitTests
 		{
 			mockClient.Update(CommandKeys.None);
 			Client engineClient = mockClient.EngineClient;
-			Assert.AreEqual(clientFrameTick, engineClient.FrameTick, "FrameTick_" + clientFrameTick);
-			Assert.AreEqual(recievedServerFrameTick, engineClient.LatestReceivedServerTick, "LatestReceivedServerTick_" + clientFrameTick);
-			Assert.AreEqual(hasInterpStarted, engineClient.HasInterpolationStarted, "HasInterpolationStarted_" + clientFrameTick);
-			Assert.AreEqual(hasInterpStarted, engineClient.InterpolationStartState != null, "InterpolationStartState_" + clientFrameTick);
-			Assert.AreEqual(hasInterpStarted, engineClient.InterpolationEndState != null, "InterpolationEndState_" + clientFrameTick);
-			Assert.AreEqual(extrapolatedFrames, engineClient.NumberOfExtrapolatedFrames, "NumberOfExtrapolatedFrames_" + clientFrameTick);
-			Assert.AreEqual(noInterpFrames, engineClient.NumberOfNoInterpolationFrames, "NumberOfNoInterpolationFrames_" + clientFrameTick);
-			Assert.AreEqual(position.HasValue, engineClient.RenderedState != null, "RenderedState_" + clientFrameTick);
+			Assert.AreEqual(clientFrameTick, engineClient.FrameTick, "FrameTick_" + mockClient.NetworkTick);
+			Assert.AreEqual(recievedServerFrameTick, engineClient.LatestReceivedServerTick, "LatestReceivedServerTick_" + mockClient.NetworkTick);
+			Assert.AreEqual(hasInterpStarted, engineClient.HasInterpolationStarted, "HasInterpolationStarted_" + mockClient.NetworkTick);
+			Assert.AreEqual(hasInterpStarted, engineClient.InterpolationStartState != null, "InterpolationStartState_" + mockClient.NetworkTick);
+			Assert.AreEqual(hasInterpStarted, engineClient.InterpolationEndState != null, "InterpolationEndState_" + mockClient.NetworkTick);
+			Assert.AreEqual(extrapolatedFrames, engineClient.NumberOfExtrapolatedFrames, "NumberOfExtrapolatedFrames_" + mockClient.NetworkTick);
+			Assert.AreEqual(noInterpFrames, engineClient.NumberOfNoInterpolationFrames, "NumberOfNoInterpolationFrames_" + mockClient.NetworkTick);
+			Assert.AreEqual(position.HasValue, engineClient.RenderedState != null, "RenderedState_" + mockClient.NetworkTick);
 			if (position.HasValue)
 			{
-				Assert.AreEqual(position.Value, engineClient.RenderedState.Entities[0].Position.X, 0.001f, "RenderedState_" + clientFrameTick);
+				Assert.AreEqual(position.Value, engineClient.RenderedState.Entities[0].Position.X, 0.001f, "RenderedState_" + mockClient.NetworkTick);
 			}
 		}
 
 		/// <summary>
-		/// Creates and returns a standard test case of incoming packets; simulates 2 tick latecy to server , 3 tick server network update rate, .
+		/// Creates and returns a standard test case of incoming packets; simulates 2 tick latecy to server, 3 tick server network update rate,
+		/// simulating the initial connection of the client. No packet jitter.
+		/// </summary>
+		private static MockClient createTestCase0()
+		{
+			MockClient client = MockClient.CreateMockClient();
+			client.EngineClient.MaxExtrapolationTicks = 5;
+			client.EngineClient.ShouldPredictInput = false;
+			client.QueueIncomingStateUpdate(4, 64, new Vector3(10, 0, 0));
+			client.QueueIncomingStateUpdate(7, 67, new Vector3(20, 0, 0));
+			client.QueueIncomingStateUpdate(10, 70, new Vector3(30, 0, 0));
+			client.QueueIncomingStateUpdate(13, 73, new Vector3(40, 0, 0));
+			client.QueueIncomingStateUpdate(16, 76, new Vector3(50, 0, 0));
+			return client;
+		}
+
+		/// <summary>
+		/// Creates and returns a standard test case of incoming packets; simulates 2 tick latecy to server, 3 tick server network update rate,
+		/// but doesn't simulate connecting (i.e. mock a mid-stream connection). No packet jitter.
 		/// </summary>
 		private static MockClient createTestCase1()
 		{
