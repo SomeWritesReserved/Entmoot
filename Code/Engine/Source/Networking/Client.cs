@@ -64,7 +64,11 @@ namespace Entmoot.Engine
 
 		public void Update(CommandKeys activeCommandKeys)
 		{
-			this.FrameTick++;
+			if (this.LatestReceivedServerTick >= 0)
+			{
+				// Only tick the client if we started getting info from the server
+				this.FrameTick++;
+			}
 
 			byte[] packet;
 			while ((packet = this.serverNetworkConnection.GetNextIncomingPacket()) != null)
