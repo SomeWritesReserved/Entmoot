@@ -45,8 +45,8 @@ namespace Entmoot.UnitTests
 			NetworkClientTests.updateClientAndAssertState(client, 84, 76, true, 60.0f, extrapolatedFrames: 3);
 			NetworkClientTests.updateClientAndAssertState(client, 85, 76, true, 63.3333f, extrapolatedFrames: 4);
 			NetworkClientTests.updateClientAndAssertState(client, 86, 76, true, 66.6666f, extrapolatedFrames: 5);
-			NetworkClientTests.updateClientAndAssertState(client, 87, 76, true, 66.6666f, extrapolatedFrames: 5, noInterpFrames:1);
-			NetworkClientTests.updateClientAndAssertState(client, 88, 76, true, 66.6666f, extrapolatedFrames: 5, noInterpFrames:2);
+			NetworkClientTests.updateClientAndAssertState(client, 87, 76, true, 66.6666f, extrapolatedFrames: 5, noInterpFrames: 1);
+			NetworkClientTests.updateClientAndAssertState(client, 88, 76, true, 66.6666f, extrapolatedFrames: 5, noInterpFrames: 2);
 		}
 
 		[Test]
@@ -149,24 +149,24 @@ namespace Entmoot.UnitTests
 
 		/// <summary>
 		/// Creates and returns a standard test case of incoming packets; simulates 2 tick latecy to server, 3 tick server network update rate,
-		/// simulating the initial connection of the client. No packet jitter.
+		/// simulating the initial connection of the client. No packet jitter. No acknowledgements from server.
 		/// </summary>
 		private static MockClient createTestCase0()
 		{
 			MockClient client = MockClient.CreateMockClient();
 			client.EngineClient.MaxExtrapolationTicks = 5;
 			client.EngineClient.ShouldPredictInput = false;
-			client.QueueIncomingStateUpdate(4, 64, new Vector3(10, 0, 0));
-			client.QueueIncomingStateUpdate(7, 67, new Vector3(20, 0, 0));
-			client.QueueIncomingStateUpdate(10, 70, new Vector3(30, 0, 0));
-			client.QueueIncomingStateUpdate(13, 73, new Vector3(40, 0, 0));
-			client.QueueIncomingStateUpdate(16, 76, new Vector3(50, 0, 0));
+			client.QueueIncomingStateUpdate(4, 64, 10.0f);
+			client.QueueIncomingStateUpdate(7, 67, 20.0f);
+			client.QueueIncomingStateUpdate(10, 70, 30.0f);
+			client.QueueIncomingStateUpdate(13, 73, 40.0f);
+			client.QueueIncomingStateUpdate(16, 76, 50.0f);
 			return client;
 		}
 
 		/// <summary>
 		/// Creates and returns a standard test case of incoming packets; simulates 2 tick latecy to server, 3 tick server network update rate,
-		/// but doesn't simulate connecting (i.e. mock a mid-stream connection). No packet jitter.
+		/// but doesn't simulate connecting (i.e. mock a mid-stream connection). No packet jitter. No acknowledgements from server.
 		/// </summary>
 		private static MockClient createTestCase1()
 		{
@@ -174,12 +174,12 @@ namespace Entmoot.UnitTests
 			client.EngineClient.InterpolationRenderDelay = 8;
 			client.EngineClient.MaxExtrapolationTicks = 3;
 			client.EngineClient.ShouldPredictInput = false;
-			client.QueueIncomingStateUpdate(1, 1, new Vector3(10, 0, 0));
-			client.QueueIncomingStateUpdate(4, 4, new Vector3(10, 0, 0));
-			client.QueueIncomingStateUpdate(7, 7, new Vector3(10, 0, 0));
-			client.QueueIncomingStateUpdate(10, 10, new Vector3(20, 0, 0));
-			client.QueueIncomingStateUpdate(13, 13, new Vector3(30, 0, 0));
-			client.QueueIncomingStateUpdate(16, 16, new Vector3(35, 0, 0));
+			client.QueueIncomingStateUpdate(1, 1, 10.0f);
+			client.QueueIncomingStateUpdate(4, 4, 10.0f);
+			client.QueueIncomingStateUpdate(7, 7, 10.0f);
+			client.QueueIncomingStateUpdate(10, 10, 20.0f);
+			client.QueueIncomingStateUpdate(13, 13, 30.0f);
+			client.QueueIncomingStateUpdate(16, 16, 35.0f);
 			return client;
 		}
 
@@ -249,18 +249,30 @@ namespace Entmoot.UnitTests
 			/// (i.e. after that many calls to <see cref="Update"/> the given <see cref="StateSnapshot"/> packet will "arrive" for the underlying
 			/// <see cref="Client"/>).
 			/// </summary>
-			public void QueueIncomingStateUpdate(int arrivalNetworkTick, int serverFrameTick, Vector3 entityPosition)
+			public void QueueIncomingStateUpdate(int networkTickToArriveOn, int serverFrameTick, float entityPosition)
 			{
-				if (!this.queuedStateSnapshots.ContainsKey(arrivalNetworkTick))
+				// Create a new state snapshot and use its acked tick so we always use whatever the default should be
+				this.QueueIncomingStateUpdate(networkTickToArriveOn, serverFrameTick, new StateSnapshot().AcknowledgedClientTick, entityPosition);
+			}
+
+			/// <summary>
+			/// Creates and adds a new <see cref="StateSnapshot"/> to the network that will "arrive" for the client at a specified network tick
+			/// (i.e. after that many calls to <see cref="Update"/> the given <see cref="StateSnapshot"/> packet will "arrive" for the underlying
+			/// <see cref="Client"/>).
+			/// </summary>
+			public void QueueIncomingStateUpdate(int networkTickToArriveOn, int serverFrameTick, int acknowledgedClientFrameTick, float entityPosition)
+			{
+				if (!this.queuedStateSnapshots.ContainsKey(networkTickToArriveOn))
 				{
-					this.queuedStateSnapshots[arrivalNetworkTick] = new Queue<StateSnapshot>();
+					this.queuedStateSnapshots[networkTickToArriveOn] = new Queue<StateSnapshot>();
 				}
 				StateSnapshot stateSnapshot = new StateSnapshot()
 				{
 					ServerFrameTick = serverFrameTick,
-					Entities = new Entity[] { new Entity() { Position = entityPosition } },
+					AcknowledgedClientTick = acknowledgedClientFrameTick,
+					Entities = new Entity[] { new Entity() { Position = new Vector3(entityPosition, 0, 0) } },
 				};
-				this.queuedStateSnapshots[arrivalNetworkTick].Enqueue(stateSnapshot);
+				this.queuedStateSnapshots[networkTickToArriveOn].Enqueue(stateSnapshot);
 			}
 
 			byte[] INetworkConnection.GetNextIncomingPacket()
