@@ -116,7 +116,6 @@ namespace Entmoot.Engine
 
 		private void setupRenderSnapshot()
 		{
-			// Todo: this delay should be: frame - (updaterate + 1/2latency) * 0.1fudgefactor
 			int renderedFrameTick = this.FrameTick - this.InterpolationRenderDelay;
 
 			if (!this.HasInterpolationStarted)
@@ -147,7 +146,7 @@ namespace Entmoot.Engine
 				}
 			}
 
-			// Even after polling this frame we still don't have enough data so exit without setting a render snapshot
+			// Check to see if we still can't interpolate after going through the latest receieved updates
 			if (!this.HasInterpolationStarted) { return; }
 
 			if (renderedFrameTick > this.InterpolationEndState.ServerFrameTick)
@@ -180,19 +179,16 @@ namespace Entmoot.Engine
 
 			if (this.ShouldInterpolate)
 			{
-				if (renderedFrameTick - this.InterpolationEndState.ServerFrameTick <= this.MaxExtrapolationTicks)
-				{
-					this.RenderedState = StateSnapshot.Interpolate(this.InterpolationStartState, this.InterpolationEndState, renderedFrameTick);
-					if (this.InterpolationEndState.ServerFrameTick < renderedFrameTick) { this.NumberOfExtrapolatedFrames++; }
-				}
-				else
-				{
-					// Even though we aren't changing the state of the rendered frame, we still need to update its tick number since we are actively
-					// deciding it is current. If we don't then when we go to interpolate away from this frame then it could be far in the past leading
-					// to jumpy transitions.
-					this.RenderedState.ServerFrameTick = renderedFrameTick;
-					this.NumberOfNoInterpolationFrames++;
-				}
+				// Clamp the interpolation frame tick to the maximum number of frames we are allowed to extrapolate, then render that
+				int interpolationFrameTick = Math.Min(renderedFrameTick, this.InterpolationEndState.ServerFrameTick + this.MaxExtrapolationTicks);
+				this.RenderedState = StateSnapshot.Interpolate(this.InterpolationStartState, this.InterpolationEndState, interpolationFrameTick);
+
+				// Always make sure the rendered state has the correct frame tick, even if extrapolation was clamped
+				// Todo: Should this happen all the time, even when not interpolating? Doing so breaks the unit tests
+				this.RenderedState.ServerFrameTick = renderedFrameTick;
+
+				if (interpolationFrameTick < renderedFrameTick) { this.NumberOfNoInterpolationFrames++; }
+				else if (this.InterpolationEndState.ServerFrameTick < renderedFrameTick) { this.NumberOfExtrapolatedFrames++; }
 			}
 			else
 			{
