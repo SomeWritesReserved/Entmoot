@@ -71,7 +71,7 @@ namespace Entmoot.TestGame
 			this.serverEntities[1].Position.X = (float)Math.Cos(this.server.FrameTick * 0.065) * 50 + 100;
 			this.serverEntities[1].Position.Y = (float)Math.Sin(this.server.FrameTick * 0.065) * 50 + 100;
 
-			this.server.Update();
+			this.clientServerNetworkConnection.UpdateServer();
 			this.serverGroupBox.Refresh();
 			this.clientPacketTimelineDisplay.Refresh();
 			this.serverStepsRemaining--;
@@ -88,7 +88,7 @@ namespace Entmoot.TestGame
 			if (Keyboard.IsKeyDown(Key.D)) { currentCommandKeys |= CommandKeys.MoveRight; }
 
 			this.clientServerNetworkConnection.CurrentContext = ClientServerContext.Client;
-			this.client.Update(currentCommandKeys);
+			this.clientServerNetworkConnection.UpdateClient(currentCommandKeys);
 			this.clientGroupBox.Refresh();
 			this.clientPacketTimelineDisplay.Refresh();
 			this.clientStepsRemaining--;
@@ -233,9 +233,27 @@ namespace Entmoot.TestGame
 		/// <summary>Gets or sets whether all simulated packets should be dropped.</summary>
 		public bool DropAllPackets { get; set; }
 
+		/// <summary>Gets the network tick that the server is currently reading from (which can be different from the server's current frame tick).</summary>
+		public int NetworkServerTick { get; private set; }
+
+		/// <summary>Gets the network tick that the client is currently reading from (which can be different from the client's current frame tick and render tick).</summary>
+		public int NetworkClientTick { get; private set; }
+
 		#endregion Properties
 
 		#region Methods
+
+		public void UpdateServer()
+		{
+			this.NetworkServerTick++;
+			this.Server.Update();
+		}
+
+		public void UpdateClient(CommandKeys commandKeys)
+		{
+			this.NetworkClientTick++;
+			this.Client.Update(commandKeys);
+		}
 
 		public byte[] GetNextIncomingPacket()
 		{
@@ -248,22 +266,22 @@ namespace Entmoot.TestGame
 
 			if (this.CurrentContext == ClientServerContext.Client)
 			{
-				int arrivalTick = (int)(this.Server.FrameTick + this.SimulatedLatency + (this.random.NextDouble() - this.random.NextDouble()) * this.SimulatedJitter);
-				SentPacket sentPacket = new SentPacket() { ArrivalTick = arrivalTick, Data = packet };
+				int arrivalNetworkTick = (int)(this.NetworkServerTick + this.SimulatedLatency + (this.random.NextDouble() - this.random.NextDouble()) * this.SimulatedJitter);
+				SentPacket sentPacket = new SentPacket() { ArrivalNetworkTick = arrivalNetworkTick, Data = packet };
 				this.IncomingPacketsForServer.Add(sentPacket);
 			}
 			else
 			{
-				int arrivalTick = (int)(this.Client.FrameTick + this.SimulatedLatency + (this.random.NextDouble() - this.random.NextDouble()) * this.SimulatedJitter);
-				SentPacket sentPacket = new SentPacket() { ArrivalTick = arrivalTick, Data = packet };
+				int arrivalNetworkTick = (int)(this.NetworkClientTick + this.SimulatedLatency + (this.random.NextDouble() - this.random.NextDouble()) * this.SimulatedJitter);
+				SentPacket sentPacket = new SentPacket() { ArrivalNetworkTick = arrivalNetworkTick, Data = packet };
 				this.IncomingPacketsForClient.Add(sentPacket);
 			}
 		}
 
 		private byte[] getArrivedPacket(List<SentPacket> incomingPackets, List<SentPacket> oldPackets)
 		{
-			int now = (this.CurrentContext == ClientServerContext.Client) ? this.Client.FrameTick : this.Server.FrameTick;
-			SentPacket packet = incomingPackets.FirstOrDefault((p) => p.ArrivalTick <= now);
+			int nowNetworkTick = (this.CurrentContext == ClientServerContext.Client) ? this.NetworkClientTick : this.NetworkServerTick;
+			SentPacket packet = incomingPackets.FirstOrDefault((p) => p.ArrivalNetworkTick <= nowNetworkTick);
 			if (packet != null)
 			{
 				incomingPackets.Remove(packet);
@@ -280,7 +298,7 @@ namespace Entmoot.TestGame
 		{
 			#region Properties
 
-			public int ArrivalTick { get; set; }
+			public int ArrivalNetworkTick { get; set; }
 
 			public byte[] Data { get; set; }
 
@@ -345,44 +363,46 @@ namespace Entmoot.TestGame
 
 			float centerX = this.Width / 2.0f;
 			float centerY = this.Height / 2.0f;
-			int now = (this.ClientServerContext == ClientServerContext.Client) ? this.NetworkConnection.Client.FrameTick : this.NetworkConnection.Server.FrameTick;
+			int nowTick = (this.ClientServerContext == ClientServerContext.Client) ? this.NetworkConnection.Client.FrameTick : this.NetworkConnection.Server.FrameTick;
+			int nowNetworkTick = (this.ClientServerContext == ClientServerContext.Client) ? this.NetworkConnection.NetworkClientTick : this.NetworkConnection.NetworkServerTick;
 			var incomingPackets = (this.ClientServerContext == ClientServerContext.Client) ? this.NetworkConnection.IncomingPacketsForClient : this.NetworkConnection.IncomingPacketsForServer;
 			var oldPackets = (this.ClientServerContext == ClientServerContext.Client) ? this.NetworkConnection.OldPacketsForClient : this.NetworkConnection.OldPacketsForServer;
 
-			Func<int, float> timeToX = (time) => time * 12.0f;
+			Func<int, float> engineTickToX = (time) => time * 12.0f;
+			Func<int, float> networkTickToX = (time) => (time - (nowNetworkTick - nowTick)) * 12.0f;
 
 			// Shade the "past" side of the timeline display
 			e.Graphics.FillRectangle(Brushes.WhiteSmoke, 0, 0, this.Width / 2.0f, this.Height);
 			e.Graphics.DrawString(string.Format("{0} {1}", this.NetworkConnection.Client.NumberOfExtrapolatedFrames, this.NetworkConnection.Client.NumberOfNoInterpolationFrames), this.Font, Brushes.Black, 0, 0);
 
 			// Make the current tick always centered in the display
-			e.Graphics.TranslateTransform(-timeToX(now) + centerX, 0);
+			e.Graphics.TranslateTransform(-engineTickToX(nowTick) + centerX, 0);
 			int numberOfTicksToDraw = this.Width / 12;
-			foreach (var tick in Enumerable.Range(now - numberOfTicksToDraw / 2, numberOfTicksToDraw))
+			foreach (var tick in Enumerable.Range(nowTick - numberOfTicksToDraw / 2, numberOfTicksToDraw))
 			{
-				if ((Math.Abs(now - tick) % 5) == 0)
+				if ((Math.Abs(nowTick - tick) % 5) == 0)
 				{
-					e.Graphics.DrawLine(Pens.LightGray, timeToX(tick), 0, timeToX(tick), this.Height - 17);
-					e.Graphics.DrawString(tick.ToString(), this.Font, Brushes.LightGray, timeToX(tick) - 10, this.Height - 16);
+					e.Graphics.DrawLine(Pens.LightGray, engineTickToX(tick), 0, engineTickToX(tick), this.Height - 17);
+					e.Graphics.DrawString(tick.ToString(), this.Font, Brushes.LightGray, engineTickToX(tick) - 10, this.Height - 16);
 				}
 				else
 				{
-					e.Graphics.DrawLine(this.tickLinePen, timeToX(tick), 0, timeToX(tick), this.Height);
+					e.Graphics.DrawLine(this.tickLinePen, engineTickToX(tick), 0, engineTickToX(tick), this.Height);
 				}
 			}
 			foreach (var incomingPacket in incomingPackets)
 			{
 				var packetTick = StateSnapshot.DeserializePacket(incomingPacket.Data).ServerFrameTick;
-				e.Graphics.DrawLine(Pens.Black, timeToX(incomingPacket.ArrivalTick) - 4, centerY - 4, timeToX(incomingPacket.ArrivalTick), centerY);
-				e.Graphics.DrawLine(Pens.Black, timeToX(incomingPacket.ArrivalTick), centerY, timeToX(incomingPacket.ArrivalTick) + 4, centerY - 4);
-				e.Graphics.DrawString(packetTick.ToString(), this.Font, Brushes.Black, timeToX(incomingPacket.ArrivalTick) - 6, centerY - 20);
+				e.Graphics.DrawLine(Pens.Black, networkTickToX(incomingPacket.ArrivalNetworkTick) - 4, centerY - 4, networkTickToX(incomingPacket.ArrivalNetworkTick), centerY);
+				e.Graphics.DrawLine(Pens.Black, networkTickToX(incomingPacket.ArrivalNetworkTick), centerY, networkTickToX(incomingPacket.ArrivalNetworkTick) + 4, centerY - 4);
+				e.Graphics.DrawString(packetTick.ToString(), this.Font, Brushes.Black, networkTickToX(incomingPacket.ArrivalNetworkTick) - 6, centerY - 20);
 			}
 			foreach (var incomingPacket in oldPackets)
 			{
 				var packetTick = StateSnapshot.DeserializePacket(incomingPacket.Data).ServerFrameTick;
-				e.Graphics.DrawLine(Pens.Gray, timeToX(incomingPacket.ArrivalTick) - 4, centerY - 4, timeToX(incomingPacket.ArrivalTick), centerY);
-				e.Graphics.DrawLine(Pens.Gray, timeToX(incomingPacket.ArrivalTick), centerY, timeToX(incomingPacket.ArrivalTick) + 4, centerY - 4);
-				e.Graphics.DrawString(packetTick.ToString(), this.Font, Brushes.Gray, timeToX(incomingPacket.ArrivalTick) - 6, centerY - 20);
+				e.Graphics.DrawLine(Pens.Gray, networkTickToX(incomingPacket.ArrivalNetworkTick) - 4, centerY - 4, networkTickToX(incomingPacket.ArrivalNetworkTick), centerY);
+				e.Graphics.DrawLine(Pens.Gray, networkTickToX(incomingPacket.ArrivalNetworkTick), centerY, networkTickToX(incomingPacket.ArrivalNetworkTick) + 4, centerY - 4);
+				e.Graphics.DrawString(packetTick.ToString(), this.Font, Brushes.Gray, networkTickToX(incomingPacket.ArrivalNetworkTick) - 6, centerY - 20);
 			}
 			if (this.ClientServerContext == ClientServerContext.Client)
 			{
@@ -397,17 +417,17 @@ namespace Entmoot.TestGame
 						snapshotBrush = Brushes.Red;
 					}
 					StateSnapshot receivedStateSnapshot = kvp.Value;
-					e.Graphics.DrawLine(snapshotPen, timeToX(receivedStateSnapshot.ServerFrameTick) - 4, centerY + 4, timeToX(receivedStateSnapshot.ServerFrameTick), centerY);
-					e.Graphics.DrawLine(snapshotPen, timeToX(receivedStateSnapshot.ServerFrameTick), centerY, timeToX(receivedStateSnapshot.ServerFrameTick) + 4, centerY + 4);
-					e.Graphics.DrawString(receivedStateSnapshot.ServerFrameTick.ToString(), this.Font, snapshotBrush, timeToX(receivedStateSnapshot.ServerFrameTick) - 6, centerY + 6);
+					e.Graphics.DrawLine(snapshotPen, engineTickToX(receivedStateSnapshot.ServerFrameTick) - 4, centerY + 4, engineTickToX(receivedStateSnapshot.ServerFrameTick), centerY);
+					e.Graphics.DrawLine(snapshotPen, engineTickToX(receivedStateSnapshot.ServerFrameTick), centerY, engineTickToX(receivedStateSnapshot.ServerFrameTick) + 4, centerY + 4);
+					e.Graphics.DrawString(receivedStateSnapshot.ServerFrameTick.ToString(), this.Font, snapshotBrush, engineTickToX(receivedStateSnapshot.ServerFrameTick) - 6, centerY + 6);
 				}
 
 				if (this.NetworkConnection.Client.RenderedState != null)
 				{
-					e.Graphics.DrawLine(Pens.Red, timeToX(this.NetworkConnection.Client.RenderedState.ServerFrameTick), 0, timeToX(this.NetworkConnection.Client.RenderedState.ServerFrameTick), this.Height);
+					e.Graphics.DrawLine(Pens.Red, engineTickToX(this.NetworkConnection.Client.RenderedState.ServerFrameTick), 0, engineTickToX(this.NetworkConnection.Client.RenderedState.ServerFrameTick), this.Height);
 				}
 			}
-			e.Graphics.DrawLine(Pens.Blue, timeToX(now), 0, timeToX(now), this.Height);
+			e.Graphics.DrawLine(Pens.Blue, engineTickToX(nowTick), 0, engineTickToX(nowTick), this.Height);
 		}
 
 		#endregion Methods
