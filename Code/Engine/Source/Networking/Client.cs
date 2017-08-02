@@ -101,16 +101,16 @@ namespace Entmoot.Engine
 			// Client side prediction
 			if (this.ShouldPredictInput && this.RenderedState != null)
 			{
-				Entity predictionEnt = new Entity() { Position = this.InterpolationEndState.Entities[0].Position };
-				foreach (ClientCommand clientCommandNotAckedByServer in this.SentClientCommands.Where((cmd) => cmd.ClientFrameTick > this.InterpolationEndState.AcknowledgedClientTick))
+				StateSnapshot latestStateSnapshot = this.ReceivedStateSnapshots.Last().Value;
+				Entity predictedEntity = new Entity() { Position = latestStateSnapshot.Entities[0].Position };
+				foreach (ClientCommand clientCommandNotAckedByServer in this.SentClientCommands.Where((cmd) => cmd.ClientFrameTick > latestStateSnapshot.AcknowledgedClientTick))
 				{
 					// Reapply all the commands we've sent that the server hasn't processed yet to get us back to where we predicted we should be, starting
 					// from where the server last gave us an authoritative response
-					clientCommandNotAckedByServer.RunOnEntity(predictionEnt);
-					clientCommandNotAckedByServer.RunOnEntity(this.RenderedState.Entities[0]);
+					clientCommandNotAckedByServer.RunOnEntity(predictedEntity);
 				}
-
-				this.predictedPositions.Add(this.FrameTick, predictionEnt.Position);
+				this.RenderedState.Entities[0].Position = predictedEntity.Position;
+				this.predictedPositions.Add(this.FrameTick, predictedEntity.Position);
 			}
 		}
 
@@ -166,14 +166,6 @@ namespace Entmoot.Engine
 				{
 					this.InterpolationStartState = this.RenderedState;
 					this.InterpolationEndState = closestSnapshot;
-
-					if (this.ShouldPredictInput)
-					{
-						// Since the client's entity is predicted, don't interpolate it just snap it to the end position because
-						// later we'll reapply all the commands we've issued since then to get back to where we are
-						Vector3 truePosition = this.InterpolationEndState.Entities[0].Position;
-						this.InterpolationStartState.Entities[0].Position = truePosition;
-					}
 				}
 			}
 
