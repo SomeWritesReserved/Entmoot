@@ -270,6 +270,65 @@ namespace Entmoot.UnitTests
 			NetworkClientTests.updateClientAndAssertState(client, 50, 49, true, 11.6666f, extrapolatedFrames: 3, noInterpFrames: 3);
 		}
 
+		[Test]
+		public void RenderState3_Prediction()
+		{
+			MockClient client = NetworkClientTests.createTestCase3();
+			client.EngineClient.ShouldInterpolate = true;
+			client.EngineClient.InterpolationRenderDelay = 8;
+			client.EngineClient.ShouldPredictInput = true;
+			NetworkClientTests.updateClientAndAssertState(client, 1, 1, false, null);
+			NetworkClientTests.updateClientAndAssertState(client, 2, 1, false, null);
+			NetworkClientTests.updateClientAndAssertState(client, 3, 1, false, null);
+			NetworkClientTests.updateClientAndAssertState(client, 4, 4, false, null);
+			NetworkClientTests.updateClientAndAssertState(client, 5, 4, false, null);
+			NetworkClientTests.updateClientAndAssertState(client, 6, 4, false, null);
+			NetworkClientTests.updateClientAndAssertState(client, 7, 7, false, null);
+			NetworkClientTests.updateClientAndAssertState(client, 8, 7, false, null);
+			NetworkClientTests.updateClientAndAssertState(client, 9, 7, true, 10.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 10, 10, true, 10.0f);
+			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 11, 10, true, 15.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 12, 10, true, 15.0f);
+			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 13, 13, true, 20.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 14, 13, true, 20.0f);
+			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 15, 13, true, 25.0f);
+			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 16, 16, true, 30.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 17, 16, true, 30.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 18, 16, true, 30.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 19, 19, true, 30.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 20, 19, true, 30.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 21, 19, true, 30.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 22, 22, true, 30.0f); // <- packets dropped after this
+			NetworkClientTests.updateClientAndAssertState(client, 23, 22, true, 30.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 24, 22, true, 30.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 25, 22, true, 30.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 26, 22, true, 30.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 27, 22, true, 30.0f);
+			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveLeft, 28, 22, true, 25.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 29, 22, true, 25.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 30, 22, true, 25.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 31, 22, true, 25.0f, extrapolatedFrames: 1);
+			NetworkClientTests.updateClientAndAssertState(client, 32, 22, true, 25.0f, extrapolatedFrames: 2);
+			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveLeft, 33, 22, true, 20.0f, extrapolatedFrames: 3);
+			NetworkClientTests.updateClientAndAssertState(client, 34, 22, true, 20.0f, extrapolatedFrames: 3, noInterpFrames: 1);
+			NetworkClientTests.updateClientAndAssertState(client, 35, 22, true, 20.0f, extrapolatedFrames: 3, noInterpFrames: 2);
+			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveLeft, 36, 22, true, 15.0f, extrapolatedFrames: 3, noInterpFrames: 3);
+			NetworkClientTests.updateClientAndAssertState(client, 37, 37, true, 15.0f, extrapolatedFrames: 3, noInterpFrames: 3); // <- getting packets again
+			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveLeft, 38, 37, true, 10.0f, extrapolatedFrames: 3, noInterpFrames: 3);
+			NetworkClientTests.updateClientAndAssertState(client, 39, 37, true, 10.0f, extrapolatedFrames: 3, noInterpFrames: 3);
+			NetworkClientTests.updateClientAndAssertState(client, 40, 40, true, 10.0f, extrapolatedFrames: 3, noInterpFrames: 3);
+			NetworkClientTests.updateClientAndAssertState(client, 41, 40, true, 10.0f, extrapolatedFrames: 3, noInterpFrames: 3);
+			NetworkClientTests.updateClientAndAssertState(client, 42, 40, true, 10.0f, extrapolatedFrames: 3, noInterpFrames: 3);
+			NetworkClientTests.updateClientAndAssertState(client, 43, 43, true, 10.0f, extrapolatedFrames: 3, noInterpFrames: 3);
+			NetworkClientTests.updateClientAndAssertState(client, 44, 43, true, 10.0f, extrapolatedFrames: 3, noInterpFrames: 3);
+			NetworkClientTests.updateClientAndAssertState(client, 45, 43, true, 10.0f, extrapolatedFrames: 3, noInterpFrames: 3);
+			NetworkClientTests.updateClientAndAssertState(client, 46, 46, true, 10.0f, extrapolatedFrames: 3, noInterpFrames: 3);
+			NetworkClientTests.updateClientAndAssertState(client, 47, 46, true, 10.0f, extrapolatedFrames: 3, noInterpFrames: 3);
+			NetworkClientTests.updateClientAndAssertState(client, 48, 46, true, 10.0f, extrapolatedFrames: 3, noInterpFrames: 3);
+			NetworkClientTests.updateClientAndAssertState(client, 49, 49, true, 10.0f, extrapolatedFrames: 3, noInterpFrames: 3);
+			NetworkClientTests.updateClientAndAssertState(client, 50, 49, true, 10.0f, extrapolatedFrames: 3, noInterpFrames: 3);
+		}
+
 		#endregion Tests
 
 		#region Helpers
