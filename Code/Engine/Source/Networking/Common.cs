@@ -13,6 +13,7 @@ namespace Entmoot.Engine
 
 		public int ServerFrameTick = -1;
 		public int AcknowledgedClientTick = -1;
+		public int ClientOwnedEntity = -1;
 		public Entity[] Entities;
 
 		#endregion Fields
@@ -47,6 +48,7 @@ namespace Entmoot.Engine
 				{
 					stateSnapshot.ServerFrameTick = binaryReader.ReadInt32();
 					stateSnapshot.AcknowledgedClientTick = binaryReader.ReadInt32();
+					stateSnapshot.ClientOwnedEntity = binaryReader.ReadInt32();
 					List<Entity> entities = new List<Entity>(16);
 					while (memoryStream.Position < memoryStream.Length)
 					{
@@ -63,13 +65,14 @@ namespace Entmoot.Engine
 
 		public byte[] SerializePacket()
 		{
-			byte[] packet = new byte[sizeof(int) + sizeof(int) + sizeof(float) * 3 * this.Entities.Length];
+			byte[] packet = new byte[sizeof(int) + sizeof(int) + sizeof(int) + sizeof(float) * 3 * this.Entities.Length];
 			using (MemoryStream memoryStream = new MemoryStream(packet, 0, packet.Length, true))
 			{
 				using (BinaryWriter binaryWriter = new BinaryWriter(memoryStream))
 				{
 					binaryWriter.Write(this.ServerFrameTick);
 					binaryWriter.Write(this.AcknowledgedClientTick);
+					binaryWriter.Write(this.ClientOwnedEntity);
 					foreach (Entity entity in this.Entities)
 					{
 						binaryWriter.Write(entity.Position.X);
@@ -110,6 +113,7 @@ namespace Entmoot.Engine
 
 		public int ClientFrameTick = -1;
 		public int AcknowledgedServerTick = -1;
+		public int OwnedEntity = -1;
 		public CommandKeys CommandKeys;
 
 		#endregion Fields
@@ -129,6 +133,7 @@ namespace Entmoot.Engine
 						{
 							ClientFrameTick = binaryReader.ReadInt32(),
 							AcknowledgedServerTick = binaryReader.ReadInt32(),
+							OwnedEntity = binaryReader.ReadInt32(),
 							CommandKeys = (CommandKeys)binaryReader.ReadByte(),
 						});
 					}
@@ -139,7 +144,7 @@ namespace Entmoot.Engine
 
 		public static byte[] SerializeCommands(ClientCommand[] clientCommands)
 		{
-			byte[] packet = new byte[(sizeof(int) + sizeof(int) + sizeof(byte)) * clientCommands.Length];
+			byte[] packet = new byte[(sizeof(int) + sizeof(int) + sizeof(int) + sizeof(byte)) * clientCommands.Length];
 			using (MemoryStream memoryStream = new MemoryStream(packet, 0, packet.Length, true))
 			{
 				using (BinaryWriter binaryWriter = new BinaryWriter(memoryStream))
@@ -148,6 +153,7 @@ namespace Entmoot.Engine
 					{
 						binaryWriter.Write(clientCommand.ClientFrameTick);
 						binaryWriter.Write(clientCommand.AcknowledgedServerTick);
+						binaryWriter.Write(clientCommand.OwnedEntity);
 						binaryWriter.Write((byte)clientCommand.CommandKeys);
 					}
 				}

@@ -101,6 +101,7 @@ namespace Entmoot.Engine
 		{
 			// Overwrite the state's acked client tick since each client will have a different number here
 			stateSnapshot.AcknowledgedClientTick = this.LatestReceivedClientTick;
+			stateSnapshot.ClientOwnedEntity = 0;
 			byte[] packet = stateSnapshot.SerializePacket();
 			this.clientNetworkConnection.SendPacket(packet);
 		}

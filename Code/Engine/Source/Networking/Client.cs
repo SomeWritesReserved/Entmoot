@@ -43,6 +43,8 @@ namespace Entmoot.Engine
 		public int LatestReceivedServerTick { get; private set; } = -1;
 		/// <summary>Gets the last client tick that was acknowledged by the server.</summary>
 		public int LatestTickAcknowledgedByServer { get; private set; } = -1;
+		/// <summary>Gets the entity that is currently owned by this client (and might take part in client-side prediction).</summary>
+		public int CurrentOwnedEntity { get; private set; } = -1;
 
 		/// <summary>Gets whether or not the client has enough data from the server to start interpolation and that indeed interpolation has begun.</summary>
 		public bool HasInterpolationStarted { get { return (this.InterpolationStartState != null && this.InterpolationEndState != null); } }
@@ -85,6 +87,7 @@ namespace Entmoot.Engine
 				if (this.LatestReceivedServerTick < stateSnapshot.ServerFrameTick)
 				{
 					this.LatestReceivedServerTick = stateSnapshot.ServerFrameTick;
+					this.CurrentOwnedEntity = stateSnapshot.ClientOwnedEntity;
 				}
 			}
 
