@@ -130,6 +130,15 @@ namespace Entmoot.Engine
 						clientCommand.RunOnEntity(this.parentServer.CurrentState.Entities[this.OwnedEntity]);
 					}
 
+					if ((clientCommand.CommandKeys & CommandKeys.Seat1) != 0)
+					{
+						this.OwnedEntity = 0;
+					}
+					else if ((clientCommand.CommandKeys & CommandKeys.Seat2) != 0)
+					{
+						this.OwnedEntity = 1;
+					}
+
 					if (this.LatestReceivedClientTick < clientCommand.ClientFrameTick) { this.LatestReceivedClientTick = clientCommand.ClientFrameTick; }
 				}
 			}

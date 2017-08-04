@@ -179,5 +179,7 @@ namespace Entmoot.Engine
 		MoveBackward = 2,
 		MoveLeft = 4,
 		MoveRight = 8,
+		Seat1 = 16,
+		Seat2 = 32,
 	}
 }

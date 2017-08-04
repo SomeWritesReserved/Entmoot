@@ -68,8 +68,8 @@ namespace Entmoot.TestGame
 
 			this.clientServerNetworkConnection.CurrentContext = ClientServerContext.Server;
 
-			this.serverEntities[1].Position.X = (float)Math.Cos(this.server.FrameTick * 0.065) * 50 + 100;
-			this.serverEntities[1].Position.Y = (float)Math.Sin(this.server.FrameTick * 0.065) * 50 + 100;
+			//this.serverEntities[1].Position.X = (float)Math.Cos(this.server.FrameTick * 0.065) * 50 + 100;
+			//this.serverEntities[1].Position.Y = (float)Math.Sin(this.server.FrameTick * 0.065) * 50 + 100;
 
 			this.clientServerNetworkConnection.UpdateServer();
 			this.serverGroupBox.Refresh();
@@ -86,6 +86,8 @@ namespace Entmoot.TestGame
 			if (Keyboard.IsKeyDown(Key.S)) { currentCommandKeys |= CommandKeys.MoveBackward; }
 			if (Keyboard.IsKeyDown(Key.A)) { currentCommandKeys |= CommandKeys.MoveLeft; }
 			if (Keyboard.IsKeyDown(Key.D)) { currentCommandKeys |= CommandKeys.MoveRight; }
+			if (Keyboard.IsKeyDown(Key.D1)) { currentCommandKeys |= CommandKeys.Seat1; }
+			else if (Keyboard.IsKeyDown(Key.D2)) { currentCommandKeys |= CommandKeys.Seat2; }
 
 			this.clientServerNetworkConnection.CurrentContext = ClientServerContext.Client;
 			this.clientServerNetworkConnection.UpdateClient(currentCommandKeys);
