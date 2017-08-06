@@ -536,6 +536,7 @@ namespace Entmoot.UnitTests
 				{
 					ServerFrameTick = serverFrameTick,
 					AcknowledgedClientTick = acknowledgedClientFrameTick,
+					ClientOwnedEntity = 0,
 					Entities = new Entity[] { new Entity() { Position = new Vector3(entityPosition, 0, 0) } },
 				};
 				this.queuedStateSnapshots[networkTickToArriveOn].Enqueue(stateSnapshot);
