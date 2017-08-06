@@ -213,6 +213,50 @@ namespace Entmoot.UnitTests
 		}
 
 		[Test]
+		public void RenderState2B_Prediction()
+		{
+			MockClient client = NetworkClientTests.createTestCase2B();
+			client.EngineClient.ShouldInterpolate = true;
+			client.EngineClient.InterpolationRenderDelay = 8;
+			client.EngineClient.ShouldPredictInput = true;
+			NetworkClientTests.updateClientAndAssertState(client, 1, 1, false, null);
+			NetworkClientTests.updateClientAndAssertState(client, 2, 1, false, null);
+			NetworkClientTests.updateClientAndAssertState(client, 3, 1, false, null);
+			NetworkClientTests.updateClientAndAssertState(client, 4, 4, false, null);
+			NetworkClientTests.updateClientAndAssertState(client, 5, 4, false, null);
+			NetworkClientTests.updateClientAndAssertState(client, 6, 4, false, null);
+			NetworkClientTests.updateClientAndAssertState(client, 7, 7, false, null);
+			NetworkClientTests.updateClientAndAssertState(client, 8, 7, false, null);
+			NetworkClientTests.updateClientAndAssertState(client, 9, 7, true, 10.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 10, 10, true, 10.0f);
+			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 11, 10, true, 15.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 12, 10, true, 15.0f);
+			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 13, 13, true, 20.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 14, 13, true, 20.0f);
+			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 15, 13, true, 25.0f);
+			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 16, 16, true, 30.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 17, 16, true, 30.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 18, 16, true, 30.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 19, 19, true, 25.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 20, 19, true, 25.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 21, 19, true, 25.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 22, 22, true, 25.0f); // <- packets dropped after this
+			NetworkClientTests.updateClientAndAssertState(client, 23, 22, true, 25.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 24, 22, true, 25.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 25, 22, true, 25.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 26, 22, true, 25.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 27, 22, true, 25.0f);
+			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 28, 22, true, 30.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 29, 22, true, 30.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 30, 22, true, 30.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 31, 22, true, 30.0f, extrapolatedFrames: 1);
+			NetworkClientTests.updateClientAndAssertState(client, 32, 22, true, 30.0f, extrapolatedFrames: 2);
+			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 33, 22, true, 35.0f, extrapolatedFrames: 3);
+			NetworkClientTests.updateClientAndAssertState(client, 34, 22, true, 35.0f, extrapolatedFrames: 3, noInterpFrames: 1);
+			NetworkClientTests.updateClientAndAssertState(client, 35, 22, true, 35.0f, extrapolatedFrames: 3, noInterpFrames: 2);
+		}
+
+		[Test]
 		public void RenderState3_Interpolation()
 		{
 			MockClient client = NetworkClientTests.createTestCase3();
@@ -419,6 +463,28 @@ namespace Entmoot.UnitTests
 			client.QueueIncomingStateUpdate(16, 16, 12, 15.0f);
 			client.QueueIncomingStateUpdate(19, 19, 15, 25.0f);
 			client.QueueIncomingStateUpdate(22, 22, 18, 30.0f);
+			return client;
+		}
+
+		/// <summary>
+		/// Creates and returns a standard test case of incoming packets; simulates 2 tick latecy to server, 3 tick server network update rate,
+		/// but doesn't simulate connecting (i.e. mock a mid-stream connection). No packet jitter. Mock server acknowledgements of client commands.
+		/// Client mis-predicts and corrected by server.
+		/// </summary>
+		private static MockClient createTestCase2B()
+		{
+			MockClient client = MockClient.CreateMockClient();
+			client.EngineClient.InterpolationRenderDelay = 8;
+			client.EngineClient.MaxExtrapolationTicks = 3;
+			client.EngineClient.ShouldPredictInput = false;
+			client.QueueIncomingStateUpdate(1, 1, -1, 10.0f);
+			client.QueueIncomingStateUpdate(4, 4, -1, 10.0f);
+			client.QueueIncomingStateUpdate(7, 7, 3, 10.0f);
+			client.QueueIncomingStateUpdate(10, 10, 6, 10.0f);
+			client.QueueIncomingStateUpdate(13, 13, 9, 10.0f);
+			client.QueueIncomingStateUpdate(16, 16, 12, 15.0f);
+			client.QueueIncomingStateUpdate(19, 19, 15, 20.0f);
+			client.QueueIncomingStateUpdate(22, 22, 18, 25.0f);
 			return client;
 		}
 
