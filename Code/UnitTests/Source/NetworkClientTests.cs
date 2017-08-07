@@ -300,6 +300,50 @@ namespace Entmoot.UnitTests
 		}
 
 		[Test]
+		public void RenderState2C_Prediction()
+		{
+			MockClient client = NetworkClientTests.createTestCase2C();
+			client.EngineClient.ShouldInterpolate = true;
+			client.EngineClient.InterpolationRenderDelay = 8;
+			client.EngineClient.ShouldPredictInput = true;
+			NetworkClientTests.updateClientAndAssertState(client, 1, 1, false, null);
+			NetworkClientTests.updateClientAndAssertState(client, 2, 1, false, null);
+			NetworkClientTests.updateClientAndAssertState(client, 3, 1, false, null);
+			NetworkClientTests.updateClientAndAssertState(client, 4, 1, false, null);
+			NetworkClientTests.updateClientAndAssertState(client, 5, 4, false, null);
+			NetworkClientTests.updateClientAndAssertState(client, 6, 4, false, null);
+			NetworkClientTests.updateClientAndAssertState(client, 7, 7, false, null);
+			NetworkClientTests.updateClientAndAssertState(client, 8, 7, false, null);
+			NetworkClientTests.updateClientAndAssertState(client, 9, 10, true, 10.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 10, 10, true, 10.0f);
+			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 11, 10, true, 15.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 12, 10, true, 15.0f);
+			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 13, 10, true, 20.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 14, 13, true, 20.0f);
+			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 15, 16, true, 25.0f);
+			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 16, 16, true, 30.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 17, 16, true, 30.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 18, 19, true, 30.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 19, 19, true, 30.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 20, 19, true, 30.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 21, 19, true, 30.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 22, 19, true, 30.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 23, 22, true, 30.0f); // <- packets dropped after this
+			NetworkClientTests.updateClientAndAssertState(client, 24, 22, true, 30.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 25, 22, true, 30.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 26, 22, true, 30.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 27, 22, true, 30.0f);
+			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 28, 22, true, 35.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 29, 22, true, 35.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 30, 22, true, 35.0f);
+			NetworkClientTests.updateClientAndAssertState(client, 31, 22, true, 35.0f, extrapolatedFrames: 1);
+			NetworkClientTests.updateClientAndAssertState(client, 32, 22, true, 35.0f, extrapolatedFrames: 2);
+			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 33, 22, true, 40.0f, extrapolatedFrames: 3);
+			NetworkClientTests.updateClientAndAssertState(client, 34, 22, true, 40.0f, extrapolatedFrames: 3, noInterpFrames: 1);
+			NetworkClientTests.updateClientAndAssertState(client, 35, 22, true, 40.0f, extrapolatedFrames: 3, noInterpFrames: 2);
+		}
+
+		[Test]
 		public void RenderState3_Interpolation()
 		{
 			MockClient client = NetworkClientTests.createTestCase3();
