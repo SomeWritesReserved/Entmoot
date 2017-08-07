@@ -50,7 +50,7 @@ namespace Entmoot.UnitTests
 		}
 
 		[Test]
-		public void RenderState1_Interpolation()
+		public void TestCase1_Interpolation()
 		{
 			MockClient client = NetworkClientTests.createTestCase1();
 			client.EngineClient.ShouldInterpolate = true;
@@ -88,7 +88,7 @@ namespace Entmoot.UnitTests
 		}
 
 		[Test]
-		public void RenderState1_NoInterpolation()
+		public void TestCase1_NoInterpolation()
 		{
 			MockClient client = NetworkClientTests.createTestCase1();
 			client.EngineClient.ShouldInterpolate = false;
@@ -126,7 +126,7 @@ namespace Entmoot.UnitTests
 		}
 
 		[Test]
-		public void RenderState2_Interpolation()
+		public void TestCase2_Interpolation()
 		{
 			MockClient client = NetworkClientTests.createTestCase2();
 			client.EngineClient.ShouldInterpolate = true;
@@ -169,7 +169,7 @@ namespace Entmoot.UnitTests
 		}
 
 		[Test]
-		public void RenderState2_Prediction()
+		public void TestCase2_Prediction()
 		{
 			MockClient client = NetworkClientTests.createTestCase2();
 			client.EngineClient.ShouldInterpolate = true;
@@ -213,7 +213,7 @@ namespace Entmoot.UnitTests
 		}
 
 		[Test]
-		public void RenderState2B_Prediction()
+		public void TestCase2B_Mispredict_Prediction()
 		{
 			MockClient client = NetworkClientTests.createTestCase2B();
 			client.EngineClient.ShouldInterpolate = true;
@@ -257,7 +257,7 @@ namespace Entmoot.UnitTests
 		}
 
 		[Test]
-		public void RenderState2C_Interpolation()
+		public void TestCase2C_Jitter_Interpolation()
 		{
 			MockClient client = NetworkClientTests.createTestCase2C();
 			client.EngineClient.ShouldInterpolate = true;
@@ -300,7 +300,7 @@ namespace Entmoot.UnitTests
 		}
 
 		[Test]
-		public void RenderState2C_Prediction()
+		public void TestCase2C_Jitter_Prediction()
 		{
 			MockClient client = NetworkClientTests.createTestCase2C();
 			client.EngineClient.ShouldInterpolate = true;
@@ -344,7 +344,7 @@ namespace Entmoot.UnitTests
 		}
 
 		[Test]
-		public void RenderState3_Interpolation()
+		public void TestCase3_Recovery_Interpolation()
 		{
 			MockClient client = NetworkClientTests.createTestCase3();
 			client.EngineClient.ShouldInterpolate = true;
@@ -402,7 +402,7 @@ namespace Entmoot.UnitTests
 		}
 
 		[Test]
-		public void RenderState3_Prediction()
+		public void TestCase3_Recovery_Prediction()
 		{
 			MockClient client = NetworkClientTests.createTestCase3();
 			client.EngineClient.ShouldInterpolate = true;
