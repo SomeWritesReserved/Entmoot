@@ -20,6 +20,23 @@ namespace Entmoot.Engine
 
 		#region Methods
 
+		public static StateSnapshot Clone(StateSnapshot stateSnapshot)
+		{
+			Entity[] interpolatedEntities = new Entity[stateSnapshot.Entities.Length];
+			foreach (int entityIndex in Enumerable.Range(0, interpolatedEntities.Length))
+			{
+				interpolatedEntities[entityIndex] = new Entity()
+				{
+					Position = stateSnapshot.Entities[entityIndex].Position,
+				};
+			}
+			return new StateSnapshot()
+			{
+				ServerFrameTick = stateSnapshot.ServerFrameTick,
+				Entities = interpolatedEntities,
+			};
+		}
+
 		public static StateSnapshot Interpolate(StateSnapshot stateSnapshotA, StateSnapshot stateSnapshotB, int frameTick)
 		{
 			float amount = ((float)frameTick - stateSnapshotA.ServerFrameTick) / ((float)stateSnapshotB.ServerFrameTick - stateSnapshotA.ServerFrameTick);

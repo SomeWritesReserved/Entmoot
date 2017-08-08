@@ -12,6 +12,7 @@ namespace Entmoot.Engine
 
 		private readonly List<ClientConnection> clients = new List<ClientConnection>();
 		private readonly Entity[] entities;
+		private Queue<StateSnapshot> stateSnapshotHistory = new Queue<StateSnapshot>(64);
 
 		#endregion Fields
 
@@ -54,6 +55,7 @@ namespace Entmoot.Engine
 				ServerFrameTick = this.FrameTick,
 				Entities = this.entities,
 			};
+			this.stateSnapshotHistory.Enqueue(StateSnapshot.Clone(this.CurrentState));
 
 			if (this.FrameTick % this.NetworkSendRate == 0)
 			{
