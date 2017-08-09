@@ -91,14 +91,19 @@ namespace Entmoot.Engine
 				}
 			}
 
-			this.SentClientCommands.Add(new ClientCommand()
+			if (this.HasInterpolationStarted)
 			{
-				ClientFrameTick = this.FrameTick,
-				AcknowledgedServerTick = this.LatestReceivedServerTick,
-				CommandingEntity = this.CurrentOwnedEntity,
-				CommandKeys = activeCommandKeys,
-			});
-			this.serverNetworkConnection.SendPacket(ClientCommand.SerializeCommands(this.SentClientCommands.Where((cmd) => cmd.ClientFrameTick > this.LatestTickAcknowledgedByServer).ToArray()));
+				this.SentClientCommands.Add(new ClientCommand()
+				{
+					ClientFrameTick = this.FrameTick,
+					AcknowledgedServerTick = this.LatestReceivedServerTick,
+					InterpolationStartTick = this.InterpolationStartState.ServerFrameTick,
+					InterpolationEndTick = this.InterpolationEndState.ServerFrameTick,
+					CommandingEntity = this.CurrentOwnedEntity,
+					CommandKeys = activeCommandKeys,
+				});
+				this.serverNetworkConnection.SendPacket(ClientCommand.SerializeCommands(this.SentClientCommands.Where((cmd) => cmd.ClientFrameTick > this.LatestTickAcknowledgedByServer).ToArray()));
+			}
 
 			this.setupRenderSnapshot();
 
