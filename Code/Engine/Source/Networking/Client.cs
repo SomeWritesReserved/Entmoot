@@ -99,6 +99,7 @@ namespace Entmoot.Engine
 					AcknowledgedServerTick = this.LatestReceivedServerTick,
 					InterpolationStartTick = this.InterpolationStartState.ServerFrameTick,
 					InterpolationEndTick = this.InterpolationEndState.ServerFrameTick,
+					RenderedFrameTick = this.FrameTick - this.InterpolationRenderDelay,
 					CommandingEntity = this.CurrentOwnedEntity,
 					CommandKeys = activeCommandKeys,
 				});

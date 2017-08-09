@@ -132,6 +132,7 @@ namespace Entmoot.Engine
 		public int AcknowledgedServerTick = -1;
 		public int InterpolationStartTick = -1;
 		public int InterpolationEndTick = -1;
+		public int RenderedFrameTick = -1;
 		public int CommandingEntity = -1;
 		public CommandKeys CommandKeys;
 
@@ -154,6 +155,7 @@ namespace Entmoot.Engine
 							AcknowledgedServerTick = binaryReader.ReadInt32(),
 							InterpolationStartTick = binaryReader.ReadInt32(),
 							InterpolationEndTick = binaryReader.ReadInt32(),
+							RenderedFrameTick = binaryReader.ReadInt32(),
 							CommandingEntity = binaryReader.ReadInt32(),
 							CommandKeys = (CommandKeys)binaryReader.ReadByte(),
 						});
@@ -165,7 +167,7 @@ namespace Entmoot.Engine
 
 		public static byte[] SerializeCommands(ClientCommand[] clientCommands)
 		{
-			byte[] packet = new byte[(sizeof(int) + sizeof(int) + sizeof(int) + sizeof(int) + sizeof(int) + sizeof(byte)) * clientCommands.Length];
+			byte[] packet = new byte[(sizeof(int) + sizeof(int) + sizeof(int) + sizeof(int) + sizeof(int) + sizeof(int) + sizeof(byte)) * clientCommands.Length];
 			using (MemoryStream memoryStream = new MemoryStream(packet, 0, packet.Length, true))
 			{
 				using (BinaryWriter binaryWriter = new BinaryWriter(memoryStream))
@@ -176,6 +178,7 @@ namespace Entmoot.Engine
 						binaryWriter.Write(clientCommand.AcknowledgedServerTick);
 						binaryWriter.Write(clientCommand.InterpolationStartTick);
 						binaryWriter.Write(clientCommand.InterpolationEndTick);
+						binaryWriter.Write(clientCommand.RenderedFrameTick);
 						binaryWriter.Write(clientCommand.CommandingEntity);
 						binaryWriter.Write((byte)clientCommand.CommandKeys);
 					}
@@ -204,5 +207,6 @@ namespace Entmoot.Engine
 		MoveRight = 8,
 		Seat1 = 16,
 		Seat2 = 32,
+		Fire = 64,
 	}
 }

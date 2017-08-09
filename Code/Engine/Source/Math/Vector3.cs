@@ -31,6 +31,13 @@ namespace Entmoot.Engine
 
 		#region Methods
 
+		public static bool CloseTo(Vector3 vectorA, Vector3 vectorB, float distance)
+		{
+			return (Math.Abs(vectorA.X - vectorB.X) < distance) &&
+				(Math.Abs(vectorA.Y - vectorB.Y) < distance) &&
+				(Math.Abs(vectorA.Z - vectorB.Z) < distance);
+		}
+
 		public static Vector3 Interpolate(Vector3 vectorA, Vector3 vectorB, float amount)
 		{
 			return new Vector3(vectorA.X + (vectorB.X - vectorA.X) * amount,

@@ -12,7 +12,7 @@ namespace Entmoot.Engine
 
 		private readonly List<ClientConnection> clients = new List<ClientConnection>();
 		private readonly Entity[] entities;
-		private Queue<StateSnapshot> stateSnapshotHistory = new Queue<StateSnapshot>(64);
+		public Queue<StateSnapshot> stateSnapshotHistory = new Queue<StateSnapshot>(64);
 
 		#endregion Fields
 
@@ -36,6 +36,8 @@ namespace Entmoot.Engine
 
 		/// <summary>Gets the <see cref="StateSnapshot"/> that is currently the most up-to-date state.</summary>
 		public StateSnapshot CurrentState { get; private set; }
+
+		public StateSnapshot FiredSnapshot { get; set; }
 
 		#endregion Properties
 
@@ -96,7 +98,7 @@ namespace Entmoot.Engine
 		public int LatestTickAcknowledgedByClient { get; private set; } = -1;
 
 		/// <summary>Gets or sets the entity that this client currently owns.</summary>
-		public int OwnedEntity { get; set; } = -1;
+		public int OwnedEntity { get; set; } = 0;
 
 		#endregion Properties
 
@@ -114,6 +116,7 @@ namespace Entmoot.Engine
 
 		public void RecieveClientCommands()
 		{
+			this.parentServer.FiredSnapshot = null;
 			byte[] packet;
 			while ((packet = this.clientNetworkConnection.GetNextIncomingPacket()) != null)
 			{
@@ -127,18 +130,16 @@ namespace Entmoot.Engine
 					// Ignore the commands that were for some other owned entity (these are old commands the client was trying to execute before it knew of its new entity)
 					if (clientCommand.CommandingEntity != this.OwnedEntity) { continue; }
 
+					if ((clientCommand.CommandKeys & CommandKeys.Fire) != 0)
+					{
+						this.parentServer.FiredSnapshot = StateSnapshot.Interpolate(this.parentServer.stateSnapshotHistory.Single((s) => s.ServerFrameTick == clientCommand.InterpolationStartTick),
+							this.parentServer.stateSnapshotHistory.Single((s) => s.ServerFrameTick == clientCommand.InterpolationEndTick),
+							clientCommand.RenderedFrameTick);
+					}
+
 					if (this.OwnedEntity != -1)
 					{
 						clientCommand.RunOnEntity(this.parentServer.CurrentState.Entities[this.OwnedEntity]);
-					}
-
-					if ((clientCommand.CommandKeys & CommandKeys.Seat1) != 0)
-					{
-						this.OwnedEntity = 0;
-					}
-					else if ((clientCommand.CommandKeys & CommandKeys.Seat2) != 0)
-					{
-						this.OwnedEntity = 1;
 					}
 
 					if (this.LatestReceivedClientTick < clientCommand.ClientFrameTick) { this.LatestReceivedClientTick = clientCommand.ClientFrameTick; }
