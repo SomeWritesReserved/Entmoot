@@ -125,7 +125,7 @@ namespace Entmoot.Engine
 				foreach (ClientCommand clientCommand in clientCommands)
 				{
 					// Ignore the commands that were for some other owned entity (these are old commands the client was trying to execute before it knew of its new entity)
-					if (clientCommand.OwnedEntity != this.OwnedEntity) { continue; }
+					if (clientCommand.CommandingEntity != this.OwnedEntity) { continue; }
 
 					if (this.OwnedEntity != -1)
 					{

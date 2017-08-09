@@ -95,7 +95,7 @@ namespace Entmoot.Engine
 			{
 				ClientFrameTick = this.FrameTick,
 				AcknowledgedServerTick = this.LatestReceivedServerTick,
-				OwnedEntity = this.CurrentOwnedEntity,
+				CommandingEntity = this.CurrentOwnedEntity,
 				CommandKeys = activeCommandKeys,
 			});
 			this.serverNetworkConnection.SendPacket(ClientCommand.SerializeCommands(this.SentClientCommands.Where((cmd) => cmd.ClientFrameTick > this.LatestTickAcknowledgedByServer).ToArray()));
@@ -110,7 +110,7 @@ namespace Entmoot.Engine
 				foreach (ClientCommand clientCommandNotAckedByServer in this.SentClientCommands.Where((cmd) => cmd.ClientFrameTick > latestStateSnapshot.AcknowledgedClientTick))
 				{
 					// Don't use this command for prediction since its an old command that applied to some other owned entity
-					if (clientCommandNotAckedByServer.OwnedEntity != this.CurrentOwnedEntity) { continue; }
+					if (clientCommandNotAckedByServer.CommandingEntity != this.CurrentOwnedEntity) { continue; }
 
 					// Reapply all the commands we've sent that the server hasn't processed yet to get us back to where we predicted we should be, starting
 					// from where the server last gave us an authoritative response

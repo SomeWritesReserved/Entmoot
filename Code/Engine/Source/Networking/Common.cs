@@ -130,7 +130,7 @@ namespace Entmoot.Engine
 
 		public int ClientFrameTick = -1;
 		public int AcknowledgedServerTick = -1;
-		public int OwnedEntity = -1;
+		public int CommandingEntity = -1;
 		public CommandKeys CommandKeys;
 
 		#endregion Fields
@@ -150,7 +150,7 @@ namespace Entmoot.Engine
 						{
 							ClientFrameTick = binaryReader.ReadInt32(),
 							AcknowledgedServerTick = binaryReader.ReadInt32(),
-							OwnedEntity = binaryReader.ReadInt32(),
+							CommandingEntity = binaryReader.ReadInt32(),
 							CommandKeys = (CommandKeys)binaryReader.ReadByte(),
 						});
 					}
@@ -170,7 +170,7 @@ namespace Entmoot.Engine
 					{
 						binaryWriter.Write(clientCommand.ClientFrameTick);
 						binaryWriter.Write(clientCommand.AcknowledgedServerTick);
-						binaryWriter.Write(clientCommand.OwnedEntity);
+						binaryWriter.Write(clientCommand.CommandingEntity);
 						binaryWriter.Write((byte)clientCommand.CommandKeys);
 					}
 				}
