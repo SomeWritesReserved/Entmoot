@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Entmoot.Engine
 {
-	public class Client : ISystem
+	public class Client : INetworkPeer
 	{
 		#region Fields
 

@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace Entmoot.Engine
 {
-	public sealed class Entity
+	public class Entity
 	{
+		public int ID;
 		public Vector3 Position;
 	}
 }

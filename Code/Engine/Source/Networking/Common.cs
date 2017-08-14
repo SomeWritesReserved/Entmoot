@@ -115,7 +115,7 @@ namespace Entmoot.Engine
 		#endregion Methods
 	}
 
-	public interface ISystem
+	public interface INetworkPeer
 	{
 		#region Properties
 
