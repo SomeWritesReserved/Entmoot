@@ -8,7 +8,7 @@ namespace Entmoot.Engine
 {
 	public class Entity
 	{
-		public int ID;
+		public int ID = -1;
 		public Vector3 Position;
 	}
 }
