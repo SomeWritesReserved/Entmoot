@@ -10,10 +10,7 @@ namespace Entmoot.Engine
 	{
 		#region Methods
 
-		void OnEntityCreated(Entity entity);
-		void OnEntityRemoved(Entity entity);
-
-		void Update();
+		void Update(IEntityCollection entityCollection);
 
 		#endregion Methods
 	}

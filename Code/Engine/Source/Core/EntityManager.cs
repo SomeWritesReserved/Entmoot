@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Entmoot.Engine
 {
-	public sealed class EntityManager
+	public sealed class EntityManager : IEntityCollection
 	{
 		#region Fields
 
 		private Entity[] entities;
-		private IList<IEntitySystem> entitySystems;
+		private ReadOnlyCollection<IEntitySystem> entitySystems;
 		private List<Entity> createdEntities;
 		private List<Entity> removedEntities;
 
@@ -19,15 +20,26 @@ namespace Entmoot.Engine
 
 		#region Constructors
 
-		public EntityManager(int entityCapacity, IEntitySystem[] entitySystems)
+		public EntityManager(int entityCapacity, IEnumerable<IEntitySystem> entitySystems)
 		{
 			this.entities = new Entity[entityCapacity];
+			this.entitiesAsReadOnly = new ReadOnlyCollection<Entity>(this.entities);
 			this.entitySystems = entitySystems.ToList().AsReadOnly();
 			this.createdEntities = new List<Entity>(64);
 			this.removedEntities = new List<Entity>(64);
 		}
 
 		#endregion Constructors
+
+		#region Properties
+
+		private ReadOnlyCollection<Entity> entitiesAsReadOnly;
+		public ReadOnlyCollection<Entity> Entities
+		{
+			get { return this.entitiesAsReadOnly; }
+		}
+
+		#endregion Properties
 
 		#region Methods
 
@@ -40,14 +52,12 @@ namespace Entmoot.Engine
 
 			TEntity newEntity = new TEntity();
 			newEntity.ID = nextEntityIndex;
-			this.entities[nextEntityIndex] = newEntity;
 			this.createdEntities.Add(newEntity);
 			return newEntity;
 		}
 
 		public void RemoveEntity(Entity entity)
 		{
-			this.entities[entity.ID] = null;
 			this.removedEntities.Add(entity);
 		}
 
@@ -55,26 +65,26 @@ namespace Entmoot.Engine
 		{
 			foreach (IEntitySystem entitySystem in this.entitySystems)
 			{
-				entitySystem.Update();
+				entitySystem.Update(this);
 			}
+
 			foreach (Entity createdEntity in this.createdEntities)
 			{
-				foreach (IEntitySystem entitySystem in this.entitySystems)
-				{
-					entitySystem.OnEntityCreated(createdEntity);
-				}
-			}
-			foreach (Entity removedEntity in this.removedEntities)
-			{
-				foreach (IEntitySystem entitySystem in this.entitySystems)
-				{
-					entitySystem.OnEntityRemoved(removedEntity);
-				}
+				this.entities[createdEntity.ID] = createdEntity;
 			}
 			this.createdEntities.Clear();
+			foreach (Entity removedEntity in this.removedEntities)
+			{
+				this.entities[removedEntity.ID] = null;
+			}
 			this.removedEntities.Clear();
 		}
 
 		#endregion Methods
+	}
+
+	public interface IEntityCollection
+	{
+		ReadOnlyCollection<Entity> Entities { get; }
 	}
 }
