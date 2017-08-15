@@ -58,6 +58,7 @@ namespace Entmoot.Engine
 
 		public void RemoveEntity(Entity entity)
 		{
+			if (entity == null) { throw new ArgumentNullException(nameof(entity)); }
 			this.removedEntities.Add(entity);
 		}
 
@@ -70,11 +71,13 @@ namespace Entmoot.Engine
 
 			foreach (Entity createdEntity in this.createdEntities)
 			{
+				if (this.entities[createdEntity.ID] != null) { throw new InvalidOperationException(string.Format("Bad created entity; an entity already exists with the ID {0}.", createdEntity.ID)); }
 				this.entities[createdEntity.ID] = createdEntity;
 			}
 			this.createdEntities.Clear();
 			foreach (Entity removedEntity in this.removedEntities)
 			{
+				if (this.entities[removedEntity.ID] != null && this.entities[removedEntity.ID] != removedEntity) { throw new InvalidOperationException("Bad removed entity; removing entity doesn't match existing entity."); }
 				this.entities[removedEntity.ID] = null;
 			}
 			this.removedEntities.Clear();
