@@ -9,6 +9,19 @@ namespace Entmoot.Engine
 	public class Entity
 	{
 		public int ID = -1;
+		public EntityState EntityState = EntityState.NoState;
 		public Vector3 Position;
+	}
+
+	public enum EntityState : byte
+	{
+		/// <summary>The entity has no state (undefined state or not part of the game).</summary>
+		NoState = 0,
+		/// <summary>The entity is in the process of being created and hasn't been added to the game yet, it will be fully added at the end of the next update.</summary>
+		Creating,
+		/// <summary>The entity is actively part of the game.</summary>
+		Active,
+		/// <summary>The entity is still actively part of the game but is scheduled to be removed at the end of the next update.</summary>
+		Removing,
 	}
 }

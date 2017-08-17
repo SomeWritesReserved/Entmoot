@@ -12,7 +12,6 @@ namespace Entmoot.Engine
 		#region Fields
 
 		private Entity[] entities;
-		private EntityState[] entityStates;
 		private ReadOnlyCollection<IEntitySystem> entitySystems;
 		private List<Entity> createdEntities = new List<Entity>(16);
 		private List<Entity> removedEntities = new List<Entity>(16);
@@ -24,7 +23,6 @@ namespace Entmoot.Engine
 		public EntityManager(int entityCapacity, IEnumerable<IEntitySystem> entitySystems)
 		{
 			this.entities = new Entity[entityCapacity];
-			this.entityStates = new EntityState[entityCapacity];
 			this.entitiesAsReadOnly = new ReadOnlyCollection<Entity>(this.entities);
 			this.entitySystems = entitySystems.ToList().AsReadOnly();
 		}
@@ -46,13 +44,12 @@ namespace Entmoot.Engine
 		public TEntity CreateEntity<TEntity>()
 			where TEntity : Entity, new()
 		{
-			int nextEntityIndex = Array.IndexOf(this.entityStates, EntityState.NoEntity);
+			int nextEntityIndex = Array.IndexOf(this.entities, null);
 			if (nextEntityIndex < 0) { return null; }
 
 			TEntity newEntity = new TEntity();
 			newEntity.ID = nextEntityIndex;
-
-			this.entityStates[nextEntityIndex] = EntityState.Creating;
+			newEntity.EntityState = EntityState.Creating;
 			this.createdEntities.Add(newEntity);
 			return newEntity;
 		}
@@ -60,8 +57,7 @@ namespace Entmoot.Engine
 		public void RemoveEntity(Entity entity)
 		{
 			if (entity == null) { throw new ArgumentNullException(nameof(entity)); }
-			// Todo: more checks here to make sure we aren't removing something not supposed to. Probably always want to add entity to array and instead filter by state in the collection?
-			this.entityStates[entity.ID] = EntityState.Destroying;
+			entity.EntityState = EntityState.Removing;
 			this.removedEntities.Add(entity);
 		}
 
@@ -76,30 +72,18 @@ namespace Entmoot.Engine
 			{
 				if (this.entities[createdEntity.ID] != null) { throw new InvalidOperationException(string.Format("Bad created entity; an entity already exists with the ID {0}.", createdEntity.ID)); }
 				this.entities[createdEntity.ID] = createdEntity;
-				this.entityStates[createdEntity.ID] = EntityState.Active;
+				createdEntity.EntityState = EntityState.Active;
 			}
 			this.createdEntities.Clear();
 			foreach (Entity removedEntity in this.removedEntities)
 			{
 				if (this.entities[removedEntity.ID] != null && this.entities[removedEntity.ID] != removedEntity) { throw new InvalidOperationException("Bad removed entity; removing entity doesn't match existing entity."); }
 				this.entities[removedEntity.ID] = null;
-				this.entityStates[removedEntity.ID] = EntityState.NoEntity;
+				removedEntity.EntityState = EntityState.NoState;
 			}
 			this.removedEntities.Clear();
 		}
 
 		#endregion Methods
-
-		#region Nested Types
-
-		private enum EntityState : byte
-		{
-			NoEntity = 0,
-			Creating,
-			Active,
-			Destroying,
-		}
-
-		#endregion Nested Types
 	}
 }
