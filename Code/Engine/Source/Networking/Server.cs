@@ -12,7 +12,7 @@ namespace Entmoot.Engine
 
 		private readonly List<ClientConnection> clients = new List<ClientConnection>();
 		private readonly Entity[] entities;
-		public Queue<StateSnapshot> stateSnapshotHistory = new Queue<StateSnapshot>(64);
+		private readonly Queue<StateSnapshot> stateSnapshotHistory = new Queue<StateSnapshot>(64);
 
 		#endregion Fields
 
@@ -36,8 +36,6 @@ namespace Entmoot.Engine
 
 		/// <summary>Gets the <see cref="StateSnapshot"/> that is currently the most up-to-date state.</summary>
 		public StateSnapshot CurrentState { get; private set; }
-
-		public StateSnapshot FiredSnapshot { get; set; }
 
 		#endregion Properties
 
@@ -69,84 +67,80 @@ namespace Entmoot.Engine
 		}
 
 		#endregion Methods
-	}
 
-	public class ClientConnection
-	{
-		#region Fields
+		#region Nested Types
 
-		private Server parentServer;
-		private INetworkConnection clientNetworkConnection;
-
-		#endregion Fields
-
-		#region Constructors
-
-		public ClientConnection(Server parentServer, INetworkConnection clientCetworkConnection)
+		public class ClientConnection
 		{
-			this.parentServer = parentServer;
-			this.clientNetworkConnection = clientCetworkConnection;
-		}
+			#region Fields
 
-		#endregion Constructors
+			private Server parentServer;
+			private INetworkConnection clientNetworkConnection;
 
-		#region Properties
+			#endregion Fields
 
-		/// <summary>Gets the last client tick that was actually received from the client.</summary>
-		public int LatestReceivedClientTick { get; private set; } = -1;
-		/// <summary>Gets the last server tick that was acknowledged by the client.</summary>
-		public int LatestTickAcknowledgedByClient { get; private set; } = -1;
+			#region Constructors
 
-		/// <summary>Gets or sets the entity that this client currently owns.</summary>
-		public int OwnedEntity { get; set; } = 0;
-
-		#endregion Properties
-
-		#region Methods
-
-		public void SendStateSnapshot(StateSnapshot stateSnapshot)
-		{
-			// Overwrite the state's acked client tick and owned entity since each client will be different
-			stateSnapshot.AcknowledgedClientTick = this.LatestReceivedClientTick;
-			stateSnapshot.ClientOwnedEntity = this.OwnedEntity;
-
-			byte[] packet = stateSnapshot.SerializePacket();
-			this.clientNetworkConnection.SendPacket(packet);
-		}
-
-		public void RecieveClientCommands()
-		{
-			this.parentServer.FiredSnapshot = null;
-			byte[] packet;
-			while ((packet = this.clientNetworkConnection.GetNextIncomingPacket()) != null)
+			public ClientConnection(Server parentServer, INetworkConnection clientCetworkConnection)
 			{
-				// Todo: handle out of order packets here and make sure we only execute each command once (drop old packets)
-				ClientCommand[] clientCommands = ClientCommand.DeserializePacket(packet)
-					.Where((cmd) => cmd.ClientFrameTick > this.LatestReceivedClientTick)
-					.ToArray();
+				this.parentServer = parentServer;
+				this.clientNetworkConnection = clientCetworkConnection;
+			}
 
-				foreach (ClientCommand clientCommand in clientCommands)
+			#endregion Constructors
+
+			#region Properties
+
+			/// <summary>Gets the last client tick that was actually received from the client.</summary>
+			public int LatestReceivedClientTick { get; private set; } = -1;
+			/// <summary>Gets the last server tick that was acknowledged by the client.</summary>
+			public int LatestTickAcknowledgedByClient { get; private set; } = -1;
+
+			/// <summary>Gets or sets the entity that this client currently owns.</summary>
+			public int OwnedEntity { get; set; } = -1;
+
+			#endregion Properties
+
+			#region Methods
+
+			public void SendStateSnapshot(StateSnapshot stateSnapshot)
+			{
+				// Overwrite the state's acked client tick and owned entity since each client will be different
+				stateSnapshot.AcknowledgedClientTick = this.LatestReceivedClientTick;
+				stateSnapshot.ClientOwnedEntity = this.OwnedEntity;
+
+				byte[] packet = stateSnapshot.SerializePacket();
+				this.clientNetworkConnection.SendPacket(packet);
+			}
+
+			public void RecieveClientCommands()
+			{
+				byte[] packet;
+				while ((packet = this.clientNetworkConnection.GetNextIncomingPacket()) != null)
 				{
-					// Ignore the commands that were for some other owned entity (these are old commands the client was trying to execute before it knew of its new entity)
-					if (clientCommand.CommandingEntity != this.OwnedEntity) { continue; }
+					// Todo: handle out of order packets here and make sure we only execute each command once (drop old packets)
+					ClientCommand[] clientCommands = ClientCommand.DeserializePacket(packet)
+						.Where((cmd) => cmd.ClientFrameTick > this.LatestReceivedClientTick)
+						.ToArray();
 
-					if ((clientCommand.CommandKeys & CommandKeys.Fire) != 0)
+					foreach (ClientCommand clientCommand in clientCommands)
 					{
-						this.parentServer.FiredSnapshot = StateSnapshot.Interpolate(this.parentServer.stateSnapshotHistory.Single((s) => s.ServerFrameTick == clientCommand.InterpolationStartTick),
-							this.parentServer.stateSnapshotHistory.Single((s) => s.ServerFrameTick == clientCommand.InterpolationEndTick),
-							clientCommand.RenderedFrameTick);
-					}
+						// Ignore the commands that were for some other owned entity (these are old commands the client was trying to execute before it knew of its new entity)
+						if (clientCommand.CommandingEntity != this.OwnedEntity) { continue; }
 
-					if (this.OwnedEntity != -1)
-					{
-						clientCommand.RunOnEntity(this.parentServer.CurrentState.Entities[this.OwnedEntity]);
-					}
+						if (this.OwnedEntity != -1)
+						{
+							clientCommand.RunOnEntity(this.parentServer.CurrentState.Entities[this.OwnedEntity]);
+						}
 
-					if (this.LatestReceivedClientTick < clientCommand.ClientFrameTick) { this.LatestReceivedClientTick = clientCommand.ClientFrameTick; }
+						if (this.LatestReceivedClientTick < clientCommand.ClientFrameTick) { this.LatestReceivedClientTick = clientCommand.ClientFrameTick; }
+					}
 				}
 			}
+
+			#endregion Methods
 		}
 
-		#endregion Methods
+		#endregion Nested Types
 	}
 }

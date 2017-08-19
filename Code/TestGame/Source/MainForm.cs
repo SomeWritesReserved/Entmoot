@@ -75,12 +75,6 @@ namespace Entmoot.TestGame
 			this.serverGroupBox.Refresh();
 			this.clientPacketTimelineDisplay.Refresh();
 			this.serverStepsRemaining--;
-
-			if (this.server.FiredSnapshot != null)
-			{
-				this.serverStepsRemaining = 0;
-				this.clientStepsRemaining = 0;
-			}
 		}
 
 		private void clientTimer_Tick(object sender, EventArgs e)
@@ -95,22 +89,11 @@ namespace Entmoot.TestGame
 			if (Keyboard.IsKeyDown(Key.D1)) { currentCommandKeys |= CommandKeys.Seat1; }
 			else if (Keyboard.IsKeyDown(Key.D2)) { currentCommandKeys |= CommandKeys.Seat2; }
 
-			if (this.client.RenderedState != null && Vector3.CloseTo(this.client.RenderedState.Entities[1].Position, new Vector3(100, 50, 0), 3))
-			{
-				currentCommandKeys |= CommandKeys.Fire;
-			}
-
 			this.clientServerNetworkConnection.CurrentContext = ClientServerContext.Client;
 			this.clientServerNetworkConnection.UpdateClient(currentCommandKeys);
 			this.clientGroupBox.Refresh();
 			this.clientPacketTimelineDisplay.Refresh();
 			this.clientStepsRemaining--;
-
-			if ((currentCommandKeys & CommandKeys.Fire) != 0)
-			{
-				this.serverStepsRemaining = 0;
-				this.clientStepsRemaining = 0;
-			}
 		}
 
 		private void runPauseServerButton_Click(object sender, EventArgs e)
@@ -184,13 +167,6 @@ namespace Entmoot.TestGame
 				foreach (Entity entity in this.client.InterpolationEndState.Entities)
 				{
 					e.Graphics.FillRectangle(Brushes.Gainsboro, entity.Position.X, entity.Position.Y, 3, 3);
-				}
-			}
-			if (clientServerContext == ClientServerContext.Server && this.server.FiredSnapshot != null)
-			{
-				foreach (Entity entity in this.server.FiredSnapshot.Entities)
-				{
-					e.Graphics.FillRectangle(Brushes.PaleVioletRed, entity.Position.X, entity.Position.Y, 3, 3);
 				}
 			}
 			if (entities != null)
