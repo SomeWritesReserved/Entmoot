@@ -11,22 +11,27 @@ namespace Entmoot.Engine
 		#region Fields
 
 		private readonly List<ClientConnection> clients = new List<ClientConnection>();
-		private readonly Entity[] entities;
 		private readonly Queue<StateSnapshot> stateSnapshotHistory = new Queue<StateSnapshot>(64);
 
 		#endregion Fields
 
 		#region Constructors
 
-		public Server(IEnumerable<INetworkConnection> clientNetworkConnections, Entity[] entities)
+		public Server(EntityManager entityManager)
 		{
-			this.clients = clientNetworkConnections.Select((netConn, index) => new ClientConnection(this, netConn)).ToList();
-			this.entities = entities.ToArray();
+			this.entityManager = entityManager;
 		}
 
 		#endregion Constructors
 
 		#region Properties
+
+		private readonly EntityManager entityManager;
+		/// <summary>Gets the <see cref="EntityManager"/> this server is using to store and update entities.</summary>
+		public EntityManager EntityManager
+		{
+			get { return this.entityManager; }
+		}
 
 		/// <summary>Gets or sets the rate at which the server will send updates to the clients (i.e. every Nth frame updates will be sent).</summary>
 		public int NetworkSendRate { get; set; } = 3;
@@ -50,10 +55,12 @@ namespace Entmoot.Engine
 				client.RecieveClientCommands();
 			}
 
+			this.entityManager.Update();
+
 			this.CurrentState = new StateSnapshot()
 			{
 				ServerFrameTick = this.FrameTick,
-				Entities = this.entities,
+				Entities = this.EntityManager.Entities.ToArray(),
 			};
 			this.stateSnapshotHistory.Enqueue(StateSnapshot.Clone(this.CurrentState));
 
@@ -64,6 +71,11 @@ namespace Entmoot.Engine
 					client.SendStateSnapshot(this.CurrentState);
 				}
 			}
+		}
+
+		public void AddConnectedClient(INetworkConnection clientNetworkConnection)
+		{
+			this.clients.Add(new ClientConnection(this, clientNetworkConnection));
 		}
 
 		#endregion Methods
@@ -81,10 +93,10 @@ namespace Entmoot.Engine
 
 			#region Constructors
 
-			public ClientConnection(Server parentServer, INetworkConnection clientCetworkConnection)
+			public ClientConnection(Server parentServer, INetworkConnection clientNetworkConnection)
 			{
 				this.parentServer = parentServer;
-				this.clientNetworkConnection = clientCetworkConnection;
+				this.clientNetworkConnection = clientNetworkConnection;
 			}
 
 			#endregion Constructors

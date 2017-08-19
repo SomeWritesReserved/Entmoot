@@ -20,7 +20,6 @@ namespace Entmoot.TestGame
 		private Client client;
 		private Server server;
 		private TestNetworkConnection clientServerNetworkConnection;
-		private Entity[] serverEntities;
 
 		private int serverStepsRemaining = 0;
 		private int clientStepsRemaining = 0;
@@ -33,12 +32,6 @@ namespace Entmoot.TestGame
 		{
 			this.InitializeComponent();
 
-			this.serverEntities = new Entity[]
-			{
-				new Entity() { Position = new Vector3(100, 50, 0), },
-				new Entity() { Position = new Vector3(0, 0, 0), },
-			};
-
 			this.clientServerNetworkConnection = new TestNetworkConnection()
 			{
 				SimulatedLatency = 4,
@@ -46,7 +39,10 @@ namespace Entmoot.TestGame
 				SimulatedPacketLoss = 0,
 			};
 			this.client = new Client(this.clientServerNetworkConnection);
-			this.server = new Server(new[] { this.clientServerNetworkConnection }, this.serverEntities);
+			this.server = new Server(new EntityManager(10, new IEntitySystem[0]));
+			this.server.EntityManager.CreateEntity<Entity>().Position = new Vector3(100, 50, 0);
+			this.server.EntityManager.CreateEntity<Entity>().Position = new Vector3(0, 0, 0);
+			this.server.AddConnectedClient(this.clientServerNetworkConnection);
 
 			this.clientServerNetworkConnection.Client = this.client;
 			this.clientServerNetworkConnection.Server = this.server;
@@ -68,8 +64,11 @@ namespace Entmoot.TestGame
 
 			this.clientServerNetworkConnection.CurrentContext = ClientServerContext.Server;
 
-			this.serverEntities[1].Position.X = (float)Math.Cos(this.server.FrameTick * 0.15) * 50 + 100;
-			this.serverEntities[1].Position.Y = (float)Math.Sin(this.server.FrameTick * 0.15) * 50 + 100;
+			if (this.server.EntityManager.Entities.Count > 0)
+			{
+				this.server.EntityManager.Entities[1].Position.X = (float)Math.Cos(this.server.FrameTick * 0.15) * 50 + 100;
+				this.server.EntityManager.Entities[1].Position.Y = (float)Math.Sin(this.server.FrameTick * 0.15) * 50 + 100;
+			}
 
 			this.clientServerNetworkConnection.UpdateServer();
 			this.serverGroupBox.Refresh();
