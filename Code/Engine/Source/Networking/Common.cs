@@ -115,15 +115,6 @@ namespace Entmoot.Engine
 		#endregion Methods
 	}
 
-	public interface INetworkPeer
-	{
-		#region Properties
-
-		int FrameTick { get; }
-
-		#endregion Properties
-	}
-
 	public class ClientCommand
 	{
 		#region Fields
@@ -134,7 +125,6 @@ namespace Entmoot.Engine
 		public int InterpolationEndTick = -1;
 		public int RenderedFrameTick = -1;
 		public int CommandingEntity = -1;
-		public CommandKeys CommandKeys;
 
 		#endregion Fields
 
@@ -157,7 +147,6 @@ namespace Entmoot.Engine
 							InterpolationEndTick = binaryReader.ReadInt32(),
 							RenderedFrameTick = binaryReader.ReadInt32(),
 							CommandingEntity = binaryReader.ReadInt32(),
-							CommandKeys = (CommandKeys)binaryReader.ReadByte(),
 						});
 					}
 					return clientCommands.ToArray();
@@ -167,7 +156,7 @@ namespace Entmoot.Engine
 
 		public static byte[] SerializeCommands(ClientCommand[] clientCommands)
 		{
-			byte[] packet = new byte[(sizeof(int) + sizeof(int) + sizeof(int) + sizeof(int) + sizeof(int) + sizeof(int) + sizeof(byte)) * clientCommands.Length];
+			byte[] packet = new byte[(sizeof(int) + sizeof(int) + sizeof(int) + sizeof(int) + sizeof(int) + sizeof(int)) * clientCommands.Length];
 			using (MemoryStream memoryStream = new MemoryStream(packet, 0, packet.Length, true))
 			{
 				using (BinaryWriter binaryWriter = new BinaryWriter(memoryStream))
@@ -180,33 +169,12 @@ namespace Entmoot.Engine
 						binaryWriter.Write(clientCommand.InterpolationEndTick);
 						binaryWriter.Write(clientCommand.RenderedFrameTick);
 						binaryWriter.Write(clientCommand.CommandingEntity);
-						binaryWriter.Write((byte)clientCommand.CommandKeys);
 					}
 				}
 			}
 			return packet;
 		}
 
-		public void RunOnEntity(Entity entity)
-		{
-			if ((this.CommandKeys & CommandKeys.MoveForward) != 0) { entity.Position.Y -= 5; }
-			if ((this.CommandKeys & CommandKeys.MoveBackward) != 0) { entity.Position.Y += 5; }
-			if ((this.CommandKeys & CommandKeys.MoveLeft) != 0) { entity.Position.X -= 5; }
-			if ((this.CommandKeys & CommandKeys.MoveRight) != 0) { entity.Position.X += 5; }
-		}
-
 		#endregion Methods
-	}
-
-	public enum CommandKeys : byte
-	{
-		None = 0,
-		MoveForward = 1,
-		MoveBackward = 2,
-		MoveLeft = 4,
-		MoveRight = 8,
-		Seat1 = 16,
-		Seat2 = 32,
-		Fire = 64,
 	}
 }

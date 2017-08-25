@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Entmoot.Engine
 {
-	public class Client : INetworkPeer
+	public class Client
 	{
 		#region Fields
 
@@ -64,7 +64,7 @@ namespace Entmoot.Engine
 
 		#region Methods
 
-		public void Update(CommandKeys activeCommandKeys)
+		public void Update()
 		{
 			if (this.LatestReceivedServerTick >= 0)
 			{
@@ -101,7 +101,6 @@ namespace Entmoot.Engine
 					InterpolationEndTick = this.InterpolationEndState.ServerFrameTick,
 					RenderedFrameTick = this.FrameTick - this.InterpolationRenderDelay,
 					CommandingEntity = this.CurrentOwnedEntity,
-					CommandKeys = activeCommandKeys,
 				});
 				this.serverNetworkConnection.SendPacket(ClientCommand.SerializeCommands(this.SentClientCommands.Where((cmd) => cmd.ClientFrameTick > this.LatestTickAcknowledgedByServer).ToArray()));
 			}
@@ -120,7 +119,7 @@ namespace Entmoot.Engine
 
 					// Reapply all the commands we've sent that the server hasn't processed yet to get us back to where we predicted we should be, starting
 					// from where the server last gave us an authoritative response
-					clientCommandNotAckedByServer.RunOnEntity(predictedEntity);
+					//clientCommandNotAckedByServer.RunOnEntity(predictedEntity);
 				}
 				this.RenderedState.Entities[this.CurrentOwnedEntity].Position = predictedEntity.Position;
 				this.predictedPositions.Add(this.FrameTick, predictedEntity.Position);

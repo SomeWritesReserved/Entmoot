@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Entmoot.Engine
 {
-	public class Server : INetworkPeer
+	public class Server
 	{
 		#region Fields
 
@@ -142,7 +142,7 @@ namespace Entmoot.Engine
 
 						if (this.OwnedEntity != -1)
 						{
-							clientCommand.RunOnEntity(this.parentServer.CurrentState.Entities[this.OwnedEntity]);
+							//clientCommand.RunOnEntity(this.parentServer.CurrentState.Entities[this.OwnedEntity]);
 						}
 
 						if (this.LatestReceivedClientTick < clientCommand.ClientFrameTick) { this.LatestReceivedClientTick = clientCommand.ClientFrameTick; }
