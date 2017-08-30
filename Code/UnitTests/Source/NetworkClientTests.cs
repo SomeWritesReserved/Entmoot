@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -185,12 +186,12 @@ namespace Entmoot.UnitTests
 			NetworkClientTests.updateClientAndAssertState(client, 8, 7, false, null);
 			NetworkClientTests.updateClientAndAssertState(client, 9, 7, true, 10.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 10, 10, true, 10.0f);
-			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 11, 10, true, 15.0f);
+			NetworkClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveRight, 11, 10, true, 15.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 12, 10, true, 15.0f);
-			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 13, 13, true, 20.0f);
+			NetworkClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveRight, 13, 13, true, 20.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 14, 13, true, 20.0f);
-			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 15, 13, true, 25.0f);
-			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 16, 16, true, 30.0f);
+			NetworkClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveRight, 15, 13, true, 25.0f);
+			NetworkClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveRight, 16, 16, true, 30.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 17, 16, true, 30.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 18, 16, true, 30.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 19, 19, true, 30.0f);
@@ -202,12 +203,12 @@ namespace Entmoot.UnitTests
 			NetworkClientTests.updateClientAndAssertState(client, 25, 22, true, 30.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 26, 22, true, 30.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 27, 22, true, 30.0f);
-			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 28, 22, true, 35.0f);
+			NetworkClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveRight, 28, 22, true, 35.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 29, 22, true, 35.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 30, 22, true, 35.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 31, 22, true, 35.0f, extrapolatedFrames: 1);
 			NetworkClientTests.updateClientAndAssertState(client, 32, 22, true, 35.0f, extrapolatedFrames: 2);
-			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 33, 22, true, 40.0f, extrapolatedFrames: 3);
+			NetworkClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveRight, 33, 22, true, 40.0f, extrapolatedFrames: 3);
 			NetworkClientTests.updateClientAndAssertState(client, 34, 22, true, 40.0f, extrapolatedFrames: 3, noInterpFrames: 1);
 			NetworkClientTests.updateClientAndAssertState(client, 35, 22, true, 40.0f, extrapolatedFrames: 3, noInterpFrames: 2);
 		}
@@ -229,12 +230,12 @@ namespace Entmoot.UnitTests
 			NetworkClientTests.updateClientAndAssertState(client, 8, 7, false, null);
 			NetworkClientTests.updateClientAndAssertState(client, 9, 7, true, 10.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 10, 10, true, 10.0f);
-			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 11, 10, true, 15.0f);
+			NetworkClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveRight, 11, 10, true, 15.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 12, 10, true, 15.0f);
-			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 13, 13, true, 20.0f);
+			NetworkClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveRight, 13, 13, true, 20.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 14, 13, true, 20.0f);
-			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 15, 13, true, 25.0f);
-			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 16, 16, true, 30.0f);
+			NetworkClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveRight, 15, 13, true, 25.0f);
+			NetworkClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveRight, 16, 16, true, 30.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 17, 16, true, 30.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 18, 16, true, 30.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 19, 19, true, 25.0f);
@@ -246,12 +247,12 @@ namespace Entmoot.UnitTests
 			NetworkClientTests.updateClientAndAssertState(client, 25, 22, true, 25.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 26, 22, true, 25.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 27, 22, true, 25.0f);
-			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 28, 22, true, 30.0f);
+			NetworkClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveRight, 28, 22, true, 30.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 29, 22, true, 30.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 30, 22, true, 30.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 31, 22, true, 30.0f, extrapolatedFrames: 1);
 			NetworkClientTests.updateClientAndAssertState(client, 32, 22, true, 30.0f, extrapolatedFrames: 2);
-			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 33, 22, true, 35.0f, extrapolatedFrames: 3);
+			NetworkClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveRight, 33, 22, true, 35.0f, extrapolatedFrames: 3);
 			NetworkClientTests.updateClientAndAssertState(client, 34, 22, true, 35.0f, extrapolatedFrames: 3, noInterpFrames: 1);
 			NetworkClientTests.updateClientAndAssertState(client, 35, 22, true, 35.0f, extrapolatedFrames: 3, noInterpFrames: 2);
 		}
@@ -316,12 +317,12 @@ namespace Entmoot.UnitTests
 			NetworkClientTests.updateClientAndAssertState(client, 8, 7, false, null);
 			NetworkClientTests.updateClientAndAssertState(client, 9, 10, true, 10.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 10, 10, true, 10.0f);
-			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 11, 10, true, 15.0f);
+			NetworkClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveRight, 11, 10, true, 15.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 12, 10, true, 15.0f);
-			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 13, 10, true, 20.0f);
+			NetworkClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveRight, 13, 10, true, 20.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 14, 13, true, 20.0f);
-			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 15, 16, true, 25.0f);
-			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 16, 16, true, 30.0f);
+			NetworkClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveRight, 15, 16, true, 25.0f);
+			NetworkClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveRight, 16, 16, true, 30.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 17, 16, true, 30.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 18, 19, true, 30.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 19, 19, true, 30.0f);
@@ -333,12 +334,12 @@ namespace Entmoot.UnitTests
 			NetworkClientTests.updateClientAndAssertState(client, 25, 22, true, 30.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 26, 22, true, 30.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 27, 22, true, 30.0f);
-			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 28, 22, true, 35.0f);
+			NetworkClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveRight, 28, 22, true, 35.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 29, 22, true, 35.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 30, 22, true, 35.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 31, 22, true, 35.0f, extrapolatedFrames: 1);
 			NetworkClientTests.updateClientAndAssertState(client, 32, 22, true, 35.0f, extrapolatedFrames: 2);
-			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 33, 22, true, 40.0f, extrapolatedFrames: 3);
+			NetworkClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveRight, 33, 22, true, 40.0f, extrapolatedFrames: 3);
 			NetworkClientTests.updateClientAndAssertState(client, 34, 22, true, 40.0f, extrapolatedFrames: 3, noInterpFrames: 1);
 			NetworkClientTests.updateClientAndAssertState(client, 35, 22, true, 40.0f, extrapolatedFrames: 3, noInterpFrames: 2);
 		}
@@ -403,12 +404,12 @@ namespace Entmoot.UnitTests
 			NetworkClientTests.updateClientAndAssertState(client, 8, 10, false, null);
 			NetworkClientTests.updateClientAndAssertState(client, 9, 10, true, 10.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 10, 10, true, 10.0f);
-			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 11, 10, true, 15.0f);
+			NetworkClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveRight, 11, 10, true, 15.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 12, 10, true, 15.0f);
-			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 13, 10, true, 20.0f);
+			NetworkClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveRight, 13, 10, true, 20.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 14, 10, true, 20.0f);
-			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 15, 10, true, 25.0f);
-			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 16, 16, true, 30.0f);
+			NetworkClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveRight, 15, 10, true, 25.0f);
+			NetworkClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveRight, 16, 16, true, 30.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 17, 16, true, 30.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 18, 16, true, 30.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 19, 19, true, 30.0f);
@@ -420,12 +421,12 @@ namespace Entmoot.UnitTests
 			NetworkClientTests.updateClientAndAssertState(client, 25, 22, true, 30.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 26, 22, true, 30.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 27, 22, true, 30.0f);
-			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 28, 22, true, 35.0f);
+			NetworkClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveRight, 28, 22, true, 35.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 29, 22, true, 35.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 30, 22, true, 35.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 31, 22, true, 35.0f, extrapolatedFrames: 1);
 			NetworkClientTests.updateClientAndAssertState(client, 32, 22, true, 35.0f, extrapolatedFrames: 2);
-			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 33, 22, true, 40.0f, extrapolatedFrames: 3);
+			NetworkClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveRight, 33, 22, true, 40.0f, extrapolatedFrames: 3);
 			NetworkClientTests.updateClientAndAssertState(client, 34, 22, true, 40.0f, extrapolatedFrames: 3, noInterpFrames: 1);
 			NetworkClientTests.updateClientAndAssertState(client, 35, 22, true, 40.0f, extrapolatedFrames: 3, noInterpFrames: 2);
 		}
@@ -490,12 +491,12 @@ namespace Entmoot.UnitTests
 			NetworkClientTests.updateClientAndAssertState(client, 8, 10, false, null);
 			NetworkClientTests.updateClientAndAssertState(client, 9, 10, true, 10.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 10, 10, true, 10.0f);
-			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 11, 10, true, 15.0f);
+			NetworkClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveRight, 11, 10, true, 15.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 12, 10, true, 15.0f);
-			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 13, 10, true, 20.0f);
+			NetworkClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveRight, 13, 10, true, 20.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 14, 10, true, 20.0f);
-			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 15, 10, true, 25.0f);
-			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 16, 16, true, 30.0f);
+			NetworkClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveRight, 15, 10, true, 25.0f);
+			NetworkClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveRight, 16, 16, true, 30.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 17, 16, true, 30.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 18, 16, true, 30.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 19, 19, true, 30.0f);
@@ -507,12 +508,12 @@ namespace Entmoot.UnitTests
 			NetworkClientTests.updateClientAndAssertState(client, 25, 22, true, 30.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 26, 22, true, 30.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 27, 22, true, 30.0f);
-			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 28, 22, true, 35.0f);
+			NetworkClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveRight, 28, 22, true, 35.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 29, 22, true, 35.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 30, 22, true, 35.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 31, 22, true, 35.0f, extrapolatedFrames: 1);
 			NetworkClientTests.updateClientAndAssertState(client, 32, 22, true, 35.0f, extrapolatedFrames: 2);
-			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 33, 22, true, 40.0f, extrapolatedFrames: 3);
+			NetworkClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveRight, 33, 22, true, 40.0f, extrapolatedFrames: 3);
 			NetworkClientTests.updateClientAndAssertState(client, 34, 22, true, 40.0f, extrapolatedFrames: 3, noInterpFrames: 1);
 			NetworkClientTests.updateClientAndAssertState(client, 35, 22, true, 40.0f, extrapolatedFrames: 3, noInterpFrames: 2);
 		}
@@ -592,12 +593,12 @@ namespace Entmoot.UnitTests
 			NetworkClientTests.updateClientAndAssertState(client, 8, 7, false, null);
 			NetworkClientTests.updateClientAndAssertState(client, 9, 7, true, 10.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 10, 10, true, 10.0f);
-			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 11, 10, true, 15.0f);
+			NetworkClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveRight, 11, 10, true, 15.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 12, 10, true, 15.0f);
-			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 13, 13, true, 20.0f);
+			NetworkClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveRight, 13, 13, true, 20.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 14, 13, true, 20.0f);
-			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 15, 13, true, 25.0f);
-			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveRight, 16, 16, true, 30.0f);
+			NetworkClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveRight, 15, 13, true, 25.0f);
+			NetworkClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveRight, 16, 16, true, 30.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 17, 16, true, 30.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 18, 16, true, 30.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 19, 19, true, 30.0f);
@@ -609,17 +610,17 @@ namespace Entmoot.UnitTests
 			NetworkClientTests.updateClientAndAssertState(client, 25, 22, true, 30.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 26, 22, true, 30.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 27, 22, true, 30.0f);
-			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveLeft, 28, 22, true, 25.0f);
+			NetworkClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveLeft, 28, 22, true, 25.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 29, 22, true, 25.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 30, 22, true, 25.0f);
 			NetworkClientTests.updateClientAndAssertState(client, 31, 22, true, 25.0f, extrapolatedFrames: 1);
 			NetworkClientTests.updateClientAndAssertState(client, 32, 22, true, 25.0f, extrapolatedFrames: 2);
-			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveLeft, 33, 22, true, 20.0f, extrapolatedFrames: 3);
+			NetworkClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveLeft, 33, 22, true, 20.0f, extrapolatedFrames: 3);
 			NetworkClientTests.updateClientAndAssertState(client, 34, 22, true, 20.0f, extrapolatedFrames: 3, noInterpFrames: 1);
 			NetworkClientTests.updateClientAndAssertState(client, 35, 22, true, 20.0f, extrapolatedFrames: 3, noInterpFrames: 2);
-			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveLeft, 36, 22, true, 15.0f, extrapolatedFrames: 3, noInterpFrames: 3);
+			NetworkClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveLeft, 36, 22, true, 15.0f, extrapolatedFrames: 3, noInterpFrames: 3);
 			NetworkClientTests.updateClientAndAssertState(client, 37, 37, true, 15.0f, extrapolatedFrames: 3, noInterpFrames: 3); // <- getting packets again
-			NetworkClientTests.updateClientAndAssertState(client, CommandKeys.MoveLeft, 38, 37, true, 10.0f, extrapolatedFrames: 3, noInterpFrames: 3);
+			NetworkClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveLeft, 38, 37, true, 10.0f, extrapolatedFrames: 3, noInterpFrames: 3);
 			NetworkClientTests.updateClientAndAssertState(client, 39, 37, true, 10.0f, extrapolatedFrames: 3, noInterpFrames: 3);
 			NetworkClientTests.updateClientAndAssertState(client, 40, 40, true, 10.0f, extrapolatedFrames: 3, noInterpFrames: 3);
 			NetworkClientTests.updateClientAndAssertState(client, 41, 40, true, 10.0f, extrapolatedFrames: 3, noInterpFrames: 3);
@@ -640,13 +641,13 @@ namespace Entmoot.UnitTests
 
 		private static void updateClientAndAssertState(MockClient mockClient, int clientFrameTick, int recievedServerFrameTick, bool hasInterpStarted, float? position, int extrapolatedFrames = 0, int noInterpFrames = 0)
 		{
-			NetworkClientTests.updateClientAndAssertState(mockClient, CommandKeys.None, clientFrameTick, recievedServerFrameTick, hasInterpStarted, position, extrapolatedFrames, noInterpFrames);
+			NetworkClientTests.updateClientAndAssertState(mockClient, MockCommandKeys.None, clientFrameTick, recievedServerFrameTick, hasInterpStarted, position, extrapolatedFrames, noInterpFrames);
 		}
 
-		private static void updateClientAndAssertState(MockClient mockClient, CommandKeys keys, int clientFrameTick, int recievedServerFrameTick, bool hasInterpStarted, float? position, int extrapolatedFrames = 0, int noInterpFrames = 0)
+		private static void updateClientAndAssertState(MockClient mockClient, MockCommandKeys keys, int clientFrameTick, int recievedServerFrameTick, bool hasInterpStarted, float? position, int extrapolatedFrames = 0, int noInterpFrames = 0)
 		{
 			mockClient.Update(keys);
-			Client engineClient = mockClient.EngineClient;
+			Client<MockCommandData> engineClient = mockClient.EngineClient;
 			Assert.AreEqual(clientFrameTick, engineClient.FrameTick, "Unexpected FrameTick at tick " + mockClient.NetworkTick);
 			Assert.AreEqual(recievedServerFrameTick, engineClient.LatestReceivedServerTick, "Unexpected LatestReceivedServerTick at tick " + mockClient.NetworkTick);
 			Assert.AreEqual(hasInterpStarted, engineClient.HasInterpolationStarted, "Unexpected HasInterpolationStarted at tick " + mockClient.NetworkTick);
@@ -874,7 +875,7 @@ namespace Entmoot.UnitTests
 			public int NetworkTick { get; private set; }
 
 			/// <summary>Gets the underlying <see cref="Client"/> object.</summary>
-			public Client EngineClient { get; private set; }
+			public Client<MockCommandData> EngineClient { get; private set; }
 
 			#endregion Properties
 
@@ -886,7 +887,7 @@ namespace Entmoot.UnitTests
 			public static MockClient CreateMockClient()
 			{
 				MockClient mockClient = new MockClient();
-				Client engineClient = new Client(mockClient);
+				Client<MockCommandData> engineClient = new Client<MockCommandData>(mockClient);
 				mockClient.EngineClient = engineClient;
 				return mockClient;
 			}
@@ -896,10 +897,10 @@ namespace Entmoot.UnitTests
 			/// to call this <see cref="Update"/> rather than <see cref="Client.Update"/> otherwise the underlying <see cref="Client"/>
 			/// will never get new packets (since the network never gets updated).
 			/// </summary>
-			public void Update(CommandKeys activeCommandKeys)
+			public void Update(MockCommandKeys commandKeys)
 			{
 				this.NetworkTick++;
-				this.EngineClient.Update(activeCommandKeys);
+				this.EngineClient.Update(new MockCommandData() { CommandKeys = commandKeys });
 			}
 
 			/// <summary>
@@ -946,6 +947,47 @@ namespace Entmoot.UnitTests
 			}
 
 			#endregion Methods
+		}
+
+		private struct MockCommandData : ICommandData
+		{
+			#region Fields
+
+			public MockCommandKeys CommandKeys;
+
+			#endregion Fields
+
+			#region Methods
+
+			public void DeserializeData(BinaryReader binaryReader)
+			{
+				this.CommandKeys = (MockCommandKeys)binaryReader.ReadByte();
+			}
+
+			public void SerializeData(BinaryWriter binaryWriter)
+			{
+				binaryWriter.Write((byte)this.CommandKeys);
+			}
+
+			public void RunOnEntity(Entity entity)
+			{
+				if ((this.CommandKeys & MockCommandKeys.MoveForward) != 0) { entity.Position.Y -= 5; }
+				if ((this.CommandKeys & MockCommandKeys.MoveBackward) != 0) { entity.Position.Y += 5; }
+				if ((this.CommandKeys & MockCommandKeys.MoveLeft) != 0) { entity.Position.X -= 5; }
+				if ((this.CommandKeys & MockCommandKeys.MoveRight) != 0) { entity.Position.X += 5; }
+			}
+
+			#endregion Methods
+		}
+
+		private enum MockCommandKeys : byte
+		{
+			None = 0,
+			MoveForward = 1,
+			MoveBackward = 2,
+			MoveLeft = 4,
+			MoveRight = 8,
+			Shoot = 16,
 		}
 
 		#endregion Nested Types
