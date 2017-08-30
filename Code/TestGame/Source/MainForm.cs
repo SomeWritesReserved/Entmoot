@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -17,8 +18,8 @@ namespace Entmoot.TestGame
 	{
 		#region Fields
 
-		private Client client;
-		private Server server;
+		private Client<TestCommandData> client;
+		private Server<TestCommandData> server;
 		private TestNetworkConnection clientServerNetworkConnection;
 
 		private int serverStepsRemaining = 0;
@@ -38,8 +39,8 @@ namespace Entmoot.TestGame
 				SimulatedJitter = 0,
 				SimulatedPacketLoss = 0,
 			};
-			this.client = new Client(this.clientServerNetworkConnection);
-			this.server = new Server(new EntityManager(10, new IEntitySystem[0]));
+			this.client = new Client<TestCommandData>(this.clientServerNetworkConnection);
+			this.server = new Server<TestCommandData>(new EntityManager(10, new IEntitySystem[0]));
 			this.server.EntityManager.CreateEntity<Entity>().Position = new Vector3(100, 50, 0);
 			this.server.EntityManager.CreateEntity<Entity>().Position = new Vector3(0, 0, 0);
 			this.server.AddConnectedClient(this.clientServerNetworkConnection);
@@ -80,13 +81,13 @@ namespace Entmoot.TestGame
 		{
 			if (this.clientStepsRemaining == 0) { return; }
 
-			CommandKeys currentCommandKeys = CommandKeys.None;
-			if (Keyboard.IsKeyDown(Key.W)) { currentCommandKeys |= CommandKeys.MoveForward; }
-			if (Keyboard.IsKeyDown(Key.S)) { currentCommandKeys |= CommandKeys.MoveBackward; }
-			if (Keyboard.IsKeyDown(Key.A)) { currentCommandKeys |= CommandKeys.MoveLeft; }
-			if (Keyboard.IsKeyDown(Key.D)) { currentCommandKeys |= CommandKeys.MoveRight; }
-			if (Keyboard.IsKeyDown(Key.D1)) { currentCommandKeys |= CommandKeys.Seat1; }
-			else if (Keyboard.IsKeyDown(Key.D2)) { currentCommandKeys |= CommandKeys.Seat2; }
+			TestCommandKeys currentCommandKeys = TestCommandKeys.None;
+			if (Keyboard.IsKeyDown(Key.W)) { currentCommandKeys |= TestCommandKeys.MoveForward; }
+			if (Keyboard.IsKeyDown(Key.S)) { currentCommandKeys |= TestCommandKeys.MoveBackward; }
+			if (Keyboard.IsKeyDown(Key.A)) { currentCommandKeys |= TestCommandKeys.MoveLeft; }
+			if (Keyboard.IsKeyDown(Key.D)) { currentCommandKeys |= TestCommandKeys.MoveRight; }
+			if (Keyboard.IsKeyDown(Key.D1)) { currentCommandKeys |= TestCommandKeys.Seat1; }
+			else if (Keyboard.IsKeyDown(Key.D2)) { currentCommandKeys |= TestCommandKeys.Seat2; }
 
 			this.clientServerNetworkConnection.CurrentContext = ClientServerContext.Client;
 			this.clientServerNetworkConnection.UpdateClient(currentCommandKeys);
@@ -216,9 +217,9 @@ namespace Entmoot.TestGame
 
 		#region Properties
 
-		public Client Client { get; set; }
+		public Client<TestCommandData> Client { get; set; }
 
-		public Server Server { get; set; }
+		public Server<TestCommandData> Server { get; set; }
 
 		public ClientServerContext CurrentContext { get; set; }
 
@@ -250,10 +251,10 @@ namespace Entmoot.TestGame
 			this.Server.Update();
 		}
 
-		public void UpdateClient(CommandKeys commandKeys)
+		public void UpdateClient(TestCommandKeys commandKeys)
 		{
 			this.NetworkClientTick++;
-			this.Client.Update(commandKeys);
+			this.Client.Update(new TestCommandData() { CommandKeys = commandKeys });
 		}
 
 		public byte[] GetNextIncomingPacket()
@@ -432,5 +433,48 @@ namespace Entmoot.TestGame
 		}
 
 		#endregion Methods
+	}
+
+	public struct TestCommandData : ICommandData
+	{
+		#region Fields
+
+		public TestCommandKeys CommandKeys;
+
+		#endregion Fields
+
+		#region Methods
+
+		public void DeserializeData(BinaryReader binaryReader)
+		{
+			this.CommandKeys = (TestCommandKeys)binaryReader.ReadByte();
+		}
+
+		public void SerializeData(BinaryWriter binaryWriter)
+		{
+			binaryWriter.Write((byte)this.CommandKeys);
+		}
+
+		public void RunOnEntity(Entity entity)
+		{
+			if ((this.CommandKeys & TestCommandKeys.MoveForward) != 0) { entity.Position.Y -= 5; }
+			if ((this.CommandKeys & TestCommandKeys.MoveBackward) != 0) { entity.Position.Y += 5; }
+			if ((this.CommandKeys & TestCommandKeys.MoveLeft) != 0) { entity.Position.X -= 5; }
+			if ((this.CommandKeys & TestCommandKeys.MoveRight) != 0) { entity.Position.X += 5; }
+		}
+
+		#endregion Methods
+	}
+
+	public enum TestCommandKeys : byte
+	{
+		None = 0,
+		MoveForward = 1,
+		MoveBackward = 2,
+		MoveLeft = 4,
+		MoveRight = 8,
+		Shoot = 16,
+		Seat1 = 32,
+		Seat2 = 64,
 	}
 }
