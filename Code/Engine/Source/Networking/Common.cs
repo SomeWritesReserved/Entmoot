@@ -109,13 +109,25 @@ namespace Entmoot.Engine
 		#region Methods
 
 		byte[] GetNextIncomingPacket();
-
 		void SendPacket(byte[] packet);
 
 		#endregion Methods
 	}
 
-	public class ClientCommand
+	public interface ICommandData
+	{
+		#region Methods
+
+		void DeserializeData(BinaryReader binaryReader);
+		void SerializeData(BinaryWriter binaryWriter);
+
+		void RunOnEntity(Entity entity);
+
+		#endregion Methods
+	}
+
+	public class ClientCommand<TCommandData>
+		where TCommandData : struct, ICommandData
 	{
 		#region Fields
 
@@ -125,21 +137,27 @@ namespace Entmoot.Engine
 		public int InterpolationEndTick = -1;
 		public int RenderedFrameTick = -1;
 		public int CommandingEntity = -1;
+		public TCommandData CommandData = default(TCommandData);
 
 		#endregion Fields
 
 		#region Methods
 
-		public static ClientCommand[] DeserializePacket(byte[] packet)
+		public void RunOnEntity(Entity entity)
+		{
+			this.CommandData.RunOnEntity(entity);
+		}
+
+		public static ClientCommand<TCommandData>[] DeserializePacket(byte[] packet)
 		{
 			using (MemoryStream memoryStream = new MemoryStream(packet, 0, packet.Length, false))
 			{
 				using (BinaryReader binaryReader = new BinaryReader(memoryStream))
 				{
-					List<ClientCommand> clientCommands = new List<ClientCommand>(32);
+					List<ClientCommand<TCommandData>> clientCommands = new List<ClientCommand<TCommandData>>(32);
 					while (memoryStream.Position < memoryStream.Length)
 					{
-						clientCommands.Add(new ClientCommand()
+						ClientCommand<TCommandData> clientCommand = new ClientCommand<TCommandData>()
 						{
 							ClientFrameTick = binaryReader.ReadInt32(),
 							AcknowledgedServerTick = binaryReader.ReadInt32(),
@@ -147,21 +165,22 @@ namespace Entmoot.Engine
 							InterpolationEndTick = binaryReader.ReadInt32(),
 							RenderedFrameTick = binaryReader.ReadInt32(),
 							CommandingEntity = binaryReader.ReadInt32(),
-						});
+						};
+						clientCommand.CommandData.DeserializeData(binaryReader);
+						clientCommands.Add(clientCommand);
 					}
 					return clientCommands.ToArray();
 				}
 			}
 		}
 
-		public static byte[] SerializeCommands(ClientCommand[] clientCommands)
+		public static byte[] SerializeCommands(ClientCommand<TCommandData>[] clientCommands)
 		{
-			byte[] packet = new byte[(sizeof(int) + sizeof(int) + sizeof(int) + sizeof(int) + sizeof(int) + sizeof(int)) * clientCommands.Length];
-			using (MemoryStream memoryStream = new MemoryStream(packet, 0, packet.Length, true))
+			using (MemoryStream memoryStream = new MemoryStream(256))
 			{
 				using (BinaryWriter binaryWriter = new BinaryWriter(memoryStream))
 				{
-					foreach (ClientCommand clientCommand in clientCommands)
+					foreach (ClientCommand<TCommandData> clientCommand in clientCommands)
 					{
 						binaryWriter.Write(clientCommand.ClientFrameTick);
 						binaryWriter.Write(clientCommand.AcknowledgedServerTick);
@@ -169,10 +188,11 @@ namespace Entmoot.Engine
 						binaryWriter.Write(clientCommand.InterpolationEndTick);
 						binaryWriter.Write(clientCommand.RenderedFrameTick);
 						binaryWriter.Write(clientCommand.CommandingEntity);
+						clientCommand.CommandData.SerializeData(binaryWriter);
 					}
 				}
+				return memoryStream.ToArray();
 			}
-			return packet;
 		}
 
 		#endregion Methods

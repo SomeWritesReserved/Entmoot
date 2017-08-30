@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace Entmoot.Engine
 {
-	public class Server
+	public class Server<TCommandData>
+		where TCommandData : struct, ICommandData
 	{
 		#region Fields
 
@@ -86,14 +87,14 @@ namespace Entmoot.Engine
 		{
 			#region Fields
 
-			private Server parentServer;
+			private Server<TCommandData> parentServer;
 			private INetworkConnection clientNetworkConnection;
 
 			#endregion Fields
 
 			#region Constructors
 
-			public ClientConnection(Server parentServer, INetworkConnection clientNetworkConnection)
+			public ClientConnection(Server<TCommandData> parentServer, INetworkConnection clientNetworkConnection)
 			{
 				this.parentServer = parentServer;
 				this.clientNetworkConnection = clientNetworkConnection;
@@ -131,18 +132,18 @@ namespace Entmoot.Engine
 				while ((packet = this.clientNetworkConnection.GetNextIncomingPacket()) != null)
 				{
 					// Todo: handle out of order packets here and make sure we only execute each command once (drop old packets)
-					ClientCommand[] clientCommands = ClientCommand.DeserializePacket(packet)
+					ClientCommand<TCommandData>[] clientCommands = ClientCommand<TCommandData>.DeserializePacket(packet)
 						.Where((cmd) => cmd.ClientFrameTick > this.LatestReceivedClientTick)
 						.ToArray();
 
-					foreach (ClientCommand clientCommand in clientCommands)
+					foreach (ClientCommand<TCommandData> clientCommand in clientCommands)
 					{
 						// Ignore the commands that were for some other owned entity (these are old commands the client was trying to execute before it knew of its new entity)
 						if (clientCommand.CommandingEntity != this.OwnedEntity) { continue; }
 
 						if (this.OwnedEntity != -1)
 						{
-							//clientCommand.RunOnEntity(this.parentServer.CurrentState.Entities[this.OwnedEntity]);
+							clientCommand.RunOnEntity(this.parentServer.CurrentState.Entities[this.OwnedEntity]);
 						}
 
 						if (this.LatestReceivedClientTick < clientCommand.ClientFrameTick) { this.LatestReceivedClientTick = clientCommand.ClientFrameTick; }

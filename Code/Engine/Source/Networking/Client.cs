@@ -6,13 +6,14 @@ using System.Threading.Tasks;
 
 namespace Entmoot.Engine
 {
-	public class Client
+	public class Client<TCommandData>
+		where TCommandData : struct, ICommandData
 	{
 		#region Fields
 
 		private INetworkConnection serverNetworkConnection;
 		public SortedList<int, StateSnapshot> ReceivedStateSnapshots = new SortedList<int, StateSnapshot>(64);
-		public List<ClientCommand> SentClientCommands = new List<ClientCommand>(64);
+		public List<ClientCommand<TCommandData>> SentClientCommands = new List<ClientCommand<TCommandData>>(64);
 		private SortedList<int, Vector3> predictedPositions = new SortedList<int, Vector3>();
 
 		#endregion Fields
@@ -64,7 +65,7 @@ namespace Entmoot.Engine
 
 		#region Methods
 
-		public void Update()
+		public void Update(TCommandData commandData)
 		{
 			if (this.LatestReceivedServerTick >= 0)
 			{
@@ -93,7 +94,7 @@ namespace Entmoot.Engine
 
 			if (this.HasInterpolationStarted)
 			{
-				this.SentClientCommands.Add(new ClientCommand()
+				this.SentClientCommands.Add(new ClientCommand<TCommandData>()
 				{
 					ClientFrameTick = this.FrameTick,
 					AcknowledgedServerTick = this.LatestReceivedServerTick,
@@ -101,8 +102,9 @@ namespace Entmoot.Engine
 					InterpolationEndTick = this.InterpolationEndState.ServerFrameTick,
 					RenderedFrameTick = this.FrameTick - this.InterpolationRenderDelay,
 					CommandingEntity = this.CurrentOwnedEntity,
+					CommandData = commandData,
 				});
-				this.serverNetworkConnection.SendPacket(ClientCommand.SerializeCommands(this.SentClientCommands.Where((cmd) => cmd.ClientFrameTick > this.LatestTickAcknowledgedByServer).ToArray()));
+				this.serverNetworkConnection.SendPacket(ClientCommand<TCommandData>.SerializeCommands(this.SentClientCommands.Where((cmd) => cmd.ClientFrameTick > this.LatestTickAcknowledgedByServer).ToArray()));
 			}
 
 			this.setupRenderSnapshot();
@@ -112,14 +114,14 @@ namespace Entmoot.Engine
 			{
 				StateSnapshot latestStateSnapshot = this.ReceivedStateSnapshots.Last().Value;
 				Entity predictedEntity = new Entity() { Position = latestStateSnapshot.Entities[this.CurrentOwnedEntity].Position };
-				foreach (ClientCommand clientCommandNotAckedByServer in this.SentClientCommands.Where((cmd) => cmd.ClientFrameTick > latestStateSnapshot.AcknowledgedClientTick))
+				foreach (ClientCommand<TCommandData> clientCommandNotAckedByServer in this.SentClientCommands.Where((cmd) => cmd.ClientFrameTick > latestStateSnapshot.AcknowledgedClientTick))
 				{
 					// Don't use this command for prediction since its an old command that applied to some other owned entity
 					if (clientCommandNotAckedByServer.CommandingEntity != this.CurrentOwnedEntity) { continue; }
 
 					// Reapply all the commands we've sent that the server hasn't processed yet to get us back to where we predicted we should be, starting
 					// from where the server last gave us an authoritative response
-					//clientCommandNotAckedByServer.RunOnEntity(predictedEntity);
+					clientCommandNotAckedByServer.RunOnEntity(predictedEntity);
 				}
 				this.RenderedState.Entities[this.CurrentOwnedEntity].Position = predictedEntity.Position;
 				this.predictedPositions.Add(this.FrameTick, predictedEntity.Position);
