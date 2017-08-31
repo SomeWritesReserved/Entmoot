@@ -121,7 +121,7 @@ namespace Entmoot.Engine
 
 					// Reapply all the commands we've sent that the server hasn't processed yet to get us back to where we predicted we should be, starting
 					// from where the server last gave us an authoritative response
-					clientCommandNotAckedByServer.RunOnEntity(predictedEntity);
+					clientCommandNotAckedByServer.CommandData.ApplyToEntity(predictedEntity);
 				}
 				this.RenderedState.Entities[this.CurrentOwnedEntity].Position = predictedEntity.Position;
 				this.predictedPositions.Add(this.FrameTick, predictedEntity.Position);

@@ -40,8 +40,8 @@ namespace Entmoot.TestGame
 				SimulatedPacketLoss = 0,
 			};
 			this.client = new Client<TestCommandData>(this.clientServerNetworkConnection);
-			this.server = new Server<TestCommandData>(new EntityManager(10, new IEntitySystem[0]));
-			this.server.EntityManager.CreateEntity<Entity>().Position = new Vector3(100, 50, 0);
+			this.server = new Server<TestCommandData>(new EntityManager(10, new IEntitySystem[] { new TestInputSystem() }));
+			this.server.EntityManager.CreateEntity<EntityWithInput>().Position = new Vector3(100, 50, 0);
 			this.server.EntityManager.CreateEntity<Entity>().Position = new Vector3(0, 0, 0);
 			this.server.AddConnectedClient(this.clientServerNetworkConnection);
 
@@ -455,12 +455,57 @@ namespace Entmoot.TestGame
 			binaryWriter.Write((byte)this.CommandKeys);
 		}
 
-		public void RunOnEntity(Entity entity)
+		public void ApplyToEntity(Entity entity)
 		{
-			if ((this.CommandKeys & TestCommandKeys.MoveForward) != 0) { entity.Position.Y -= 5; }
-			if ((this.CommandKeys & TestCommandKeys.MoveBackward) != 0) { entity.Position.Y += 5; }
-			if ((this.CommandKeys & TestCommandKeys.MoveLeft) != 0) { entity.Position.X -= 5; }
-			if ((this.CommandKeys & TestCommandKeys.MoveRight) != 0) { entity.Position.X += 5; }
+			IEntityWithInput entityWithInput = entity as IEntityWithInput;
+			if (entityWithInput == null) { return; }
+
+			entityWithInput.CommandKeys = this.CommandKeys;
+		}
+
+		#endregion Methods
+	}
+
+	public interface IEntityWithInput
+	{
+		#region Properties
+
+		TestCommandKeys CommandKeys { get; set; }
+
+		#endregion Properties
+	}
+
+	public class EntityWithInput : Entity, IEntityWithInput
+	{
+		#region Properties
+
+		public TestCommandKeys CommandKeys { get; set; }
+
+		#endregion Properties
+	}
+
+	public class TestInputSystem : IEntitySystem
+	{
+		#region Methods
+
+		public void Update(IEntityCollection entityCollection)
+		{
+			foreach (Entity entity in entityCollection.Entities)
+			{
+				IEntityWithInput entityWithInput = entity as IEntityWithInput;
+				if (entityWithInput == null) { continue; }
+
+				this.UpdateEntity((IEntityWithInput)entity);
+			}
+		}
+
+		public void UpdateEntity(IEntityWithInput entityWithInput)
+		{
+			Entity entity = (Entity)entityWithInput;
+			if ((entityWithInput.CommandKeys & TestCommandKeys.MoveForward) != 0) { entity.Position.Y -= 5; }
+			if ((entityWithInput.CommandKeys & TestCommandKeys.MoveBackward) != 0) { entity.Position.Y += 5; }
+			if ((entityWithInput.CommandKeys & TestCommandKeys.MoveLeft) != 0) { entity.Position.X -= 5; }
+			if ((entityWithInput.CommandKeys & TestCommandKeys.MoveRight) != 0) { entity.Position.X += 5; }
 		}
 
 		#endregion Methods

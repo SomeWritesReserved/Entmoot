@@ -969,7 +969,7 @@ namespace Entmoot.UnitTests
 				binaryWriter.Write((byte)this.CommandKeys);
 			}
 
-			public void RunOnEntity(Entity entity)
+			public void ApplyToEntity(Entity entity)
 			{
 				if ((this.CommandKeys & MockCommandKeys.MoveForward) != 0) { entity.Position.Y -= 5; }
 				if ((this.CommandKeys & MockCommandKeys.MoveBackward) != 0) { entity.Position.Y += 5; }

@@ -121,7 +121,7 @@ namespace Entmoot.Engine
 		void DeserializeData(BinaryReader binaryReader);
 		void SerializeData(BinaryWriter binaryWriter);
 
-		void RunOnEntity(Entity entity);
+		void ApplyToEntity(Entity entity);
 
 		#endregion Methods
 	}
@@ -142,11 +142,6 @@ namespace Entmoot.Engine
 		#endregion Fields
 
 		#region Methods
-
-		public void RunOnEntity(Entity entity)
-		{
-			this.CommandData.RunOnEntity(entity);
-		}
 
 		public static ClientCommand<TCommandData>[] DeserializePacket(byte[] packet)
 		{

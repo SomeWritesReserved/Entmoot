@@ -76,7 +76,10 @@ namespace Entmoot.Engine
 
 		public void AddConnectedClient(INetworkConnection clientNetworkConnection)
 		{
-			this.clients.Add(new ClientConnection(this, clientNetworkConnection));
+			this.clients.Add(new ClientConnection(this, clientNetworkConnection)
+			{
+				OwnedEntity = this.clients.Count,
+			});
 		}
 
 		#endregion Methods
@@ -143,7 +146,7 @@ namespace Entmoot.Engine
 
 						if (this.OwnedEntity != -1)
 						{
-							clientCommand.RunOnEntity(this.parentServer.CurrentState.Entities[this.OwnedEntity]);
+							clientCommand.CommandData.ApplyToEntity(this.parentServer.CurrentState.Entities[this.OwnedEntity]);
 						}
 
 						if (this.LatestReceivedClientTick < clientCommand.ClientFrameTick) { this.LatestReceivedClientTick = clientCommand.ClientFrameTick; }
