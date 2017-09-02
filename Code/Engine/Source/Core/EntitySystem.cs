@@ -7,20 +7,11 @@ using System.Threading.Tasks;
 
 namespace Entmoot.Engine
 {
-	public interface IEntityCollection
-	{
-		#region Properties
-
-		ReadOnlyCollection<Entity> Entities { get; }
-
-		#endregion Properties
-	}
-
 	public interface IEntitySystem
 	{
 		#region Methods
 
-		void Update(IEntityCollection entityCollection);
+		void Update();
 
 		#endregion Methods
 	}

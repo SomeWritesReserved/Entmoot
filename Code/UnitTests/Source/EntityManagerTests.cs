@@ -16,82 +16,60 @@ namespace Entmoot.UnitTests
 		[Test]
 		public void EntityCreate()
 		{
-			EntityManager entityManager = new EntityManager(2, new IEntitySystem[0]);
-			Entity newEntity = entityManager.CreateEntity<Entity>();
-			Assert.NotNull(newEntity);
+			EntitySystemManager entitySystemManager = new EntitySystemManager(2, new IEntitySystem[0]);
+			Assert.IsTrue(entitySystemManager.TryCreateEntity(out Entity newEntity));
 			Assert.AreEqual(0, newEntity.ID);
-			Assert.AreEqual(EntityState.Creating, newEntity.EntityState);
-			Assert.AreEqual(0, entityManager.Entities.Count);
-			entityManager.Update();
-			Assert.AreEqual(EntityState.Active, newEntity.EntityState);
-			Assert.AreEqual(newEntity, entityManager.Entities[0]);
+			// Todo: makes sure before the update the entity isn't active yet (for this and all tests)
+			entitySystemManager.Update();
+			// Todo: make sure after an update the entity is active (for this and all tests)
 		}
 
 		[Test]
 		public void EntityCreateMultiple()
 		{
-			EntityManager entityManager = new EntityManager(2, new IEntitySystem[0]);
-			Entity newEntity1 = entityManager.CreateEntity<Entity>();
-			Assert.NotNull(newEntity1);
+			// Todo: make sure after each update that the entity collection is in the order we expect
+			EntitySystemManager entitySystemManager = new EntitySystemManager(2, new IEntitySystem[0]);
+			Assert.IsTrue(entitySystemManager.TryCreateEntity(out Entity newEntity1));
 			Assert.AreEqual(0, newEntity1.ID);
-			Assert.AreEqual(EntityState.Creating, newEntity1.EntityState);
-			Assert.AreEqual(0, entityManager.Entities.Count);
-			entityManager.Update();
-			Assert.AreEqual(EntityState.Active, newEntity1.EntityState);
-			Assert.AreEqual(1, entityManager.Entities.Count);
-			Assert.AreEqual(newEntity1, entityManager.Entities[0]);
-			Entity newEntity2 = entityManager.CreateEntity<Entity>();
-			Assert.NotNull(newEntity2);
+			entitySystemManager.Update();
+			Assert.IsTrue(entitySystemManager.TryCreateEntity(out Entity newEntity2));
 			Assert.AreEqual(1, newEntity2.ID);
-			Assert.AreEqual(EntityState.Creating, newEntity2.EntityState);
-			Assert.AreEqual(1, entityManager.Entities.Count);
-			entityManager.Update();
-			Assert.AreEqual(EntityState.Active, newEntity1.EntityState);
-			Assert.AreEqual(EntityState.Active, newEntity2.EntityState);
-			Assert.AreEqual(2, entityManager.Entities.Count);
-			Assert.AreEqual(newEntity1, entityManager.Entities[0]);
-			Assert.AreEqual(newEntity2, entityManager.Entities[1]);
+			entitySystemManager.Update();
+			// Todo:
 		}
 
 		[Test]
 		public void EntityCreateMultipleInSameTick()
 		{
-			EntityManager entityManager = new EntityManager(2, new IEntitySystem[0]);
-			Entity newEntity1 = entityManager.CreateEntity<Entity>();
-			Assert.NotNull(newEntity1);
+			EntitySystemManager entitySystemManager = new EntitySystemManager(2, new IEntitySystem[0]);
+			Assert.IsTrue(entitySystemManager.TryCreateEntity(out Entity newEntity1));
 			Assert.AreEqual(0, newEntity1.ID);
-			Assert.AreEqual(EntityState.Creating, newEntity1.EntityState);
-			Assert.AreEqual(0, entityManager.Entities.Count);
-			Entity newEntity2 = entityManager.CreateEntity<Entity>();
-			Assert.NotNull(newEntity2);
+			Assert.IsTrue(entitySystemManager.TryCreateEntity(out Entity newEntity2));
 			Assert.AreEqual(1, newEntity2.ID);
-			Assert.AreEqual(EntityState.Creating, newEntity2.EntityState);
-			Assert.AreEqual(0, entityManager.Entities.Count);
-			entityManager.Update();
-			Assert.AreEqual(EntityState.Active, newEntity1.EntityState);
-			Assert.AreEqual(newEntity1, entityManager.Entities[0]);
-			Assert.AreEqual(EntityState.Active, newEntity2.EntityState);
-			Assert.AreEqual(newEntity2, entityManager.Entities[1]);
+			entitySystemManager.Update();
+			//todo:
 		}
 
 		[Test]
 		public void EntityCreateMultiple_TooMany()
 		{
-			EntityManager entityManager = new EntityManager(2, new IEntitySystem[0]);
-			Assert.AreEqual(0, entityManager.CreateEntity<Entity>().ID);
-			entityManager.Update();
-			Assert.AreEqual(1, entityManager.CreateEntity<Entity>().ID);
-			entityManager.Update();
-			Assert.IsNull(entityManager.CreateEntity<Entity>());
+			EntitySystemManager entitySystemManager = new EntitySystemManager(2, new IEntitySystem[0]);
+			Assert.IsTrue(entitySystemManager.TryCreateEntity(out Entity newEntity1));
+			entitySystemManager.Update();
+			Assert.IsTrue(entitySystemManager.TryCreateEntity(out Entity newEntity2));
+			entitySystemManager.Update();
+			Assert.IsFalse(entitySystemManager.TryCreateEntity(out Entity newEntity3));
 		}
 
 		[Test]
 		public void EntityCreateMultiple_TooManyInSameTick()
 		{
-			EntityManager entityManager = new EntityManager(2, new IEntitySystem[0]);
-			Assert.AreEqual(0, entityManager.CreateEntity<Entity>().ID);
-			Assert.AreEqual(1, entityManager.CreateEntity<Entity>().ID);
-			Assert.IsNull(entityManager.CreateEntity<Entity>());
+			EntitySystemManager entitySystemManager = new EntitySystemManager(2, new IEntitySystem[0]);
+			Assert.IsTrue(entitySystemManager.TryCreateEntity(out Entity newEntity1));
+			entitySystemManager.Update();
+			Assert.IsTrue(entitySystemManager.TryCreateEntity(out Entity newEntity2));
+			entitySystemManager.Update();
+			Assert.IsFalse(entitySystemManager.TryCreateEntity(out Entity newEntity3));
 		}
 
 		[Test]

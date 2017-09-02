@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +13,7 @@ namespace Entmoot.Engine
 		#region Fields
 
 		private TComponent[] components;
+		private BitArray entityComponentStates;
 
 		#endregion Fields
 
@@ -19,32 +21,42 @@ namespace Entmoot.Engine
 
 		public ComponentCollection(int capacity)
 		{
-			this.capacity = capacity;
-			this.components = new TComponent[this.capacity];
+			this.Capacity = capacity;
+			this.components = new TComponent[this.Capacity];
+			this.entityComponentStates = new BitArray(this.Capacity, defaultValue: false);
 		}
 
 		#endregion Constructors
 
 		#region Properties
 
-		private readonly int capacity;
-		public int Capacity
-		{
-			get { return this.capacity; }
-		}
+		public int Capacity { get; }
 
 		#endregion Properties
 
 		#region Methods
 
-		public ref TComponent GetComponent(int entityID)
+		public bool HasComponent(Entity entity)
 		{
-			return ref this.components[entityID];
+			return this.entityComponentStates[entity.ID];
 		}
 
-		public void ResetComponent(int entityID)
+		public ref TComponent GetComponent(Entity entity)
 		{
-			this.components[entityID] = default(TComponent);
+			return ref this.components[entity.ID];
+		}
+
+		public ref TComponent AddComponent(Entity entity)
+		{
+			this.components[entity.ID] = default(TComponent);
+			this.entityComponentStates[entity.ID] = true;
+			return ref this.components[entity.ID];
+		}
+
+		public void RemoveComponent(Entity entity)
+		{
+			this.components[entity.ID] = default(TComponent);
+			this.entityComponentStates[entity.ID] = false;
 		}
 
 		#endregion Methods
@@ -60,7 +72,7 @@ namespace Entmoot.Engine
 
 		#region Methods
 
-		void ResetComponent(int entityID);
+		bool HasComponent(Entity entity);
 
 		#endregion Methods
 	}

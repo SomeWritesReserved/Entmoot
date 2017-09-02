@@ -7,22 +7,21 @@ using System.Threading.Tasks;
 
 namespace Entmoot.Engine
 {
-	public sealed class EntityManager : IEntityCollection
+	public sealed class EntitySystemManager
 	{
 		#region Fields
 
-		private Entity[] entities;
+		private EntityState[] entityStates;
 		private ReadOnlyCollection<IEntitySystem> entitySystems;
-		private List<Entity> createdEntities = new List<Entity>(16);
-		private List<Entity> removedEntities = new List<Entity>(16);
 
 		#endregion Fields
 
 		#region Constructors
 
-		public EntityManager(int entityCapacity, IEnumerable<IEntitySystem> entitySystems)
+		public EntitySystemManager(int entityCapacity, IEnumerable<IEntitySystem> entitySystems)
 		{
-			this.entities = new Entity[entityCapacity];
+			this.EntityCapacity = entityCapacity;
+			this.entityStates = new EntityState[this.EntityCapacity];
 			this.entitySystems = entitySystems.ToList().AsReadOnly();
 		}
 
@@ -30,55 +29,41 @@ namespace Entmoot.Engine
 
 		#region Properties
 
-		public ReadOnlyCollection<Entity> Entities
-		{
-			get { return this.entities.Where((entity) => entity != null && entity.EntityState != EntityState.Creating).ToList().AsReadOnly(); }
-		}
+		public int EntityCapacity { get; }
 
 		#endregion Properties
 
 		#region Methods
 
-		public TEntity CreateEntity<TEntity>()
-			where TEntity : Entity, new()
+		public bool TryCreateEntity(out Entity entity)
 		{
-			int nextEntityIndex = Array.IndexOf(this.entities, null);
-			if (nextEntityIndex < 0) { return null; }
+			entity = default(Entity);
+			int nextEntityIndex = Array.IndexOf(this.entityStates, EntityState.NoEntity);
+			if (nextEntityIndex < 0) { return false; }
 
-			TEntity newEntity = new TEntity();
-			newEntity.ID = nextEntityIndex;
-			newEntity.EntityState = EntityState.Creating;
-			this.entities[nextEntityIndex] = newEntity;
-			this.createdEntities.Add(newEntity);
-			return newEntity;
+			this.entityStates[nextEntityIndex] = EntityState.Creating;
+			entity = new Entity(nextEntityIndex);
+			return true;
 		}
 
 		public void RemoveEntity(Entity entity)
 		{
-			if (entity == null || entity.EntityState == EntityState.NoState) { throw new ArgumentNullException(nameof(entity)); }
-			if (this.entities[entity.ID] != null && this.entities[entity.ID] != entity) { throw new InvalidOperationException("Bad removing entity; removing entity doesn't match existing entity."); }
-			entity.EntityState = EntityState.Removing;
-			this.removedEntities.Add(entity);
+			this.entityStates[entity.ID] = EntityState.Removing;
 		}
 
 		public void Update()
 		{
 			foreach (IEntitySystem entitySystem in this.entitySystems)
 			{
-				entitySystem.Update(this);
+				entitySystem.Update();
 			}
 
-			foreach (Entity createdEntity in this.createdEntities)
+			// Post-process all entity states, completing creations and removals
+			foreach (int entityID in Enumerable.Range(0, this.EntityCapacity))
 			{
-				createdEntity.EntityState = EntityState.Active;
+				if (this.entityStates[entityID] == EntityState.Creating) { this.entityStates[entityID] = EntityState.Active; }
+				if (this.entityStates[entityID] == EntityState.Removing) { this.entityStates[entityID] = EntityState.NoEntity; }
 			}
-			this.createdEntities.Clear();
-			foreach (Entity removedEntity in this.removedEntities)
-			{
-				this.entities[removedEntity.ID] = null;
-				removedEntity.EntityState = EntityState.NoState;
-			}
-			this.removedEntities.Clear();
 		}
 
 		#endregion Methods
