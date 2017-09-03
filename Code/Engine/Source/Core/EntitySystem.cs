@@ -14,7 +14,7 @@ namespace Entmoot.Engine
 	{
 		#region Methods
 
-		void Update();
+		void Update(SystemState systemState);
 
 		#endregion Methods
 	}
