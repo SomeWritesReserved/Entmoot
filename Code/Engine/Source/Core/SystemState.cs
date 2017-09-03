@@ -12,15 +12,18 @@ namespace Entmoot.Engine
 
 		/// <summary>Stores the states for each available entity slot, defining whether an entity exists in a slot or not (as well as any other state info).</summary>
 		private EntityState[] entityStates;
+		/// <summary>Stores the collections of different component types that define what data entities have (not all entities have all component types).</summary>
+		private IComponentCollection[] componentCollections;
 
 		#endregion Fields
 
 		#region Constructors
 
-		public SystemState(int entityCapacity)
+		public SystemState(int entityCapacity, ComponentsDefinition componentsDefinition)
 		{
 			this.EntityCapacity = entityCapacity;
 			this.entityStates = new EntityState[this.EntityCapacity];
+			this.componentCollections = componentsDefinition.CreateComponentCollections(this.EntityCapacity);
 		}
 
 		#endregion Constructors
@@ -60,11 +63,10 @@ namespace Entmoot.Engine
 		}
 
 		/// <summary>
-		/// 
+		/// Processes all entity changes, completing creations and removals of both entities and components.
 		/// </summary>
 		public void CommitChanges()
 		{
-			// Process all entity states, completing creations and removals
 			foreach (int entityID in Enumerable.Range(0, this.EntityCapacity))
 			{
 				if (this.entityStates[entityID] == EntityState.Creating) { this.entityStates[entityID] = EntityState.Active; }

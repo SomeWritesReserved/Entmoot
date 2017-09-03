@@ -19,18 +19,18 @@ namespace Entmoot.Engine
 
 		#region Constructors
 
-		public ComponentCollection(int capacity)
+		public ComponentCollection(int entityCapacity)
 		{
-			this.Capacity = capacity;
-			this.components = new TComponent[this.Capacity];
-			this.entityComponentStates = new BitArray(this.Capacity, defaultValue: false);
+			this.EntityCapacity = entityCapacity;
+			this.components = new TComponent[this.EntityCapacity];
+			this.entityComponentStates = new BitArray(this.EntityCapacity, defaultValue: false);
 		}
 
 		#endregion Constructors
 
 		#region Properties
 
-		public int Capacity { get; }
+		public int EntityCapacity { get; }
 
 		#endregion Properties
 

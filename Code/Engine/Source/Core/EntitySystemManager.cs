@@ -17,9 +17,9 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		public EntitySystemManager(int entityCapacity, IEnumerable<IEntitySystem> entitySystems)
+		public EntitySystemManager(int entityCapacity, ComponentsDefinition componentsDefinition, IEnumerable<IEntitySystem> entitySystems)
 		{
-			this.SystemState = new SystemState(entityCapacity);
+			this.SystemState = new SystemState(entityCapacity, componentsDefinition);
 			this.EntitySystems = entitySystems.ToList().AsReadOnly();
 		}
 
