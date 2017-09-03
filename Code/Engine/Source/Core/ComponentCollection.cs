@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Entmoot.Engine
 {
 	public sealed class ComponentCollection<TComponent> : IComponentCollection
-		where TComponent : struct
+		where TComponent : struct, IComponent<TComponent>
 	{
 		#region Fields
 
@@ -64,15 +64,16 @@ namespace Entmoot.Engine
 
 	public interface IComponentCollection
 	{
-		#region Properties
+	}
 
-		int Capacity { get; }
-
-		#endregion Properties
-
+	public interface IComponent<TComponent>
+	{
 		#region Methods
 
-		bool HasComponent(Entity entity);
+		void Interpolate(TComponent to, TComponent from, float amount);
+
+		void Serialize();
+		void Deserialize();
 
 		#endregion Methods
 	}
