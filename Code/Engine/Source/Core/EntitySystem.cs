@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Entmoot.Engine
 {
 	/// <summary>
-	/// Represents a system with a single responsibility that will update the state of the overall system.
+	/// Represents a system with a single responsibility that will update the state of entities and components.
 	/// </summary>
 	public interface IEntitySystem
 	{

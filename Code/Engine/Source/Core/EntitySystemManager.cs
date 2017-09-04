@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Entmoot.Engine
 {
 	/// <summary>
-	/// The main class that manages entities, components, and systems.
+	/// The main class for the entire system that manages entities, components, and entity systems.
 	/// </summary>
 	public sealed class EntitySystemManager
 	{
@@ -28,7 +28,7 @@ namespace Entmoot.Engine
 		#region Properties
 
 		/// <summary>
-		/// Gets the overall system state of all managed entities and components.
+		/// Gets the current overall system state of all managed entities and components.
 		/// </summary>
 		public SystemState SystemState { get; }
 

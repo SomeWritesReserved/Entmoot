@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Entmoot.Engine
 {
+	/// <summary>
+	/// Represents a specific state that the system (entities and components) may be in.
+	/// </summary>
 	public class SystemState
 	{
 		#region Fields
