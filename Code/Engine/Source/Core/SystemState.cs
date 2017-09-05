@@ -66,6 +66,15 @@ namespace Entmoot.Engine
 		}
 
 		/// <summary>
+		/// Returns the component collection for a specific type of component.
+		/// </summary>
+		public ComponentCollection<TComponent> GetComponentCollection<TComponent>()
+			where TComponent : struct, IComponent<TComponent>
+		{
+			return this.componentCollections.OfType<ComponentCollection<TComponent>>().Single();
+		}
+
+		/// <summary>
 		/// Processes all entity changes, completing creations and removals of both entities and components.
 		/// </summary>
 		public void CommitChanges()
