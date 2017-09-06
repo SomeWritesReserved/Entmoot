@@ -46,12 +46,14 @@ namespace Entmoot.Engine
 		/// </summary>
 		public void Update()
 		{
+			this.SystemState.BeginUpdate();
+
 			foreach (IEntitySystem entitySystem in this.EntitySystems)
 			{
 				entitySystem.Update(this.SystemState);
 			}
 
-			this.SystemState.CommitChanges();
+			this.SystemState.EndUpdate();
 		}
 
 		#endregion Methods

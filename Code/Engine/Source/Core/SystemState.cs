@@ -75,9 +75,16 @@ namespace Entmoot.Engine
 		}
 
 		/// <summary>
-		/// Processes all entity changes, completing creations and removals of both entities and components.
+		/// Begins the update to this state.
 		/// </summary>
-		public void CommitChanges()
+		public void BeginUpdate()
+		{
+		}
+
+		/// <summary>
+		/// Ends the update to this state, completing creations and removals of entities.
+		/// </summary>
+		public void EndUpdate()
 		{
 			foreach (int entityID in Enumerable.Range(0, this.EntityCapacity))
 			{
