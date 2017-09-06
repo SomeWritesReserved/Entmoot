@@ -17,9 +17,9 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		public EntitySystemManager(int entityCapacity, ComponentsDefinition componentsDefinition, IEnumerable<IEntitySystem> entitySystems)
+		public EntitySystemManager(SystemState systemState, IEnumerable<IEntitySystem> entitySystems)
 		{
-			this.SystemState = new SystemState(entityCapacity, componentsDefinition);
+			this.SystemState = systemState;
 			this.EntitySystems = entitySystems.ToList().AsReadOnly();
 		}
 
@@ -28,7 +28,7 @@ namespace Entmoot.Engine
 		#region Properties
 
 		/// <summary>
-		/// Gets the current overall system state of all managed entities and components.
+		/// Gets the system state that this is managing and manipulating.
 		/// </summary>
 		public SystemState SystemState { get; }
 
