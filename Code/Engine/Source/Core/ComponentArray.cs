@@ -28,6 +28,11 @@ namespace Entmoot.Engine
 		/// </summary>
 		bool HasComponent(Entity entity);
 
+		/// <summary>
+		/// Copies all component data to another component array.
+		/// </summary>
+		void CopyTo(IComponentArray other);
+
 		#endregion Methods
 	}
 
@@ -110,6 +115,24 @@ namespace Entmoot.Engine
 		{
 			this.components[entity.ID] = default(TComponent);
 			this.entityComponentStates[entity.ID] = false;
+		}
+
+		/// <summary>
+		/// Copies all <see cref="TComponent"/> data to another component array.
+		/// </summary>
+		public void CopyTo(ComponentArray<TComponent> other)
+		{
+			Array.Copy(this.components, other.components, this.Capacity);
+			other.entityComponentStates.SetAll(false);
+			other.entityComponentStates.Or(this.entityComponentStates);
+		}
+
+		/// <summary>
+		/// Copies all component data to another component array.
+		/// </summary>
+		void IComponentArray.CopyTo(IComponentArray other)
+		{
+			this.CopyTo((ComponentArray<TComponent>)other);
 		}
 
 		#endregion Methods

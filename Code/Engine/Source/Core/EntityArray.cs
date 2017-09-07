@@ -111,6 +111,18 @@ namespace Entmoot.Engine
 			}
 		}
 
+		/// <summary>
+		/// Copies all entity and component data to another entity array.
+		/// </summary>
+		public void CopyTo(EntityArray other)
+		{
+			Array.Copy(this.entityStates, other.entityStates, this.Capacity);
+			for (int i = 0; i < this.componentArrays.Count; i++)
+			{
+				this.componentArrays[i].CopyTo(other.componentArrays[i]);
+			}
+		}
+
 		#endregion Methods
 
 		#region Nested Types
