@@ -29,6 +29,11 @@ namespace Entmoot.Engine
 		bool HasComponent(Entity entity);
 
 		/// <summary>
+		/// Removes this specific type of component from the given entity.
+		/// </summary>
+        void RemoveComponent(Entity entity);
+
+		/// <summary>
 		/// Copies all component data to another component array.
 		/// </summary>
 		void CopyTo(IComponentArray other);

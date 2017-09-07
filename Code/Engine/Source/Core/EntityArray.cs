@@ -69,9 +69,13 @@ namespace Entmoot.Engine
 			entity = default(Entity);
 			int nextEntityIndex = Array.IndexOf(this.entityStates, EntityState.NoEntity);
 			if (nextEntityIndex < 0) { return false; }
-
-			this.entityStates[nextEntityIndex] = EntityState.Creating;
+			
 			entity = new Entity(this, nextEntityIndex);
+			this.entityStates[nextEntityIndex] = EntityState.Creating;
+			foreach (IComponentArray componentArray in this.componentArrays)
+			{
+				componentArray.RemoveComponent(entity);
+			}
 			return true;
 		}
 

@@ -8,7 +8,7 @@ namespace Entmoot.Engine
 {
 	/// <summary>
 	/// Represents an individual entity, addressed by a unique ID. The entity and its components are managed
-	/// by an owning <see cref="EntityArray"/>.
+	/// by a parent <see cref="EntityArray"/>.
 	/// </summary>
 	public struct Entity
 	{
