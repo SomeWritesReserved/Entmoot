@@ -47,7 +47,7 @@ namespace Entmoot.Engine
 		/// <summary>Stores the array of individual components that will be indexed into by entity ID to get the component value.</summary>
 		private readonly TComponent[] components;
 		/// <summary>Stores whether or not this component type has been added to a given entity ID.</summary>
-		private readonly BitArray entityComponentStates;
+		private readonly BitArray entityHasComponent;
 
 		#endregion Fields
 
@@ -60,7 +60,7 @@ namespace Entmoot.Engine
 		{
 			this.Capacity = capacity;
 			this.components = new TComponent[this.Capacity];
-			this.entityComponentStates = new BitArray(this.Capacity, defaultValue: false);
+			this.entityHasComponent = new BitArray(this.Capacity, defaultValue: false);
 		}
 
 		#endregion Constructors
@@ -81,7 +81,7 @@ namespace Entmoot.Engine
 		/// </summary>
 		public bool HasComponent(Entity entity)
 		{
-			return this.entityComponentStates[entity.ID];
+			return this.entityHasComponent[entity.ID];
 		}
 
 		/// <summary>
@@ -104,7 +104,7 @@ namespace Entmoot.Engine
 			// Don't default the entity state here so consumers can call this as an easy way to get a reference
 			// to the component and make sure its added to the entity (without having to check manually if the 
 			// component doesn't exit to then call GetComponent)
-			this.entityComponentStates[entity.ID] = true;
+			this.entityHasComponent[entity.ID] = true;
 			return ref this.components[entity.ID];
 		}
 
@@ -114,7 +114,7 @@ namespace Entmoot.Engine
 		public void RemoveComponent(Entity entity)
 		{
 			this.components[entity.ID] = default(TComponent);
-			this.entityComponentStates[entity.ID] = false;
+			this.entityHasComponent[entity.ID] = false;
 		}
 
 		/// <summary>
@@ -123,8 +123,8 @@ namespace Entmoot.Engine
 		public void CopyTo(ComponentArray<TComponent> other)
 		{
 			Array.Copy(this.components, other.components, this.Capacity);
-			other.entityComponentStates.SetAll(false);
-			other.entityComponentStates.Or(this.entityComponentStates);
+			other.entityHasComponent.SetAll(false);
+			other.entityHasComponent.Or(this.entityHasComponent);
 		}
 
 		/// <summary>
