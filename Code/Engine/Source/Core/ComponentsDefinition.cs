@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Entmoot.Engine
 {
 	/// <summary>
-	/// A class to define the various types of components that can be assigned to entities in an <see cref="EntityArray"/>.
+	/// A class to define the various types of components that can be added to entities in an <see cref="EntityArray"/>.
 	/// </summary>
 	public class ComponentsDefinition
 	{

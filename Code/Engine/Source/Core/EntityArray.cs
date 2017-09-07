@@ -16,7 +16,7 @@ namespace Entmoot.Engine
 
 		/// <summary>Stores the states for each available entity ID, defining whether an entity exists in an index or not.</summary>
 		private EntityState[] entityStates;
-		/// <summary>Stores the arrays of different component types that define what data these entities have (not all entities are assigned all component types).</summary>
+		/// <summary>Stores the arrays of different component types that define what components these entities can have (not all component types will be added to all entities).</summary>
 		private ReadOnlyCollection<IComponentArray> componentArrays;
 
 		#endregion Fields
@@ -26,8 +26,8 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		/// <param name="capacity">The maximum number of entities that can exist</param>
-		/// <param name="componentsDefinition">The definition for the various component types that can be assigned to entities.</param>
+		/// <param name="capacity">The maximum number of entities that can exist.</param>
+		/// <param name="componentsDefinition">The definition for the various component types that can be added to entities.</param>
 		public EntityArray(int capacity, ComponentsDefinition componentsDefinition)
 		{
 			this.Capacity = capacity;
@@ -81,14 +81,14 @@ namespace Entmoot.Engine
 		}
 
 		/// <summary>
-		/// Begins the update to this state.
+		/// Begins the update to this entity array.
 		/// </summary>
 		public void BeginUpdate()
 		{
 		}
 
 		/// <summary>
-		/// Ends the update to this state, completing creations and removals of entities.
+		/// Ends the update to this entity array, completing creations and removals of entities.
 		/// </summary>
 		public void EndUpdate()
 		{
@@ -106,15 +106,15 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Defines the current state of an entity.
 		/// </summary>
-		public enum EntityState : byte
+		private enum EntityState : byte
 		{
 			/// <summary>The entity does not exist (undefined state or not part of the system).</summary>
 			NoEntity = 0,
-			/// <summary>The entity is in the process of being created and hasn't been completely added to the system yet, it will be fully added at the end of the next update.</summary>
+			/// <summary>The entity is in the process of being created and hasn't been completely added yet, it will be fully added at the end of the next update.</summary>
 			Creating,
-			/// <summary>The entity is actively part of the system.</summary>
+			/// <summary>The entity is actively part of the overall state.</summary>
 			Active,
-			/// <summary>The entity is still actively part of the system but is scheduled to be removed at the end of the next update.</summary>
+			/// <summary>The entity is still active but is scheduled to be removed at the end of the next update.</summary>
 			Removing,
 		}
 

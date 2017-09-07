@@ -28,7 +28,7 @@ namespace Entmoot.Engine
 		#region Properties
 
 		/// <summary>
-		/// Gets the system state that this is managing and manipulating.
+		/// Gets the array of entities that this class is managing.
 		/// </summary>
 		public EntityArray Entities { get; }
 
@@ -42,7 +42,7 @@ namespace Entmoot.Engine
 		#region Methods
 
 		/// <summary>
-		/// Updates the systems, allowing for each <see cref="IEntitySystem"/> to run its logic.
+		/// Updates the systems, allowing for each <see cref="ISystem"/> to run its logic on entities and components.
 		/// </summary>
 		public void Update()
 		{

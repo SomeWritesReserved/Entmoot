@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 namespace Entmoot.Engine
 {
 	/// <summary>
-	/// Represents an individual entity in the system, addressed by a unique ID.
-	/// The state and components of the entity are managed by the <see cref="EntitySystemManager"/>.
+	/// Represents an individual entity, addressed by a unique ID. The entity and its components are managed
+	/// by an owning <see cref="EntityArray"/>.
 	/// </summary>
 	public struct Entity
 	{

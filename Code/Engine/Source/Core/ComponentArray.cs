@@ -41,7 +41,7 @@ namespace Entmoot.Engine
 
 		/// <summary>Stores the array of individual components that will be indexed into by entity ID to get the component value.</summary>
 		private TComponent[] components;
-		/// <summary>Stores whether or not a given entity ID has been assigned this component type.</summary>
+		/// <summary>Stores whether or not this component type has been added to a given entity ID.</summary>
 		private BitArray entityComponentStates;
 
 		#endregion Fields
@@ -81,8 +81,8 @@ namespace Entmoot.Engine
 
 		/// <summary>
 		/// Returns a reference to a component that the given entity has (or could have). Be aware
-		/// that this will return the component reference even if the entity isn't assigned this type
-		/// of component.
+		/// that this will return a component reference even if this component type hasn't been
+		/// added to the entity.
 		/// </summary>
 		public ref TComponent GetComponent(Entity entity)
 		{
@@ -90,12 +90,15 @@ namespace Entmoot.Engine
 		}
 
 		/// <summary>
-		/// Adds this specific type of component to the given entity and returns a reference to the component.
+		/// Adds this specific type of component to the given entity (if it doesn't already have one) and
+		/// returns a reference to the component. This is safe to call even if this component type has
+		/// already been added to the entity.
 		/// </summary>
 		public ref TComponent AddComponent(Entity entity)
 		{
 			// Don't default the entity state here so consumers can call this as an easy way to get a reference
-			// to the component and make sure its added to the entity (without having to check manually and then do GetComponent)
+			// to the component and make sure its added to the entity (without having to check manually if the 
+			// component doesn't exit to then call GetComponent)
 			this.entityComponentStates[entity.ID] = true;
 			return ref this.components[entity.ID];
 		}
