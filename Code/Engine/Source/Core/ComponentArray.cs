@@ -17,7 +17,7 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Gets the maximum number of entities that can have this type of component.
 		/// </summary>
-		int EntityCapacity { get; }
+		int Capacity { get; }
 
 		#endregion Properties
 
@@ -39,7 +39,9 @@ namespace Entmoot.Engine
 	{
 		#region Fields
 
+		/// <summary>Stores the array of individual components that will be indexed into by entity ID to get the component value.</summary>
 		private TComponent[] components;
+		/// <summary>Stores whether or not a given entity ID has been assigned this component type.</summary>
 		private BitArray entityComponentStates;
 
 		#endregion Fields
@@ -49,11 +51,11 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		public ComponentArray(int entityCapacity)
+		public ComponentArray(int capacity)
 		{
-			this.EntityCapacity = entityCapacity;
-			this.components = new TComponent[this.EntityCapacity];
-			this.entityComponentStates = new BitArray(this.EntityCapacity, defaultValue: false);
+			this.Capacity = capacity;
+			this.components = new TComponent[this.Capacity];
+			this.entityComponentStates = new BitArray(this.Capacity, defaultValue: false);
 		}
 
 		#endregion Constructors
@@ -63,7 +65,7 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Gets the maximum number of entities that can have this type of component.
 		/// </summary>
-		public int EntityCapacity { get; }
+		public int Capacity { get; }
 
 		#endregion Properties
 
@@ -88,11 +90,12 @@ namespace Entmoot.Engine
 		}
 
 		/// <summary>
-		/// Adds this specific type of component to the given entity and returns a refernce to the component.
+		/// Adds this specific type of component to the given entity and returns a reference to the component.
 		/// </summary>
 		public ref TComponent AddComponent(Entity entity)
 		{
-			this.components[entity.ID] = default(TComponent);
+			// Don't default the entity state here so consumers can call this as an easy way to get a reference
+			// to the component and make sure its added to the entity (without having to check manually and then do GetComponent)
 			this.entityComponentStates[entity.ID] = true;
 			return ref this.components[entity.ID];
 		}
@@ -110,8 +113,7 @@ namespace Entmoot.Engine
 	}
 
 	/// <summary>
-	/// Represents a specific aspect or facet of data that entities can take on, to be stored in a component array and
-	/// modified by entity systems.
+	/// Represents a specific aspect or facet of data that entities can take on, to be  managed by a component array.
 	/// </summary>
 	public interface IComponent<TComponent>
 	{

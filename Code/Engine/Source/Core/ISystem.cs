@@ -10,11 +10,11 @@ namespace Entmoot.Engine
 	/// <summary>
 	/// Represents a system with a single responsibility that will update the state of entities and components.
 	/// </summary>
-	public interface IEntitySystem
+	public interface ISystem
 	{
 		#region Methods
 
-		void Update(SystemState systemState);
+		void Update(EntityArray entities);
 
 		#endregion Methods
 	}

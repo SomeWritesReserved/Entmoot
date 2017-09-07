@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Entmoot.Engine
 {
 	/// <summary>
-	/// A class to define the various types of components that will be used within the system.
+	/// A class to define the various types of components that can be assigned to entities in an <see cref="EntityArray"/>.
 	/// </summary>
 	public class ComponentsDefinition
 	{
@@ -22,20 +22,20 @@ namespace Entmoot.Engine
 		#region Methods
 
 		/// <summary>
-		/// Registers a specific type of component that will be used for by the system.
+		/// Registers a specific type of component that can be applied to entities.
 		/// </summary>
 		public void RegisterComponentType<TComponent>()
 			where TComponent : struct, IComponent<TComponent>
 		{
-			this.componentArrayCreators.Add((entityCapacity) => new ComponentArray<TComponent>(entityCapacity));
+			this.componentArrayCreators.Add((capacity) => new ComponentArray<TComponent>(capacity));
 		}
 
 		/// <summary>
 		/// Returns a collection of component arrays for the different component types that have been registered.
 		/// </summary>
-		public ReadOnlyCollection<IComponentArray> CreateComponentArrays(int entityCapacity)
+		public ReadOnlyCollection<IComponentArray> CreateComponentArrays(int capacity)
 		{
-			return this.componentArrayCreators.Select((componentArrayCreator) => componentArrayCreator(entityCapacity))
+			return this.componentArrayCreators.Select((componentArrayCreator) => componentArrayCreator(capacity))
 				.ToList()
 				.AsReadOnly();
 		}

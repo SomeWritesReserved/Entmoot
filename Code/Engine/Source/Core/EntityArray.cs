@@ -8,26 +8,31 @@ using System.Threading.Tasks;
 namespace Entmoot.Engine
 {
 	/// <summary>
-	/// Represents a specific state of the system (entities and components).
+	/// Represents an array of entities and their components.
 	/// </summary>
-	public class SystemState
+	public class EntityArray
 	{
 		#region Fields
 
-		/// <summary>Stores the states for each available entity slot, defining whether an entity exists in a slot or not (as well as any other state info).</summary>
+		/// <summary>Stores the states for each available entity ID, defining whether an entity exists in an index or not.</summary>
 		private EntityState[] entityStates;
-		/// <summary>Stores the arrays of different component types that define what data entities have (not all entities have all component types).</summary>
+		/// <summary>Stores the arrays of different component types that define what data these entities have (not all entities are assigned all component types).</summary>
 		private ReadOnlyCollection<IComponentArray> componentArrays;
 
 		#endregion Fields
 
 		#region Constructors
 
-		public SystemState(int entityCapacity, ComponentsDefinition componentsDefinition)
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		/// <param name="capacity">The maximum number of entities that can exist</param>
+		/// <param name="componentsDefinition">The definition for the various component types that can be assigned to entities.</param>
+		public EntityArray(int capacity, ComponentsDefinition componentsDefinition)
 		{
-			this.EntityCapacity = entityCapacity;
-			this.entityStates = new EntityState[this.EntityCapacity];
-			this.componentArrays = componentsDefinition.CreateComponentArrays(this.EntityCapacity);
+			this.Capacity = capacity;
+			this.entityStates = new EntityState[this.Capacity];
+			this.componentArrays = componentsDefinition.CreateComponentArrays(this.Capacity);
 		}
 
 		#endregion Constructors
@@ -35,9 +40,9 @@ namespace Entmoot.Engine
 		#region Properties
 
 		/// <summary>
-		/// Gets the maximum number of entities that can exist.
+		/// Gets the maximum number of entities that can exist in this collection.
 		/// </summary>
-		public int EntityCapacity { get; }
+		public int Capacity { get; }
 
 		#endregion Properties
 
@@ -69,7 +74,7 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Returns the component array for a specific type of component.
 		/// </summary>
-		public ComponentArray<TComponent> GetComponentArray<TComponent>()
+		public ComponentArray<TComponent> GetComponents<TComponent>()
 			where TComponent : struct, IComponent<TComponent>
 		{
 			return this.componentArrays.OfType<ComponentArray<TComponent>>().Single();
@@ -87,7 +92,7 @@ namespace Entmoot.Engine
 		/// </summary>
 		public void EndUpdate()
 		{
-			foreach (int entityID in Enumerable.Range(0, this.EntityCapacity))
+			foreach (int entityID in Enumerable.Range(0, this.Capacity))
 			{
 				if (this.entityStates[entityID] == EntityState.Creating) { this.entityStates[entityID] = EntityState.Active; }
 				if (this.entityStates[entityID] == EntityState.Removing) { this.entityStates[entityID] = EntityState.NoEntity; }

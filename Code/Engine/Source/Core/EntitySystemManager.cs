@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Entmoot.Engine
 {
 	/// <summary>
-	/// The main class for the entire system that manages entities, components, and entity systems.
+	/// The main class that manages entities, components, and systems.
 	/// </summary>
 	public sealed class EntitySystemManager
 	{
@@ -17,10 +17,10 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		public EntitySystemManager(SystemState systemState, IEnumerable<IEntitySystem> entitySystems)
+		public EntitySystemManager(EntityArray entityArray, IEnumerable<ISystem> systems)
 		{
-			this.SystemState = systemState;
-			this.EntitySystems = entitySystems.ToList().AsReadOnly();
+			this.Entities = entityArray;
+			this.Systems = systems.ToList().AsReadOnly();
 		}
 
 		#endregion Constructors
@@ -30,12 +30,12 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Gets the system state that this is managing and manipulating.
 		/// </summary>
-		public SystemState SystemState { get; }
+		public EntityArray Entities { get; }
 
 		/// <summary>
-		/// Gets the collection of entity systems that will update the entities and components.
+		/// Gets the collection of systems that will update the entities and components.
 		/// </summary>
-		public ReadOnlyCollection<IEntitySystem> EntitySystems { get; }
+		public ReadOnlyCollection<ISystem> Systems { get; }
 
 		#endregion Properties
 
@@ -46,14 +46,14 @@ namespace Entmoot.Engine
 		/// </summary>
 		public void Update()
 		{
-			this.SystemState.BeginUpdate();
+			this.Entities.BeginUpdate();
 
-			foreach (IEntitySystem entitySystem in this.EntitySystems)
+			foreach (ISystem system in this.Systems)
 			{
-				entitySystem.Update(this.SystemState);
+				system.Update(this.Entities);
 			}
 
-			this.SystemState.EndUpdate();
+			this.Entities.EndUpdate();
 		}
 
 		#endregion Methods
