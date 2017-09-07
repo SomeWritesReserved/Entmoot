@@ -15,9 +15,9 @@ namespace Entmoot.Engine
 		#region Fields
 
 		/// <summary>Stores the states for each available entity ID, defining whether an entity exists in an index or not.</summary>
-		private EntityState[] entityStates;
+		private readonly EntityState[] entityStates;
 		/// <summary>Stores the arrays of different component types that define what components these entities can have (not all component types will be added to all entities).</summary>
-		private ReadOnlyCollection<IComponentArray> componentArrays;
+		private readonly ReadOnlyCollection<IComponentArray> componentArrays;
 
 		#endregion Fields
 
@@ -49,6 +49,18 @@ namespace Entmoot.Engine
 		#region Methods
 
 		/// <summary>
+		/// Tries to find an existing entity, returning false if the entity does not exist.
+		/// </summary>
+		public bool TryGetEntity(int entityID, out Entity entity)
+		{
+			entity = default(Entity);
+			if (this.entityStates[entityID] == EntityState.NoEntity) { return false; }
+
+			entity = new Entity(this, entityID);
+			return true;
+		}
+
+		/// <summary>
 		/// Tries to create a new entity, if space allows. Returns false if the entity could not be created.
 		/// The entity will not be fully active until the end of the current update.
 		/// </summary>
@@ -59,7 +71,7 @@ namespace Entmoot.Engine
 			if (nextEntityIndex < 0) { return false; }
 
 			this.entityStates[nextEntityIndex] = EntityState.Creating;
-			entity = new Entity(nextEntityIndex);
+			entity = new Entity(this, nextEntityIndex);
 			return true;
 		}
 
@@ -74,7 +86,7 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Returns the component array for a specific type of component.
 		/// </summary>
-		public ComponentArray<TComponent> GetComponents<TComponent>()
+		public ComponentArray<TComponent> GetComponentArray<TComponent>()
 			where TComponent : struct, IComponent<TComponent>
 		{
 			return this.componentArrays.OfType<ComponentArray<TComponent>>().Single();

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Entmoot.Engine
 {
 	/// <summary>
-	/// The main class that manages entities, components, and systems.
+	/// The main class that manages entities (with their components) and systems.
 	/// </summary>
 	public sealed class EntitySystemManager
 	{

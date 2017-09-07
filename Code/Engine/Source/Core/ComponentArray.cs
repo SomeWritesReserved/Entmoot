@@ -40,9 +40,9 @@ namespace Entmoot.Engine
 		#region Fields
 
 		/// <summary>Stores the array of individual components that will be indexed into by entity ID to get the component value.</summary>
-		private TComponent[] components;
+		private readonly TComponent[] components;
 		/// <summary>Stores whether or not this component type has been added to a given entity ID.</summary>
-		private BitArray entityComponentStates;
+		private readonly BitArray entityComponentStates;
 
 		#endregion Fields
 

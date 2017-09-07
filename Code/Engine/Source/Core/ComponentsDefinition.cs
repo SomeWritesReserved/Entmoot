@@ -15,7 +15,7 @@ namespace Entmoot.Engine
 		#region Fields
 
 		/// <summary>Stores the list of delegates that will construct the different component arrays.</summary>
-		private List<Func<int, IComponentArray>> componentArrayCreators = new List<Func<int, IComponentArray>>();
+		private readonly List<Func<int, IComponentArray>> componentArrayCreators = new List<Func<int, IComponentArray>>();
 
 		#endregion Fields
 
