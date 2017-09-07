@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 namespace Entmoot.Engine
 {
 	/// <summary>
-	/// Represents a collection of identically typed components that can be applied to entities in the system.
+	/// Represents an array of identically typed components that define which entities have a <see cref="TComponent"/>.
 	/// </summary>
-	public sealed class ComponentCollection<TComponent> : IComponentCollection
+	public sealed class ComponentArray<TComponent> : IComponentArray
 		where TComponent : struct, IComponent<TComponent>
 	{
 		#region Fields
@@ -25,7 +25,7 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		public ComponentCollection(int entityCapacity)
+		public ComponentArray(int entityCapacity)
 		{
 			this.EntityCapacity = entityCapacity;
 			this.components = new TComponent[this.EntityCapacity];
@@ -86,15 +86,15 @@ namespace Entmoot.Engine
 	}
 
 	/// <summary>
-	/// Represents a collection of identically typed components that can be applied to entities in the system.
+	/// Represents an array of identically typed components that define which entities have a specific component.
 	/// </summary>
-	public interface IComponentCollection
+	public interface IComponentArray
 	{
 	}
 
 	/// <summary>
-	/// Represents a specific aspect or facet of data that entities can take on, to be stored in component collections
-	/// and consumed/modified by entity systems.
+	/// Represents a specific aspect or facet of data that entities can take on, to be stored in a component array and
+	/// modified by entity systems.
 	/// </summary>
 	public interface IComponent<TComponent>
 	{

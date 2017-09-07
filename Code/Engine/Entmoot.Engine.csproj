@@ -39,7 +39,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Source\Core\ComponentCollection.cs" />
+    <Compile Include="Source\Core\ComponentArray.cs" />
     <Compile Include="Source\Core\ComponentsDefinition.cs" />
     <Compile Include="Source\Core\EntityState.cs" />
     <Compile Include="Source\Core\EntitySystemManager.cs" />

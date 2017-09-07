@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 namespace Entmoot.Engine
 {
 	/// <summary>
-	/// Represents a specific state that the system (entities and components) may be in.
+	/// Represents a specific state of the system (entities and components).
 	/// </summary>
 	public class SystemState
 	{
@@ -15,8 +16,8 @@ namespace Entmoot.Engine
 
 		/// <summary>Stores the states for each available entity slot, defining whether an entity exists in a slot or not (as well as any other state info).</summary>
 		private EntityState[] entityStates;
-		/// <summary>Stores the collections of different component types that define what data entities have (not all entities have all component types).</summary>
-		private IComponentCollection[] componentCollections;
+		/// <summary>Stores the arrays of different component types that define what data entities have (not all entities have all component types).</summary>
+		private ReadOnlyCollection<IComponentArray> componentArrays;
 
 		#endregion Fields
 
@@ -26,7 +27,7 @@ namespace Entmoot.Engine
 		{
 			this.EntityCapacity = entityCapacity;
 			this.entityStates = new EntityState[this.EntityCapacity];
-			this.componentCollections = componentsDefinition.CreateComponentCollections(this.EntityCapacity);
+			this.componentArrays = componentsDefinition.CreateComponentArrays(this.EntityCapacity);
 		}
 
 		#endregion Constructors
@@ -66,12 +67,12 @@ namespace Entmoot.Engine
 		}
 
 		/// <summary>
-		/// Returns the component collection for a specific type of component.
+		/// Returns the component array for a specific type of component.
 		/// </summary>
-		public ComponentCollection<TComponent> GetComponentCollection<TComponent>()
+		public ComponentArray<TComponent> GetComponentArray<TComponent>()
 			where TComponent : struct, IComponent<TComponent>
 		{
-			return this.componentCollections.OfType<ComponentCollection<TComponent>>().Single();
+			return this.componentArrays.OfType<ComponentArray<TComponent>>().Single();
 		}
 
 		/// <summary>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,8 +14,8 @@ namespace Entmoot.Engine
 	{
 		#region Fields
 
-		/// <summary>Stores the list of delegates that will construct different types of component collections.</summary>
-		private List<Func<int, IComponentCollection>> collectionCreators = new List<Func<int, IComponentCollection>>();
+		/// <summary>Stores the list of delegates that will construct the different component arrays.</summary>
+		private List<Func<int, IComponentArray>> componentArrayCreators = new List<Func<int, IComponentArray>>();
 
 		#endregion Fields
 
@@ -26,16 +27,17 @@ namespace Entmoot.Engine
 		public void RegisterComponentType<TComponent>()
 			where TComponent : struct, IComponent<TComponent>
 		{
-			this.collectionCreators.Add((entityCapacity) => new ComponentCollection<TComponent>(entityCapacity));
+			this.componentArrayCreators.Add((entityCapacity) => new ComponentArray<TComponent>(entityCapacity));
 		}
 
 		/// <summary>
-		/// Returns an array of collections for all the component types that have been registered.
+		/// Returns a collection of component arrays for the different component types that have been registered.
 		/// </summary>
-		public IComponentCollection[] CreateComponentCollections(int entityCapacity)
+		public ReadOnlyCollection<IComponentArray> CreateComponentArrays(int entityCapacity)
 		{
-			return this.collectionCreators.Select((collectionCreator) => collectionCreator(entityCapacity))
-				.ToArray();
+			return this.componentArrayCreators.Select((componentArrayCreator) => componentArrayCreator(entityCapacity))
+				.ToList()
+				.AsReadOnly();
 		}
 
 		#endregion Methods
