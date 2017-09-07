@@ -14,7 +14,7 @@ namespace Entmoot.Engine
 	{
 		#region Methods
 
-		void Update(EntityArray entities);
+		void Update(EntityArray entityArray);
 
 		#endregion Methods
 	}

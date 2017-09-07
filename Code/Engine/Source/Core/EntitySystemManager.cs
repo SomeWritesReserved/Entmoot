@@ -19,7 +19,7 @@ namespace Entmoot.Engine
 		/// </summary>
 		public EntitySystemManager(EntityArray entityArray, IEnumerable<ISystem> systems)
 		{
-			this.Entities = entityArray;
+			this.EntityArray = entityArray;
 			this.Systems = systems.ToList().AsReadOnly();
 		}
 
@@ -30,7 +30,7 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Gets the array of entities that this class is managing.
 		/// </summary>
-		public EntityArray Entities { get; }
+		public EntityArray EntityArray { get; }
 
 		/// <summary>
 		/// Gets the collection of systems that will update the entities and components.
@@ -46,14 +46,14 @@ namespace Entmoot.Engine
 		/// </summary>
 		public void Update()
 		{
-			this.Entities.BeginUpdate();
+			this.EntityArray.BeginUpdate();
 
 			foreach (ISystem system in this.Systems)
 			{
-				system.Update(this.Entities);
+				system.Update(this.EntityArray);
 			}
 
-			this.Entities.EndUpdate();
+			this.EntityArray.EndUpdate();
 		}
 
 		#endregion Methods
