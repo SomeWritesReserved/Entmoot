@@ -8,6 +8,30 @@ using System.Threading.Tasks;
 namespace Entmoot.Engine
 {
 	/// <summary>
+	/// Represents an array of identically typed components that define which entities have a specific component type.
+	/// </summary>
+	public interface IComponentArray
+	{
+		#region Properties
+
+		/// <summary>
+		/// Gets the maximum number of entities that can have this type of component.
+		/// </summary>
+		int EntityCapacity { get; }
+
+		#endregion Properties
+
+		#region Methods
+
+		/// <summary>
+		/// Returns whether the given entity has this specific type of component.
+		/// </summary>
+		bool HasComponent(Entity entity);
+
+		#endregion Methods
+	}
+
+	/// <summary>
 	/// Represents an array of identically typed components that define which entities have a <see cref="TComponent"/>.
 	/// </summary>
 	public sealed class ComponentArray<TComponent> : IComponentArray
@@ -83,13 +107,6 @@ namespace Entmoot.Engine
 		}
 
 		#endregion Methods
-	}
-
-	/// <summary>
-	/// Represents an array of identically typed components that define which entities have a specific component.
-	/// </summary>
-	public interface IComponentArray
-	{
 	}
 
 	/// <summary>
