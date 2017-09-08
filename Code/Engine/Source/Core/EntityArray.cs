@@ -112,7 +112,7 @@ namespace Entmoot.Engine
 		/// </summary>
 		public void EndUpdate()
 		{
-			foreach (int entityID in Enumerable.Range(0, this.Capacity))
+			for (int entityID = 0; entityID < this.Capacity; entityID++)
 			{
 				if (this.entityStates[entityID] == EntityState.Creating) { this.entityStates[entityID] = EntityState.Active; }
 				if (this.entityStates[entityID] == EntityState.Removing) { this.entityStates[entityID] = EntityState.NoEntity; }
@@ -125,9 +125,9 @@ namespace Entmoot.Engine
 		public void CopyTo(EntityArray other)
 		{
 			Array.Copy(this.entityStates, other.entityStates, this.Capacity);
-			for (int i = 0; i < this.componentArrays.Count; i++)
+			for (int componentTypeID = 0; componentTypeID < this.componentArrays.Count; componentTypeID++)
 			{
-				this.componentArrays[i].CopyTo(other.componentArrays[i]);
+				this.componentArrays[componentTypeID].CopyTo(other.componentArrays[componentTypeID]);
 			}
 		}
 
