@@ -8,6 +8,13 @@ using NUnit.Framework;
 
 namespace Entmoot.UnitTests
 {
+	/// <summary>
+	/// Future tests:
+	/// -Adding, removing, editing components. Adding components multiple times don't reset state. Entity component methods same as EntityArray?
+	/// -GetComponentArray()
+	/// -CopyTo()
+	/// -Make sure components are reset on entity creation.
+	/// </summary>
 	[TestFixture]
 	public class EntitySystemManagerTests
 	{
@@ -35,6 +42,36 @@ namespace Entmoot.UnitTests
 			Assert.AreEqual(newEntity, fetchedEntity);
 			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(1, out _));
 			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(2, out _));
+		}
+
+		[Test]
+		public void EntityCreate_ResetsComponents()
+		{
+			EntitySystemManager entitySystemManager = new EntitySystemManager(new EntityArray(1, EntitySystemManagerTests.createComponentsDefinition()), new ISystem[0]);
+			Assert.IsTrue(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntityA));
+			ref PositionComponent2D positionComponentA = ref entitySystemManager.EntityArray.GetComponentArray<PositionComponent2D>().AddComponent(newEntityA);
+			ref HealthComponent healthComponentA = ref entitySystemManager.EntityArray.GetComponentArray<HealthComponent>().AddComponent(newEntityA);
+			ref StringComponent stringComponentA = ref entitySystemManager.EntityArray.GetComponentArray<StringComponent>().AddComponent(newEntityA);
+			Assert.IsTrue(entitySystemManager.EntityArray.GetComponentArray<PositionComponent2D>().HasComponent(newEntityA));
+			Assert.IsTrue(entitySystemManager.EntityArray.GetComponentArray<HealthComponent>().HasComponent(newEntityA));
+			Assert.IsTrue(entitySystemManager.EntityArray.GetComponentArray<StringComponent>().HasComponent(newEntityA));
+			positionComponentA.PositionX = 10;
+			positionComponentA.PositionY = 14.44f;
+			healthComponentA.HealthAmount = 99;
+			stringComponentA.StringValue = "!!!!";
+			entitySystemManager.EntityArray.RemoveEntity(newEntityA);
+			entitySystemManager.Update();
+			Assert.IsTrue(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntityB));
+			ref PositionComponent2D positionComponentB = ref entitySystemManager.EntityArray.GetComponentArray<PositionComponent2D>().GetComponent(newEntityB);
+			ref HealthComponent healthComponentB = ref entitySystemManager.EntityArray.GetComponentArray<HealthComponent>().GetComponent(newEntityB);
+			ref StringComponent stringComponentB = ref entitySystemManager.EntityArray.GetComponentArray<StringComponent>().GetComponent(newEntityB);
+			Assert.IsFalse(entitySystemManager.EntityArray.GetComponentArray<PositionComponent2D>().HasComponent(newEntityB));
+			Assert.IsFalse(entitySystemManager.EntityArray.GetComponentArray<HealthComponent>().HasComponent(newEntityB));
+			Assert.IsFalse(entitySystemManager.EntityArray.GetComponentArray<StringComponent>().HasComponent(newEntityB));
+			Assert.AreEqual(0, positionComponentB.PositionX);
+			Assert.AreEqual(0, positionComponentB.PositionY);
+			Assert.AreEqual(0, healthComponentB.HealthAmount);
+			Assert.IsNull(stringComponentB.StringValue);
 		}
 
 		[Test]
@@ -267,6 +304,45 @@ namespace Entmoot.UnitTests
 			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(2, out _));
 		}
 
+		[Test]
+		public void Components()
+		{
+			EntitySystemManager entitySystemManager = new EntitySystemManager(new EntityArray(3, new ComponentsDefinition()), new ISystem[0]);
+		}
+
 		#endregion Tests
+
+		#region Helpers
+
+		private static ComponentsDefinition createComponentsDefinition()
+		{
+			ComponentsDefinition componentsDefinition = new ComponentsDefinition();
+			componentsDefinition.RegisterComponentType<PositionComponent2D>();
+			componentsDefinition.RegisterComponentType<HealthComponent>();
+			componentsDefinition.RegisterComponentType<StringComponent>();
+			return componentsDefinition;
+		}
+
+		#endregion Helpers
+
+		#region Nested Types
+
+		public struct PositionComponent2D : IComponent<PositionComponent2D>
+		{
+			public float PositionX;
+			public float PositionY;
+		}
+
+		public struct HealthComponent : IComponent<HealthComponent>
+		{
+			public int HealthAmount;
+		}
+
+		public struct StringComponent : IComponent<StringComponent>
+		{
+			public string StringValue;
+		}
+
+		#endregion Nested Types
 	}
 }
