@@ -189,16 +189,82 @@ namespace Entmoot.UnitTests
 		[Test]
 		public void EntityRemove()
 		{
+			EntitySystemManager entitySystemManager = new EntitySystemManager(new EntityArray(3, new ComponentsDefinition()), new ISystem[0]);
+			Assert.IsTrue(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntity0));
+			Assert.IsTrue(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntity1));
+			Assert.IsTrue(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntity2));
+			entitySystemManager.Update();
+			entitySystemManager.EntityArray.RemoveEntity(newEntity1);
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(0, out _));
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(1, out _));
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(2, out _));
+			entitySystemManager.Update();
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(0, out _));
+			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(1, out _));
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(2, out _));
 		}
 
 		[Test]
-		public void EntityRemoveRedundant()
+		public void EntityRemove_InSameTick()
 		{
+			EntitySystemManager entitySystemManager = new EntitySystemManager(new EntityArray(3, new ComponentsDefinition()), new ISystem[0]);
+			Assert.IsTrue(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntity0));
+			Assert.IsTrue(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntity1));
+			Assert.IsTrue(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntity2));
+			entitySystemManager.EntityArray.RemoveEntity(newEntity1);
+			entitySystemManager.Update();
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(0, out _));
+			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(1, out _));
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(2, out _));
 		}
 
 		[Test]
-		public void EntityCreateAndRemoveInSameTick()
+		public void EntityRemove_NoEntityExists()
 		{
+			EntitySystemManager entitySystemManager = new EntitySystemManager(new EntityArray(3, new ComponentsDefinition()), new ISystem[0]);
+			Assert.IsTrue(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntity0));
+			Assert.IsTrue(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntity1));
+			Assert.IsTrue(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntity2));
+			entitySystemManager.EntityArray.RemoveEntity(newEntity1);
+			entitySystemManager.Update();
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(0, out _));
+			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(1, out _));
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(2, out _));
+			entitySystemManager.EntityArray.RemoveEntity(newEntity1);
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(0, out _));
+			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(1, out _));
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(2, out _));
+			entitySystemManager.Update();
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(0, out _));
+			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(1, out _));
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(2, out _));
+		}
+
+		[Test]
+		public void EntityRemove_RemoveMultipleTimesInSameTick()
+		{
+			EntitySystemManager entitySystemManager = new EntitySystemManager(new EntityArray(3, new ComponentsDefinition()), new ISystem[0]);
+			Assert.IsTrue(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntity0));
+			Assert.IsTrue(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntity1));
+			Assert.IsTrue(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntity2));
+			entitySystemManager.EntityArray.RemoveEntity(newEntity0);
+			entitySystemManager.EntityArray.RemoveEntity(newEntity0);
+			entitySystemManager.Update();
+			entitySystemManager.EntityArray.RemoveEntity(newEntity2);
+			entitySystemManager.EntityArray.RemoveEntity(newEntity2);
+			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(0, out _));
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(1, out _));
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(2, out _));
+			entitySystemManager.Update();
+			entitySystemManager.EntityArray.RemoveEntity(newEntity1);
+			entitySystemManager.EntityArray.RemoveEntity(newEntity1);
+			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(0, out _));
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(1, out _));
+			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(2, out _));
+			entitySystemManager.Update();
+			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(0, out _));
+			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(1, out _));
+			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(2, out _));
 		}
 
 		#endregion Tests
