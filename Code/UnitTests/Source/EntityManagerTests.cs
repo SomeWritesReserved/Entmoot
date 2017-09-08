@@ -16,8 +16,8 @@ namespace Entmoot.UnitTests
 		[Test]
 		public void EntityCreate()
 		{
-			EntitySystemManager entitySystemManager = new EntitySystemManager(new SystemState(2, new ComponentsDefinition()), new IEntitySystem[0]);
-			Assert.IsTrue(entitySystemManager.SystemState.TryCreateEntity(out Entity newEntity));
+			EntitySystemManager entitySystemManager = new EntitySystemManager(new EntityArray(2, new ComponentsDefinition()), new ISystem[0]);
+			Assert.IsTrue(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntity));
 			Assert.AreEqual(0, newEntity.ID);
 			// Todo: makes sure before the update the entity isn't active yet (for this and all tests)
 			entitySystemManager.Update();
@@ -28,11 +28,11 @@ namespace Entmoot.UnitTests
 		public void EntityCreateMultiple()
 		{
 			// Todo: make sure after each update that the entity collection is in the order we expect
-			EntitySystemManager entitySystemManager = new EntitySystemManager(new SystemState(2, new ComponentsDefinition()), new IEntitySystem[0]);
-			Assert.IsTrue(entitySystemManager.SystemState.TryCreateEntity(out Entity newEntity1));
+			EntitySystemManager entitySystemManager = new EntitySystemManager(new EntityArray(2, new ComponentsDefinition()), new ISystem[0]);
+			Assert.IsTrue(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntity1));
 			Assert.AreEqual(0, newEntity1.ID);
 			entitySystemManager.Update();
-			Assert.IsTrue(entitySystemManager.SystemState.TryCreateEntity(out Entity newEntity2));
+			Assert.IsTrue(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntity2));
 			Assert.AreEqual(1, newEntity2.ID);
 			entitySystemManager.Update();
 			// Todo:
@@ -41,10 +41,10 @@ namespace Entmoot.UnitTests
 		[Test]
 		public void EntityCreateMultipleInSameTick()
 		{
-			EntitySystemManager entitySystemManager = new EntitySystemManager(new SystemState(2, new ComponentsDefinition()), new IEntitySystem[0]);
-			Assert.IsTrue(entitySystemManager.SystemState.TryCreateEntity(out Entity newEntity1));
+			EntitySystemManager entitySystemManager = new EntitySystemManager(new EntityArray(2, new ComponentsDefinition()), new ISystem[0]);
+			Assert.IsTrue(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntity1));
 			Assert.AreEqual(0, newEntity1.ID);
-			Assert.IsTrue(entitySystemManager.SystemState.TryCreateEntity(out Entity newEntity2));
+			Assert.IsTrue(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntity2));
 			Assert.AreEqual(1, newEntity2.ID);
 			entitySystemManager.Update();
 			//todo:
@@ -53,23 +53,23 @@ namespace Entmoot.UnitTests
 		[Test]
 		public void EntityCreateMultiple_TooMany()
 		{
-			EntitySystemManager entitySystemManager = new EntitySystemManager(new SystemState(2, new ComponentsDefinition()), new IEntitySystem[0]);
-			Assert.IsTrue(entitySystemManager.SystemState.TryCreateEntity(out Entity newEntity1));
+			EntitySystemManager entitySystemManager = new EntitySystemManager(new EntityArray(2, new ComponentsDefinition()), new ISystem[0]);
+			Assert.IsTrue(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntity1));
 			entitySystemManager.Update();
-			Assert.IsTrue(entitySystemManager.SystemState.TryCreateEntity(out Entity newEntity2));
+			Assert.IsTrue(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntity2));
 			entitySystemManager.Update();
-			Assert.IsFalse(entitySystemManager.SystemState.TryCreateEntity(out Entity newEntity3));
+			Assert.IsFalse(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntity3));
 		}
 
 		[Test]
 		public void EntityCreateMultiple_TooManyInSameTick()
 		{
-			EntitySystemManager entitySystemManager = new EntitySystemManager(new SystemState(2, new ComponentsDefinition()), new IEntitySystem[0]);
-			Assert.IsTrue(entitySystemManager.SystemState.TryCreateEntity(out Entity newEntity1));
+			EntitySystemManager entitySystemManager = new EntitySystemManager(new EntityArray(2, new ComponentsDefinition()), new ISystem[0]);
+			Assert.IsTrue(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntity1));
 			entitySystemManager.Update();
-			Assert.IsTrue(entitySystemManager.SystemState.TryCreateEntity(out Entity newEntity2));
+			Assert.IsTrue(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntity2));
 			entitySystemManager.Update();
-			Assert.IsFalse(entitySystemManager.SystemState.TryCreateEntity(out Entity newEntity3));
+			Assert.IsFalse(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntity3));
 		}
 
 		[Test]
