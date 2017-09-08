@@ -9,7 +9,7 @@ using NUnit.Framework;
 namespace Entmoot.UnitTests
 {
 	[TestFixture]
-	public class EntityManagerTests
+	public class EntitySystemManagerTests
 	{
 		#region Tests
 
