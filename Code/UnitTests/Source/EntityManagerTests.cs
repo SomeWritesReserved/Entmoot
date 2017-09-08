@@ -14,62 +14,176 @@ namespace Entmoot.UnitTests
 		#region Tests
 
 		[Test]
+		public void EntityGet_NoEntityExists()
+		{
+			EntitySystemManager entitySystemManager = new EntitySystemManager(new EntityArray(3, new ComponentsDefinition()), new ISystem[0]);
+			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(0, out Entity noEntity));
+			Assert.AreEqual(default(Entity), noEntity);
+		}
+
+		[Test]
 		public void EntityCreate()
 		{
-			EntitySystemManager entitySystemManager = new EntitySystemManager(new EntityArray(2, new ComponentsDefinition()), new ISystem[0]);
+			EntitySystemManager entitySystemManager = new EntitySystemManager(new EntityArray(3, new ComponentsDefinition()), new ISystem[0]);
 			Assert.IsTrue(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntity));
 			Assert.AreEqual(0, newEntity.ID);
-			// Todo: makes sure before the update the entity isn't active yet (for this and all tests)
+			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(0, out _));
+			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(1, out _));
+			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(2, out _));
 			entitySystemManager.Update();
-			// Todo: make sure after an update the entity is active (for this and all tests)
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(0, out Entity fetchedEntity));
+			Assert.AreEqual(newEntity, fetchedEntity);
+			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(1, out _));
+			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(2, out _));
 		}
 
 		[Test]
-		public void EntityCreateMultiple()
+		public void EntityCreate_Multiple()
 		{
-			// Todo: make sure after each update that the entity collection is in the order we expect
-			EntitySystemManager entitySystemManager = new EntitySystemManager(new EntityArray(2, new ComponentsDefinition()), new ISystem[0]);
+			EntitySystemManager entitySystemManager = new EntitySystemManager(new EntityArray(3, new ComponentsDefinition()), new ISystem[0]);
+			Assert.IsTrue(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntity0));
+			Assert.AreEqual(0, newEntity0.ID);
 			Assert.IsTrue(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntity1));
-			Assert.AreEqual(0, newEntity1.ID);
+			Assert.AreEqual(1, newEntity1.ID);
+			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(0, out _));
+			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(1, out _));
+			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(2, out _));
 			entitySystemManager.Update();
-			Assert.IsTrue(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntity2));
-			Assert.AreEqual(1, newEntity2.ID);
-			entitySystemManager.Update();
-			// Todo:
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(0, out Entity fetchedEntity0));
+			Assert.AreEqual(newEntity0, fetchedEntity0);
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(1, out Entity fetchedEntity1));
+			Assert.AreEqual(newEntity1, fetchedEntity1);
+			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(2, out _));
 		}
 
 		[Test]
-		public void EntityCreateMultipleInSameTick()
+		public void EntityCreate_MultipleFillCapacity()
 		{
-			EntitySystemManager entitySystemManager = new EntitySystemManager(new EntityArray(2, new ComponentsDefinition()), new ISystem[0]);
+			EntitySystemManager entitySystemManager = new EntitySystemManager(new EntityArray(3, new ComponentsDefinition()), new ISystem[0]);
+			Assert.IsTrue(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntity0));
+			Assert.AreEqual(0, newEntity0.ID);
 			Assert.IsTrue(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntity1));
-			Assert.AreEqual(0, newEntity1.ID);
+			Assert.AreEqual(1, newEntity1.ID);
 			Assert.IsTrue(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntity2));
-			Assert.AreEqual(1, newEntity2.ID);
+			Assert.AreEqual(2, newEntity2.ID);
+			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(0, out _));
+			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(1, out _));
+			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(2, out _));
 			entitySystemManager.Update();
-			//todo:
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(0, out Entity fetchedEntity0));
+			Assert.AreEqual(newEntity0, fetchedEntity0);
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(1, out Entity fetchedEntity1));
+			Assert.AreEqual(newEntity1, fetchedEntity1);
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(2, out Entity fetchedEntity2));
+			Assert.AreEqual(newEntity2, fetchedEntity2);
 		}
 
 		[Test]
-		public void EntityCreateMultiple_TooMany()
+		public void EntityCreate_MultipleFillCapacity_OverMultipleTicks()
 		{
-			EntitySystemManager entitySystemManager = new EntitySystemManager(new EntityArray(2, new ComponentsDefinition()), new ISystem[0]);
+			EntitySystemManager entitySystemManager = new EntitySystemManager(new EntityArray(3, new ComponentsDefinition()), new ISystem[0]);
+			Assert.IsTrue(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntity0));
+			Assert.AreEqual(0, newEntity0.ID);
+			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(0, out _));
+			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(1, out _));
+			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(2, out _));
+			entitySystemManager.Update();
 			Assert.IsTrue(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntity1));
+			Assert.AreEqual(1, newEntity1.ID);
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(0, out Entity fetchedEntity0a));
+			Assert.AreEqual(newEntity0, fetchedEntity0a);
+			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(1, out _));
+			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(2, out _));
 			entitySystemManager.Update();
 			Assert.IsTrue(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntity2));
+			Assert.AreEqual(2, newEntity2.ID);
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(0, out Entity fetchedEntity0b));
+			Assert.AreEqual(newEntity0, fetchedEntity0b);
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(1, out Entity fetchedEntity1b));
+			Assert.AreEqual(newEntity1, fetchedEntity1b);
+			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(2, out _));
 			entitySystemManager.Update();
-			Assert.IsFalse(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntity3));
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(0, out Entity fetchedEntity0c));
+			Assert.AreEqual(newEntity0, fetchedEntity0c);
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(1, out Entity fetchedEntity1c));
+			Assert.AreEqual(newEntity1, fetchedEntity1c);
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(2, out Entity fetchedEntity2c));
+			Assert.AreEqual(newEntity2, fetchedEntity2c);
+			entitySystemManager.Update();
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(0, out Entity fetchedEntity0d));
+			Assert.AreEqual(newEntity0, fetchedEntity0d);
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(1, out Entity fetchedEntity1d));
+			Assert.AreEqual(newEntity1, fetchedEntity1d);
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(2, out Entity fetchedEntity2d));
+			Assert.AreEqual(newEntity2, fetchedEntity2d);
 		}
 
 		[Test]
-		public void EntityCreateMultiple_TooManyInSameTick()
+		public void EntityCreate_TooMany()
 		{
-			EntitySystemManager entitySystemManager = new EntitySystemManager(new EntityArray(2, new ComponentsDefinition()), new ISystem[0]);
+			EntitySystemManager entitySystemManager = new EntitySystemManager(new EntityArray(3, new ComponentsDefinition()), new ISystem[0]);
+			Assert.IsTrue(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntity0));
+			Assert.AreEqual(0, newEntity0.ID);
 			Assert.IsTrue(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntity1));
+			Assert.AreEqual(1, newEntity1.ID);
+			Assert.IsTrue(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntity2));
+			Assert.AreEqual(2, newEntity2.ID);
+			Assert.IsFalse(entitySystemManager.EntityArray.TryCreateEntity(out Entity noEntity));
+			Assert.AreEqual(default(Entity), noEntity);
+			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(0, out _));
+			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(1, out _));
+			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(2, out _));
+			entitySystemManager.Update();
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(0, out Entity fetchedEntity0));
+			Assert.AreEqual(newEntity0, fetchedEntity0);
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(1, out Entity fetchedEntity1));
+			Assert.AreEqual(newEntity1, fetchedEntity1);
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(2, out Entity fetchedEntity2));
+			Assert.AreEqual(newEntity2, fetchedEntity2);
+		}
+
+		[Test]
+		public void EntityCreate_TooMany_OverMultipleTicks()
+		{
+			EntitySystemManager entitySystemManager = new EntitySystemManager(new EntityArray(3, new ComponentsDefinition()), new ISystem[0]);
+			Assert.IsTrue(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntity0));
+			Assert.AreEqual(0, newEntity0.ID);
+			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(0, out _));
+			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(1, out _));
+			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(2, out _));
+			entitySystemManager.Update();
+			Assert.IsTrue(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntity1));
+			Assert.AreEqual(1, newEntity1.ID);
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(0, out Entity fetchedEntity0a));
+			Assert.AreEqual(newEntity0, fetchedEntity0a);
+			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(1, out _));
+			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(2, out _));
 			entitySystemManager.Update();
 			Assert.IsTrue(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntity2));
+			Assert.AreEqual(2, newEntity2.ID);
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(0, out Entity fetchedEntity0b));
+			Assert.AreEqual(newEntity0, fetchedEntity0b);
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(1, out Entity fetchedEntity1b));
+			Assert.AreEqual(newEntity1, fetchedEntity1b);
+			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(2, out _));
 			entitySystemManager.Update();
-			Assert.IsFalse(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntity3));
+			Assert.IsFalse(entitySystemManager.EntityArray.TryCreateEntity(out Entity noEntityc));
+			Assert.AreEqual(default(Entity), noEntityc);
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(0, out Entity fetchedEntity0c));
+			Assert.AreEqual(newEntity0, fetchedEntity0c);
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(1, out Entity fetchedEntity1c));
+			Assert.AreEqual(newEntity1, fetchedEntity1c);
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(2, out Entity fetchedEntity2c));
+			Assert.AreEqual(newEntity2, fetchedEntity2c);
+			entitySystemManager.Update();
+			Assert.IsFalse(entitySystemManager.EntityArray.TryCreateEntity(out Entity noEntityd));
+			Assert.AreEqual(default(Entity), noEntityd);
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(0, out Entity fetchedEntity0d));
+			Assert.AreEqual(newEntity0, fetchedEntity0d);
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(1, out Entity fetchedEntity1d));
+			Assert.AreEqual(newEntity1, fetchedEntity1d);
+			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(2, out Entity fetchedEntity2d));
+			Assert.AreEqual(newEntity2, fetchedEntity2d);
 		}
 
 		[Test]
