@@ -49,12 +49,13 @@ namespace Entmoot.Engine
 		#region Methods
 
 		/// <summary>
-		/// Tries to find an existing entity, returning false if the entity does not exist.
+		/// Tries to find an existing entity, returning false if the entity does not exist or if it
+		/// hasn't been fully created yet.
 		/// </summary>
 		public bool TryGetEntity(int entityID, out Entity entity)
 		{
 			entity = default(Entity);
-			if (this.entityStates[entityID] == EntityState.NoEntity) { return false; }
+			if (this.entityStates[entityID] == EntityState.NoEntity || this.entityStates[entityID] == EntityState.Creating) { return false; }
 
 			entity = new Entity(this, entityID);
 			return true;
@@ -69,7 +70,7 @@ namespace Entmoot.Engine
 			entity = default(Entity);
 			int nextEntityIndex = Array.IndexOf(this.entityStates, EntityState.NoEntity);
 			if (nextEntityIndex < 0) { return false; }
-			
+
 			entity = new Entity(this, nextEntityIndex);
 			this.entityStates[nextEntityIndex] = EntityState.Creating;
 			foreach (IComponentArray componentArray in this.componentArrays)
@@ -84,7 +85,10 @@ namespace Entmoot.Engine
 		/// </summary>
 		public void RemoveEntity(Entity entity)
 		{
-			this.entityStates[entity.ID] = EntityState.Removing;
+			if (this.entityStates[entity.ID] != EntityState.NoEntity)
+			{
+				this.entityStates[entity.ID] = EntityState.Removing;
+			}
 		}
 
 		/// <summary>
