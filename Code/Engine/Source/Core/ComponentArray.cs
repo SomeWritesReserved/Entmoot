@@ -150,11 +150,6 @@ namespace Entmoot.Engine
 	{
 		#region Methods
 
-		void Interpolate(TComponent to, TComponent from, float amount);
-
-		void Serialize();
-		void Deserialize();
-
 		#endregion Methods
 	}
 }
