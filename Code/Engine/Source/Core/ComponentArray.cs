@@ -31,7 +31,7 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Removes this specific type of component from the given entity.
 		/// </summary>
-        void RemoveComponent(Entity entity);
+		void RemoveComponent(Entity entity);
 
 		/// <summary>
 		/// Copies all component data to another component array.
@@ -52,7 +52,7 @@ namespace Entmoot.Engine
 		/// <summary>Stores the array of individual components that will be indexed into by entity ID to get the component value.</summary>
 		private readonly TComponent[] components;
 		/// <summary>Stores whether or not this component type has been added to a given entity ID.</summary>
-		private readonly BitArray entityHasComponent;
+		private readonly StateArray componentStates;
 
 		#endregion Fields
 
@@ -65,7 +65,7 @@ namespace Entmoot.Engine
 		{
 			this.Capacity = capacity;
 			this.components = new TComponent[this.Capacity];
-			this.entityHasComponent = new BitArray(this.Capacity, defaultValue: false);
+			this.componentStates = new StateArray(this.Capacity);
 		}
 
 		#endregion Constructors
@@ -86,7 +86,7 @@ namespace Entmoot.Engine
 		/// </summary>
 		public bool HasComponent(Entity entity)
 		{
-			return this.entityHasComponent[entity.ID];
+			return this.componentStates[entity.ID];
 		}
 
 		/// <summary>
@@ -109,7 +109,7 @@ namespace Entmoot.Engine
 			// Don't default the entity state here so consumers can call this as an easy way to get a reference
 			// to the component and make sure its added to the entity (without having to check manually if the 
 			// component doesn't exit to then call GetComponent)
-			this.entityHasComponent[entity.ID] = true;
+			this.componentStates[entity.ID] = true;
 			return ref this.components[entity.ID];
 		}
 
@@ -119,7 +119,7 @@ namespace Entmoot.Engine
 		public void RemoveComponent(Entity entity)
 		{
 			this.components[entity.ID] = default(TComponent);
-			this.entityHasComponent[entity.ID] = false;
+			this.componentStates[entity.ID] = false;
 		}
 
 		/// <summary>
@@ -128,8 +128,7 @@ namespace Entmoot.Engine
 		public void CopyTo(ComponentArray<TComponent> other)
 		{
 			Array.Copy(this.components, other.components, this.Capacity);
-			other.entityHasComponent.SetAll(false);
-			other.entityHasComponent.Or(this.entityHasComponent);
+			this.componentStates.CopyTo(other.componentStates);
 		}
 
 		/// <summary>
