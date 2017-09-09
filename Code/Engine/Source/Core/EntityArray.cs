@@ -54,7 +54,7 @@ namespace Entmoot.Engine
 		/// </summary>
 		public bool TryGetEntity(int entityID, out Entity entity)
 		{
-			entity = default(Entity);
+			entity = Entity.NoEntity;
 			if (this.entityStates[entityID] == EntityState.NoEntity || this.entityStates[entityID] == EntityState.Creating) { return false; }
 
 			entity = new Entity(this, entityID);
@@ -67,7 +67,7 @@ namespace Entmoot.Engine
 		/// </summary>
 		public bool TryCreateEntity(out Entity entity)
 		{
-			entity = default(Entity);
+			entity = Entity.NoEntity;
 			int nextEntityIndex = Array.IndexOf(this.entityStates, EntityState.NoEntity);
 			if (nextEntityIndex < 0) { return false; }
 

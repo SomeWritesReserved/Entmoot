@@ -13,7 +13,6 @@ namespace Entmoot.UnitTests
 	/// -Adding, removing, editing components. Adding components multiple times don't reset state. Entity component methods same as EntityArray?
 	/// -GetComponentArray()
 	/// -CopyTo()
-	/// -Make sure components are reset on entity creation.
 	/// </summary>
 	[TestFixture]
 	public class EntitySystemManagerTests
@@ -25,7 +24,9 @@ namespace Entmoot.UnitTests
 		{
 			EntitySystemManager entitySystemManager = new EntitySystemManager(new EntityArray(3, new ComponentsDefinition()), new ISystem[0]);
 			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(0, out Entity noEntity));
-			Assert.AreEqual(default(Entity), noEntity);
+			Assert.AreEqual(Entity.NoEntity, noEntity);
+			Assert.AreEqual(-1, noEntity.ID);
+			Assert.AreEqual(-1, Entity.NoEntity.ID);
 		}
 
 		[Test]
@@ -166,7 +167,7 @@ namespace Entmoot.UnitTests
 			Assert.IsTrue(entitySystemManager.EntityArray.TryCreateEntity(out Entity newEntity2));
 			Assert.AreEqual(2, newEntity2.ID);
 			Assert.IsFalse(entitySystemManager.EntityArray.TryCreateEntity(out Entity noEntity));
-			Assert.AreEqual(default(Entity), noEntity);
+			Assert.AreEqual(Entity.NoEntity, noEntity);
 			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(0, out _));
 			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(1, out _));
 			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(2, out _));
@@ -205,7 +206,7 @@ namespace Entmoot.UnitTests
 			Assert.IsFalse(entitySystemManager.EntityArray.TryGetEntity(2, out _));
 			entitySystemManager.Update();
 			Assert.IsFalse(entitySystemManager.EntityArray.TryCreateEntity(out Entity noEntityc));
-			Assert.AreEqual(default(Entity), noEntityc);
+			Assert.AreEqual(Entity.NoEntity, noEntityc);
 			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(0, out Entity fetchedEntity0c));
 			Assert.AreEqual(newEntity0, fetchedEntity0c);
 			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(1, out Entity fetchedEntity1c));
@@ -214,7 +215,7 @@ namespace Entmoot.UnitTests
 			Assert.AreEqual(newEntity2, fetchedEntity2c);
 			entitySystemManager.Update();
 			Assert.IsFalse(entitySystemManager.EntityArray.TryCreateEntity(out Entity noEntityd));
-			Assert.AreEqual(default(Entity), noEntityd);
+			Assert.AreEqual(Entity.NoEntity, noEntityd);
 			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(0, out Entity fetchedEntity0d));
 			Assert.AreEqual(newEntity0, fetchedEntity0d);
 			Assert.IsTrue(entitySystemManager.EntityArray.TryGetEntity(1, out Entity fetchedEntity1d));
@@ -305,9 +306,8 @@ namespace Entmoot.UnitTests
 		}
 
 		[Test]
-		public void Components()
+		public void EntityArray_CopyTo()
 		{
-			EntitySystemManager entitySystemManager = new EntitySystemManager(new EntityArray(3, new ComponentsDefinition()), new ISystem[0]);
 		}
 
 		#endregion Tests
@@ -321,6 +321,39 @@ namespace Entmoot.UnitTests
 			componentsDefinition.RegisterComponentType<HealthComponent>();
 			componentsDefinition.RegisterComponentType<StringComponent>();
 			return componentsDefinition;
+		}
+
+		private static EntityArray createStandardEntityArray()
+		{
+			EntityArray entityArray = new EntityArray(3, EntitySystemManagerTests.createComponentsDefinition());
+			entityArray.TryCreateEntity(out Entity entity0);
+			entityArray.TryCreateEntity(out Entity entity1);
+			entityArray.TryCreateEntity(out Entity entity2);
+			entity0.AddComponent<PositionComponent2D>().PositionX = 60.5f;
+			entity0.AddComponent<PositionComponent2D>().PositionX = 60.9f;
+			entity1.AddComponent<PositionComponent2D>().PositionX = 61.5f;
+			entity1.AddComponent<PositionComponent2D>().PositionX = 61.9f;
+			entity1.AddComponent<PositionComponent2D>().PositionX = 62.5f;
+			entity1.AddComponent<PositionComponent2D>().PositionX = 62.9f;
+			//entity0.AddComponent<HealthComponent>().HealthAmount = 70;
+			entity1.AddComponent<HealthComponent>().HealthAmount = 71;
+			entity2.AddComponent<HealthComponent>().HealthAmount = 72;
+			entity0.AddComponent<StringComponent>().StringValue = "entity0";
+			entity1.AddComponent<StringComponent>().StringValue = "entity1";
+			//entity2.AddComponent<StringComponent>().StringValue = "entity2";
+			entityArray.RemoveEntity(entity1);
+			EntitySystemManagerTests.assertStandardEntityArray(entityArray);
+			return entityArray;
+		}
+
+		private static void assertStandardEntityArray(EntityArray entityArray)
+		{
+			Assert.IsTrue(entityArray.TryGetEntity(0, out Entity entity0));
+			Assert.IsFalse(entityArray.TryGetEntity(1, out Entity entity1));
+			Assert.IsTrue(entityArray.TryGetEntity(2, out Entity entity2));
+			Assert.IsTrue(entity0.HasComponent<PositionComponent2D>());
+			Assert.IsTrue(entity1.HasComponent<PositionComponent2D>());
+			Assert.IsTrue(entity2.HasComponent<PositionComponent2D>());
 		}
 
 		#endregion Helpers

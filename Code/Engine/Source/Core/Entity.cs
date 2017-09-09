@@ -14,6 +14,9 @@ namespace Entmoot.Engine
 	{
 		#region Fields
 
+		/// <summary>Represents a reference to an entity that does not actually exist.</summary>
+		public static readonly Entity NoEntity = new Entity(null, -1);
+
 		private readonly EntityArray parentEntityArray;
 
 		#endregion Fields
