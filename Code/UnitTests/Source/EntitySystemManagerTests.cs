@@ -303,10 +303,37 @@ namespace Entmoot.UnitTests
 		}
 
 		[Test]
-		public void EntityArray_CopyTo()
+		public void EntityArray_CopyTo_Empty()
 		{
 			EntityArray sourceEntityArray = EntitySystemManagerTests.createStandardEntityArray();
 			EntityArray destinationEntityArray = new EntityArray(3, EntitySystemManagerTests.createComponentsDefinition());
+			sourceEntityArray.CopyTo(destinationEntityArray);
+			EntitySystemManagerTests.assertStandardEntityArray(destinationEntityArray);
+		}
+
+		[Test]
+		public void EntityArray_CopyTo_Overwrite()
+		{
+			EntityArray sourceEntityArray = EntitySystemManagerTests.createStandardEntityArray();
+			EntityArray destinationEntityArray = new EntityArray(3, EntitySystemManagerTests.createComponentsDefinition());
+			destinationEntityArray.BeginUpdate();
+			destinationEntityArray.TryCreateEntity(out Entity entity0);
+			destinationEntityArray.TryCreateEntity(out Entity entity1);
+			destinationEntityArray.TryCreateEntity(out Entity entity2);
+			entity0.AddComponent<PositionComponent2D>().PositionX = 901;
+			entity0.AddComponent<PositionComponent2D>().PositionY = 902;
+			entity1.AddComponent<PositionComponent2D>().PositionX = 911;
+			entity1.AddComponent<PositionComponent2D>().PositionY = 912;
+			entity2.AddComponent<PositionComponent2D>().PositionX = 921;
+			entity2.AddComponent<PositionComponent2D>().PositionY = 922;
+			entity0.AddComponent<HealthComponent>().HealthAmount = 200;
+			entity1.AddComponent<HealthComponent>().HealthAmount = 201;
+			entity2.AddComponent<HealthComponent>().HealthAmount = 202;
+			entity0.AddComponent<StringComponent>().StringValue = "z0";
+			entity1.AddComponent<StringComponent>().StringValue = "z1";
+			entity2.AddComponent<StringComponent>().StringValue = "z2";
+			destinationEntityArray.RemoveEntity(entity0);
+			destinationEntityArray.EndUpdate();
 			sourceEntityArray.CopyTo(destinationEntityArray);
 			EntitySystemManagerTests.assertStandardEntityArray(destinationEntityArray);
 		}
