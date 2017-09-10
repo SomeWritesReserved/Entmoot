@@ -7,98 +7,65 @@ using System.Threading.Tasks;
 
 namespace Entmoot.Engine
 {
-	public class StateSnapshot
+	/// <summary>
+	/// Represents a snapshot in time of entity state on the server.
+	/// </summary>
+	public class EntitySnapshot
 	{
-		#region Fields
+		#region Constructors
 
-		public int ServerFrameTick = -1;
-		public int AcknowledgedClientTick = -1;
-		public int ClientOwnedEntity = -1;
-		public Entity[] Entities;
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		public EntitySnapshot(int entityCapacity, ComponentsDefinition componentsDefinition)
+		{
+			this.ServerFrameTick = -1;
+			this.EntityArray = new EntityArray(entityCapacity, componentsDefinition);
+		}
 
-		#endregion Fields
+		#endregion Constructors
+
+		#region Properties
+
+		/// <summary>
+		/// Gets the frame tick on the server that this snapshot was taken at.
+		/// </summary>
+		public int ServerFrameTick { get; private set; }
+
+		/// <summary>
+		/// Gets the array of entities as they existed at the point in time at <see cref="ServerFrameTick"/>.
+		/// </summary>
+		public EntityArray EntityArray { get; }
+
+		#endregion Properties
 
 		#region Methods
 
-		public static StateSnapshot Clone(StateSnapshot stateSnapshot)
+		/// <summary>
+		/// Updates this snapshot to be a new snapshot at a new point in time, given the new server frame tick and new entities.
+		/// </summary>
+		public void UpdateFrom(int serverFrameTick, EntityArray entityArray)
 		{
-			Entity[] interpolatedEntities = new Entity[stateSnapshot.Entities.Length];
-			foreach (int entityIndex in Enumerable.Range(0, interpolatedEntities.Length))
-			{
-				interpolatedEntities[entityIndex] = new Entity()
-				{
-					Position = stateSnapshot.Entities[entityIndex].Position,
-				};
-			}
-			return new StateSnapshot()
-			{
-				ServerFrameTick = stateSnapshot.ServerFrameTick,
-				Entities = interpolatedEntities,
-			};
+			this.ServerFrameTick = serverFrameTick;
+			entityArray.CopyTo(this.EntityArray);
 		}
 
-		public static StateSnapshot Interpolate(StateSnapshot stateSnapshotA, StateSnapshot stateSnapshotB, int frameTick)
+		/// <summary>
+		/// Writes this snapshot's data to a binary source.
+		/// </summary>
+		public void Serialize(BinaryWriter binaryWriter)
 		{
-			float amount = ((float)frameTick - stateSnapshotA.ServerFrameTick) / ((float)stateSnapshotB.ServerFrameTick - stateSnapshotA.ServerFrameTick);
-
-			Entity[] interpolatedEntities = new Entity[stateSnapshotA.Entities.Length];
-			foreach (int entityIndex in Enumerable.Range(0, interpolatedEntities.Length))
-			{
-				interpolatedEntities[entityIndex] = new Entity()
-				{
-					Position = Vector3.Interpolate(stateSnapshotA.Entities[entityIndex].Position, stateSnapshotB.Entities[entityIndex].Position, amount),
-				};
-			}
-			return new StateSnapshot()
-			{
-				ServerFrameTick = frameTick,
-				Entities = interpolatedEntities,
-			};
+			binaryWriter.Write(this.ServerFrameTick);
+			this.EntityArray.Serialize(binaryWriter);
 		}
 
-		public static StateSnapshot DeserializePacket(byte[] packet)
+		/// <summary>
+		/// Reads and overwrites this snapshot with data from a binary source.
+		/// </summary>
+		public void Deserialize(BinaryReader binaryReader)
 		{
-			StateSnapshot stateSnapshot = new StateSnapshot();
-			using (MemoryStream memoryStream = new MemoryStream(packet, 0, packet.Length, false))
-			{
-				using (BinaryReader binaryReader = new BinaryReader(memoryStream))
-				{
-					stateSnapshot.ServerFrameTick = binaryReader.ReadInt32();
-					stateSnapshot.AcknowledgedClientTick = binaryReader.ReadInt32();
-					stateSnapshot.ClientOwnedEntity = binaryReader.ReadInt32();
-					List<Entity> entities = new List<Entity>(16);
-					while (memoryStream.Position < memoryStream.Length)
-					{
-						entities.Add(new Entity()
-						{
-							Position = new Vector3(binaryReader.ReadSingle(), binaryReader.ReadSingle(), binaryReader.ReadSingle()),
-						});
-					}
-					stateSnapshot.Entities = entities.ToArray();
-				}
-			}
-			return stateSnapshot;
-		}
-
-		public byte[] SerializePacket()
-		{
-			byte[] packet = new byte[sizeof(int) + sizeof(int) + sizeof(int) + sizeof(float) * 3 * this.Entities.Length];
-			using (MemoryStream memoryStream = new MemoryStream(packet, 0, packet.Length, true))
-			{
-				using (BinaryWriter binaryWriter = new BinaryWriter(memoryStream))
-				{
-					binaryWriter.Write(this.ServerFrameTick);
-					binaryWriter.Write(this.AcknowledgedClientTick);
-					binaryWriter.Write(this.ClientOwnedEntity);
-					foreach (Entity entity in this.Entities)
-					{
-						binaryWriter.Write(entity.Position.X);
-						binaryWriter.Write(entity.Position.Y);
-						binaryWriter.Write(entity.Position.Z);
-					}
-				}
-			}
-			return packet;
+			this.ServerFrameTick = binaryReader.ReadInt32();
+			this.EntityArray.Deserialize(binaryReader);
 		}
 
 		#endregion Methods
