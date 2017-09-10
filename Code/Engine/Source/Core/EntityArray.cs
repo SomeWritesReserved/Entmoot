@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -128,6 +129,30 @@ namespace Entmoot.Engine
 			for (int componentTypeID = 0; componentTypeID < this.componentArrays.Count; componentTypeID++)
 			{
 				this.componentArrays[componentTypeID].CopyTo(other.componentArrays[componentTypeID]);
+			}
+		}
+
+		/// <summary>
+		/// Writes all entity and component data to a binary source.
+		/// </summary>
+		public void Serialize(BinaryWriter binaryWriter)
+		{
+			for (int i = 0; i < this.entityStates.Length; i++) { binaryWriter.Write((byte)this.entityStates[i]); }
+			for (int componentTypeID = 0; componentTypeID < this.componentArrays.Count; componentTypeID++)
+			{
+				this.componentArrays[componentTypeID].Serialize(binaryWriter);
+			}
+		}
+
+		/// <summary>
+		/// Reads and overwrites all current entity and component data from a binary source.
+		/// </summary>
+		public void Deserialize(BinaryReader binaryReader)
+		{
+			for (int i = 0; i < this.entityStates.Length; i++) { this.entityStates[i] = (EntityState)binaryReader.ReadByte(); }
+			for (int componentTypeID = 0; componentTypeID < this.componentArrays.Count; componentTypeID++)
+			{
+				this.componentArrays[componentTypeID].Deserialize(binaryReader);
 			}
 		}
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -37,6 +38,16 @@ namespace Entmoot.Engine
 		/// Copies all component data to another component array.
 		/// </summary>
 		void CopyTo(IComponentArray other);
+
+		/// <summary>
+		/// Writes the state of all component data to a binary source.
+		/// </summary>
+		void Serialize(BinaryWriter binaryWriter);
+
+		/// <summary>
+		/// Reads and overwrites the current state of all component data from a binary source.
+		/// </summary>
+		void Deserialize(BinaryReader binaryReader);
 
 		#endregion Methods
 	}
@@ -139,6 +150,30 @@ namespace Entmoot.Engine
 			this.CopyTo((ComponentArray<TComponent>)other);
 		}
 
+		/// <summary>
+		/// Writes the state of all component data to a binary source.
+		/// </summary>
+		public void Serialize(BinaryWriter binaryWriter)
+		{
+			this.componentStates.Serialize(binaryWriter);
+			for (int componentIndex = 0; componentIndex < this.Capacity; componentIndex++)
+			{
+				this.components[componentIndex].Serialize(binaryWriter);
+			}
+		}
+
+		/// <summary>
+		/// Reads and overwrites the current state of all component data from a binary source.
+		/// </summary>
+		public void Deserialize(BinaryReader binaryReader)
+		{
+			this.componentStates.Deserialize(binaryReader);
+			for (int componentIndex = 0; componentIndex < this.Capacity; componentIndex++)
+			{
+				this.components[componentIndex].Deserialize(binaryReader);
+			}
+		}
+
 		#endregion Methods
 	}
 
@@ -148,6 +183,16 @@ namespace Entmoot.Engine
 	public interface IComponent<TComponent>
 	{
 		#region Methods
+
+		/// <summary>
+		/// Writes the state of this specific component to a binary source.
+		/// </summary>
+		void Serialize(BinaryWriter binaryWriter);
+
+		/// <summary>
+		/// Reads and overwrites the current state of this specific component from a binary source.
+		/// </summary>
+		void Deserialize(BinaryReader binaryReader);
 
 		#endregion Methods
 	}

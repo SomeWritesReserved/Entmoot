@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -338,6 +339,73 @@ namespace Entmoot.UnitTests
 			EntitySystemManagerTests.assertStandardEntityArray(destinationEntityArray);
 		}
 
+		[Test]
+		public void EntityArray_Serialize_Empty()
+		{
+			EntityArray sourceEntityArray = EntitySystemManagerTests.createStandardEntityArray();
+			EntityArray destinationEntityArray = new EntityArray(3, EntitySystemManagerTests.createComponentsDefinition());
+			byte[] serializedBytes;
+			using (MemoryStream memoryStream = new MemoryStream())
+			{
+				using (BinaryWriter binaryWriter = new BinaryWriter(memoryStream))
+				{
+					sourceEntityArray.Serialize(binaryWriter);
+					serializedBytes = memoryStream.ToArray();
+				}
+			}
+			using (MemoryStream memoryStream = new MemoryStream(serializedBytes))
+			{
+				using (BinaryReader binaryReader = new BinaryReader(memoryStream))
+				{
+					destinationEntityArray.Deserialize(binaryReader);
+				}
+			}
+			EntitySystemManagerTests.assertStandardEntityArray(destinationEntityArray);
+		}
+
+		[Test]
+		public void EntityArray_Serialize_Overwrite()
+		{
+			EntityArray sourceEntityArray = EntitySystemManagerTests.createStandardEntityArray();
+			EntityArray destinationEntityArray = new EntityArray(3, EntitySystemManagerTests.createComponentsDefinition());
+			destinationEntityArray.BeginUpdate();
+			destinationEntityArray.TryCreateEntity(out Entity entity0);
+			destinationEntityArray.TryCreateEntity(out Entity entity1);
+			destinationEntityArray.TryCreateEntity(out Entity entity2);
+			entity0.AddComponent<PositionComponent2D>().PositionX = 901;
+			entity0.AddComponent<PositionComponent2D>().PositionY = 902;
+			entity1.AddComponent<PositionComponent2D>().PositionX = 911;
+			entity1.AddComponent<PositionComponent2D>().PositionY = 912;
+			entity2.AddComponent<PositionComponent2D>().PositionX = 921;
+			entity2.AddComponent<PositionComponent2D>().PositionY = 922;
+			entity0.AddComponent<HealthComponent>().HealthAmount = 200;
+			entity1.AddComponent<HealthComponent>().HealthAmount = 201;
+			entity2.AddComponent<HealthComponent>().HealthAmount = 202;
+			entity0.AddComponent<StringComponent>().StringValue = "z0";
+			entity1.AddComponent<StringComponent>().StringValue = "z1";
+			entity2.AddComponent<StringComponent>().StringValue = "z2";
+			destinationEntityArray.RemoveEntity(entity0);
+			destinationEntityArray.EndUpdate();
+			byte[] serializedBytes;
+			using (MemoryStream memoryStream = new MemoryStream())
+			{
+				using (BinaryWriter binaryWriter = new BinaryWriter(memoryStream))
+				{
+					sourceEntityArray.Serialize(binaryWriter);
+					serializedBytes = memoryStream.ToArray();
+				}
+			}
+			using (MemoryStream memoryStream = new MemoryStream(serializedBytes))
+			{
+				using (BinaryReader binaryReader = new BinaryReader(memoryStream))
+				{
+					destinationEntityArray.Deserialize(binaryReader);
+					Assert.AreEqual(memoryStream.Length, memoryStream.Position);
+				}
+			}
+			EntitySystemManagerTests.assertStandardEntityArray(destinationEntityArray);
+		}
+
 		#endregion Tests
 
 		#region Helpers
@@ -401,18 +469,74 @@ namespace Entmoot.UnitTests
 
 		public struct PositionComponent2D : IComponent<PositionComponent2D>
 		{
+			#region Fields
+
 			public float PositionX;
 			public float PositionY;
+
+			#endregion Fields
+
+			#region Methods
+
+			public void Serialize(BinaryWriter binaryWriter)
+			{
+				binaryWriter.Write(this.PositionX);
+				binaryWriter.Write(this.PositionY);
+			}
+
+			public void Deserialize(BinaryReader binaryReader)
+			{
+				this.PositionX = binaryReader.ReadSingle();
+				this.PositionY = binaryReader.ReadSingle();
+			}
+
+			#endregion Methods
 		}
 
 		public struct HealthComponent : IComponent<HealthComponent>
 		{
+			#region Fields
+
 			public int HealthAmount;
+
+			#endregion Fields
+
+			#region Methods
+
+			public void Serialize(BinaryWriter binaryWriter)
+			{
+				binaryWriter.Write(this.HealthAmount);
+			}
+
+			public void Deserialize(BinaryReader binaryReader)
+			{
+				this.HealthAmount = binaryReader.ReadInt32();
+			}
+
+			#endregion Methods
 		}
 
 		public struct StringComponent : IComponent<StringComponent>
 		{
+			#region Fields
+
 			public string StringValue;
+
+			#endregion Fields
+
+			#region Methods
+
+			public void Serialize(BinaryWriter binaryWriter)
+			{
+				binaryWriter.Write(this.StringValue ?? "");
+			}
+
+			public void Deserialize(BinaryReader binaryReader)
+			{
+				this.StringValue = binaryReader.ReadString();
+			}
+
+			#endregion Methods
 		}
 
 		#endregion Nested Types
