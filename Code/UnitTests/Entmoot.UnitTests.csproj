@@ -44,8 +44,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Source\EntityManagerTests.cs" />
+    <Compile Include="Source\EntitySystemManagerTests.cs" />
     <Compile Include="Source\NetworkClientTests.cs" />
+    <Compile Include="Source\StateArrayTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Engine\Entmoot.Engine.csproj">
