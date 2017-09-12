@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 namespace Entmoot.Engine
 {
 	/// <summary>
-	/// An authoritative server that will host clients in a simulation of entities, where <see cref="TCommandData"/>
-	/// is the type of data expected from clients as a command.
+	/// An authoritative server that will host clients in a simulation of entities.
 	/// </summary>
+	/// <typeparam name="TCommandData">The type of data expected from clients as a command.</typeparam>
 	public class Server<TCommandData>
 		where TCommandData : struct, ICommandData
 	{
@@ -110,9 +110,9 @@ namespace Entmoot.Engine
 			#region Fields
 
 			/// <summary>The parent server that owns this client connection.</summary>
-			private Server<TCommandData> parentServer;
+			private readonly Server<TCommandData> parentServer;
 			/// <summary>The network connection that communicates to the client.</summary>
-			private INetworkConnection clientNetworkConnection;
+			private readonly INetworkConnection clientNetworkConnection;
 
 			#endregion Fields
 

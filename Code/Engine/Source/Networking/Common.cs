@@ -42,12 +42,24 @@ namespace Entmoot.Engine
 		#region Methods
 
 		/// <summary>
+		/// Updates this snapshot to be the same as the given other snapshot.
+		/// </summary>
+		public void CopyFrom(EntitySnapshot other)
+		{
+			this.UpdateFrom(other.ServerFrameTick, other.EntityArray);
+		}
+
+		/// <summary>
 		/// Updates this snapshot to be a new snapshot at a new point in time, given the new server frame tick and new entities.
 		/// </summary>
 		public void UpdateFrom(int serverFrameTick, EntityArray entityArray)
 		{
 			this.ServerFrameTick = serverFrameTick;
 			entityArray.CopyTo(this.EntityArray);
+		}
+
+		public void Interpolate(EntitySnapshot fromSnapshot, EntitySnapshot toSnapshot, int interpolationFrameTick, int serverFrameTick)
+		{
 		}
 
 		/// <summary>

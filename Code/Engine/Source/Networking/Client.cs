@@ -1,28 +1,58 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Entmoot.Engine
 {
+	/// <summary>
+	/// A dumb client that connects to a server host which dictates the state of the simulation.
+	/// </summary>
+	/// <typeparam name="TCommandData">The type of data that will be sent to the server as a command.</typeparam>
 	public class Client<TCommandData>
 		where TCommandData : struct, ICommandData
 	{
 		#region Fields
 
-		private INetworkConnection serverNetworkConnection;
-		public SortedList<int, StateSnapshot> ReceivedStateSnapshots = new SortedList<int, StateSnapshot>(64);
-		public List<ClientCommand<TCommandData>> SentClientCommands = new List<ClientCommand<TCommandData>>(64);
-		private SortedList<int, Vector3> predictedPositions = new SortedList<int, Vector3>();
+		/// <summary>The network connect to the host server.</summary>
+		private readonly INetworkConnection serverNetworkConnection;
+		/// <summary>The history of entity state snapshots received from the server, note that these are not in any order at all.</summary>
+		private readonly EntitySnapshot[] entitySnapshotHistory;
+		/// <summary>The history of client commands recoreded and sent to the server.</summary>
+		private readonly Queue<ClientCommand<TCommandData>> clientCommandHistory;
+		/// <summary>The collection of systems that will update entities.</summary>
+		private readonly SystemCollection systemCollection;
+		/// <summary>The snapshot to use purely for deserializing incoming packets.</summary>
+		private readonly EntitySnapshot deserializedEntitySnapshot;
 
 		#endregion Fields
 
 		#region Constructors
 
-		public Client(INetworkConnection serverNetworkConnection)
+		/// <summary>
+		/// Constructor.
+		/// </summary>
+		public Client(INetworkConnection serverNetworkConnection, int maxHistory, int entityCapacity, ComponentsDefinition componentsDefinition, IEnumerable<ISystem> systems)
 		{
 			this.serverNetworkConnection = serverNetworkConnection;
+			this.systemCollection = new SystemCollection(systems);
+
+			// Create the snapshots that will need to be mutated/updates, these need to be separately created to avoid accidentally mutating another snapshot reference
+			this.InterpolationStartSnapshot = new EntitySnapshot(entityCapacity, componentsDefinition);
+			this.InterpolationEndSnapshot = new EntitySnapshot(entityCapacity, componentsDefinition);
+			this.RenderedSnapshot = new EntitySnapshot(entityCapacity, componentsDefinition);
+			this.deserializedEntitySnapshot = new EntitySnapshot(entityCapacity, componentsDefinition);
+
+			// Populate the whole history buffer with data that will be overwritten as needed
+			this.entitySnapshotHistory = new EntitySnapshot[maxHistory];
+			this.clientCommandHistory = new Queue<ClientCommand<TCommandData>>(maxHistory);
+			for (int i = 0; i < maxHistory; i++)
+			{
+				this.entitySnapshotHistory[i] = new EntitySnapshot(entityCapacity, componentsDefinition);
+				this.clientCommandHistory.Enqueue(new ClientCommand<TCommandData>());
+			}
 		}
 
 		#endregion Constructors
@@ -41,25 +71,25 @@ namespace Entmoot.Engine
 		/// <summary>Gets the current frame tick of the client (which may or may not be ahead of the tick that is currently being rendered).</summary>
 		public int FrameTick { get; private set; }
 		/// <summary>Gets the last server tick that was actually received from the server.</summary>
-		public int LatestReceivedServerTick { get; private set; } = -1;
+		public int LatestServerTickAcknowledgedByClient { get; private set; } = -1;
 		/// <summary>Gets the last client tick that was acknowledged by the server.</summary>
-		public int LatestTickAcknowledgedByServer { get; private set; } = -1;
+		public int LatestClientTickAcknowledgedByServer { get; private set; } = -1;
 		/// <summary>Gets the entity that is currently owned by this client (and might take part in client-side prediction).</summary>
-		public int CurrentOwnedEntity { get; private set; } = -1;
+		public int OwnedEntity { get; private set; } = -1;
 
 		/// <summary>Gets whether or not the client has enough data from the server to start interpolation and that indeed interpolation has begun.</summary>
-		public bool HasInterpolationStarted { get { return (this.InterpolationStartState != null && this.InterpolationEndState != null); } }
+		public bool HasInterpolationStarted { get { return (this.InterpolationStartSnapshot != null && this.InterpolationEndSnapshot != null); } }
 		/// <summary>Gets the number of total frames (over the course of the entire session) that had to be extrapolated (instead of interpolated) due to packet loss.</summary>
 		public int NumberOfExtrapolatedFrames { get; private set; }
 		/// <summary>Gets the number of total frames (over the course of the entire session) that had no interpolation or extrapolation due to severe packet loss and <see cref="MaxExtrapolationTicks"/>.</summary>
 		public int NumberOfNoInterpolationFrames { get; private set; }
 
-		/// <summary>Gets the <see cref="StateSnapshot"/> that is currently being used as the starting interpolation tick (where we are coming from).</summary>
-		public StateSnapshot InterpolationStartState { get; private set; }
-		/// <summary>Gets the <see cref="StateSnapshot"/> that is currently being used as the ending interpolation tick (where we are going to).</summary>
-		public StateSnapshot InterpolationEndState { get; private set; }
-		/// <summary>Gets the <see cref="StateSnapshot"/> that is currently the actively rendered state.</summary>
-		public StateSnapshot RenderedState { get; private set; }
+		/// <summary>Gets the entity snapshot that is currently being used as the starting interpolation tick (where we are coming from).</summary>
+		public EntitySnapshot InterpolationStartSnapshot { get; }
+		/// <summary>Gets the entity snapshot that is currently being used as the ending interpolation tick (where we are going to).</summary>
+		public EntitySnapshot InterpolationEndSnapshot { get; }
+		/// <summary>Gets the entity snapshot that is currently the actively rendered state.</summary>
+		public EntitySnapshot RenderedSnapshot { get; }
 
 		#endregion Properties
 
@@ -67,7 +97,7 @@ namespace Entmoot.Engine
 
 		public void Update(TCommandData commandData)
 		{
-			if (this.LatestReceivedServerTick >= 0)
+			if (this.LatestServerTickAcknowledgedByClient >= 0)
 			{
 				// Only tick the client if we started getting info from the server
 				this.FrameTick++;
@@ -76,43 +106,64 @@ namespace Entmoot.Engine
 			byte[] packet;
 			while ((packet = this.serverNetworkConnection.GetNextIncomingPacket()) != null)
 			{
-				StateSnapshot stateSnapshot = StateSnapshot.DeserializePacket(packet);
-				this.ReceivedStateSnapshots.Add(stateSnapshot.ServerFrameTick, stateSnapshot);
-
-				if (this.LatestReceivedServerTick < 0)
+				int newLatestClientTickAcknowledgedByServer;
+				int newOwnedEntity;
+				using (MemoryStream memoryStream = new MemoryStream(packet))
 				{
-					// Sync our ticks with the server's ticks once we start getting some data from the server
-					this.FrameTick = stateSnapshot.ServerFrameTick;
+					using (BinaryReader binaryReader = new BinaryReader(memoryStream))
+					{
+						newLatestClientTickAcknowledgedByServer = binaryReader.ReadInt32();
+						newOwnedEntity = binaryReader.ReadInt32();
+						this.deserializedEntitySnapshot.Deserialize(binaryReader);
+					}
 				}
 
-				if (this.LatestReceivedServerTick < stateSnapshot.ServerFrameTick)
+				// Get the oldest entity snapshot in the buffer that will be overwritten with the new incoming data
+				EntitySnapshot oldestHistoryEntitySnapshot = this.getOldestHistoryEntitySnapshot();
+
+				// If the new packet isn't actually new, ignore it
+				if (this.deserializedEntitySnapshot.ServerFrameTick <= oldestHistoryEntitySnapshot.ServerFrameTick) { continue; }
+
+				// Replace the snapshot in the history buffer with what we just got from the server
+				oldestHistoryEntitySnapshot.CopyFrom(this.deserializedEntitySnapshot);
+
+				if (this.LatestServerTickAcknowledgedByClient < 0)
 				{
-					this.LatestReceivedServerTick = stateSnapshot.ServerFrameTick;
-					this.CurrentOwnedEntity = stateSnapshot.ClientOwnedEntity;
+					// Sync our ticks with the server's ticks once we start getting some data from the server
+					this.FrameTick = this.deserializedEntitySnapshot.ServerFrameTick;
+				}
+
+				if (this.LatestServerTickAcknowledgedByClient < this.deserializedEntitySnapshot.ServerFrameTick)
+				{
+					// This snapshot is the latest update we've gotten from the server so update our state accordingly
+					this.LatestServerTickAcknowledgedByClient = this.deserializedEntitySnapshot.ServerFrameTick;
+					this.LatestClientTickAcknowledgedByServer = newLatestClientTickAcknowledgedByServer;
+					this.OwnedEntity = newOwnedEntity;
 				}
 			}
 
 			if (this.HasInterpolationStarted)
 			{
-				this.SentClientCommands.Add(new ClientCommand<TCommandData>()
+				this.clientCommandHistory.Dequeue();
+				this.clientCommandHistory.Enqueue(new ClientCommand<TCommandData>()
 				{
 					ClientFrameTick = this.FrameTick,
-					AcknowledgedServerTick = this.LatestReceivedServerTick,
-					InterpolationStartTick = this.InterpolationStartState.ServerFrameTick,
-					InterpolationEndTick = this.InterpolationEndState.ServerFrameTick,
+					AcknowledgedServerTick = this.LatestServerTickAcknowledgedByClient,
+					InterpolationStartTick = this.InterpolationStartSnapshot.ServerFrameTick,
+					InterpolationEndTick = this.InterpolationEndSnapshot.ServerFrameTick,
 					RenderedFrameTick = this.FrameTick - this.InterpolationRenderDelay,
-					CommandingEntity = this.CurrentOwnedEntity,
+					CommandingEntity = this.OwnedEntity,
 					CommandData = commandData,
 				});
-				this.serverNetworkConnection.SendPacket(ClientCommand<TCommandData>.SerializeCommands(this.SentClientCommands.Where((cmd) => cmd.ClientFrameTick > this.LatestTickAcknowledgedByServer).ToArray()));
+				this.serverNetworkConnection.SendPacket(ClientCommand<TCommandData>.SerializeCommands(this.clientCommandHistory.Where((cmd) => cmd.ClientFrameTick > this.LatestClientTickAcknowledgedByServer).ToArray()));
 			}
 
 			this.setupRenderSnapshot();
 
 			// Client side prediction
-			if (this.ShouldPredictInput && this.RenderedState != null && this.CurrentOwnedEntity != -1)
+			if (this.ShouldPredictInput && this.RenderedSnapshot != null && this.OwnedEntity != -1)
 			{
-				StateSnapshot latestStateSnapshot = this.ReceivedStateSnapshots.Last().Value;
+				/*StateSnapshot latestStateSnapshot = this.ReceivedStateSnapshots.Last().Value;
 				Entity predictedEntity = new Entity() { Position = latestStateSnapshot.Entities[this.CurrentOwnedEntity].Position };
 				foreach (ClientCommand<TCommandData> clientCommandNotAckedByServer in this.SentClientCommands.Where((cmd) => cmd.ClientFrameTick > latestStateSnapshot.AcknowledgedClientTick))
 				{
@@ -124,10 +175,13 @@ namespace Entmoot.Engine
 					clientCommandNotAckedByServer.CommandData.ApplyToEntity(predictedEntity);
 				}
 				this.RenderedState.Entities[this.CurrentOwnedEntity].Position = predictedEntity.Position;
-				this.predictedPositions.Add(this.FrameTick, predictedEntity.Position);
+				this.predictedPositions.Add(this.FrameTick, predictedEntity.Position);*/
 			}
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
 		private void setupRenderSnapshot()
 		{
 			int renderedFrameTick = this.FrameTick - this.InterpolationRenderDelay;
@@ -136,72 +190,84 @@ namespace Entmoot.Engine
 			{
 				// We haven't received enough data from the server yet to start interpolation rendering,
 				// so keep polling until we get enough data, once we have enough data we can begin rendering.
-				StateSnapshot interpolationStartState = null;
-				StateSnapshot interpolationEndState = null;
-				foreach (var kvp in this.ReceivedStateSnapshots)
+				EntitySnapshot newInterpolationStartSnapshot = null;
+				EntitySnapshot newInterpolationEndSnapshot = null;
+				foreach (EntitySnapshot entitySnapshot in this.entitySnapshotHistory)
 				{
-					StateSnapshot stateSnapshot = kvp.Value;
-					// Todo: these should be more intelligent and grab the closest packets in either direction
-					// Todo: make sure we can grab the end packet on the last frame of the interpolation range
-					if (stateSnapshot.ServerFrameTick <= renderedFrameTick)
+					// The snapshot history isn't in any order so we need to check every snapshot for the closest ticks in both directions (start and end)
+					if (entitySnapshot.ServerFrameTick <= renderedFrameTick && (newInterpolationStartSnapshot == null || entitySnapshot.ServerFrameTick > newInterpolationStartSnapshot.ServerFrameTick))
 					{
-						interpolationStartState = stateSnapshot;
+						newInterpolationStartSnapshot = entitySnapshot;
 					}
-					if (stateSnapshot.ServerFrameTick > renderedFrameTick)
+					if (entitySnapshot.ServerFrameTick > renderedFrameTick && (newInterpolationEndSnapshot == null || entitySnapshot.ServerFrameTick < newInterpolationEndSnapshot.ServerFrameTick))
 					{
-						interpolationEndState = stateSnapshot;
-						break;
+						newInterpolationEndSnapshot = entitySnapshot;
 					}
 				}
-				if (interpolationStartState != null && interpolationEndState != null)
+				if (newInterpolationStartSnapshot != null && newInterpolationEndSnapshot != null)
 				{
-					this.InterpolationStartState = interpolationStartState;
-					this.InterpolationEndState = interpolationEndState;
+					this.InterpolationStartSnapshot.CopyFrom(newInterpolationStartSnapshot);
+					this.InterpolationEndSnapshot.CopyFrom(newInterpolationEndSnapshot);
 				}
 			}
 
 			// Check to see if we still can't interpolate after going through the latest receieved updates
 			if (!this.HasInterpolationStarted) { return; }
 
-			if (renderedFrameTick > this.InterpolationEndState.ServerFrameTick)
+			if (renderedFrameTick > this.InterpolationEndSnapshot.ServerFrameTick)
 			{
-				// Find the next closest state snapshot to start interpolating to
-				StateSnapshot closestSnapshot = null;
-				foreach (var kvp in this.ReceivedStateSnapshots)
+				// Find the next closest entity snapshot to start interpolating to
+				EntitySnapshot newInterpolationEndSnapshot = null;
+				foreach (EntitySnapshot entitySnapshot in this.entitySnapshotHistory)
 				{
-					StateSnapshot stateSnapshot = kvp.Value;
-					if (stateSnapshot.ServerFrameTick >= renderedFrameTick && (closestSnapshot == null || closestSnapshot.ServerFrameTick > stateSnapshot.ServerFrameTick))
+					// The snapshot history isn't in any order so we need to check every snapshot closest next tick
+					if (entitySnapshot.ServerFrameTick > renderedFrameTick && (newInterpolationEndSnapshot == null || entitySnapshot.ServerFrameTick < newInterpolationEndSnapshot.ServerFrameTick))
 					{
-						closestSnapshot = stateSnapshot;
+						newInterpolationEndSnapshot = entitySnapshot;
 					}
 				}
 
-				if (closestSnapshot != null)
+				if (newInterpolationEndSnapshot != null)
 				{
-					this.InterpolationStartState = this.RenderedState;
-					this.InterpolationEndState = closestSnapshot;
+					this.InterpolationStartSnapshot.CopyFrom(this.RenderedSnapshot);
+					this.InterpolationEndSnapshot.CopyFrom(newInterpolationEndSnapshot);
 				}
 			}
 
 			if (this.ShouldInterpolate)
 			{
 				// Clamp the interpolation frame tick to the maximum number of frames we are allowed to extrapolate, then render that
-				int interpolationFrameTick = Math.Min(renderedFrameTick, this.InterpolationEndState.ServerFrameTick + this.MaxExtrapolationTicks);
-				this.RenderedState = StateSnapshot.Interpolate(this.InterpolationStartState, this.InterpolationEndState, interpolationFrameTick);
-
-				// Always make sure the rendered state has the correct frame tick, even if extrapolation was clamped
-				// Todo: Should this happen all the time, even when not interpolating? Doing so breaks the unit tests
-				this.RenderedState.ServerFrameTick = renderedFrameTick;
+				// Always make sure the rendered state has the correct rendered frame tick number, even if extrapolation was clamped
+				int interpolationFrameTick = Math.Min(renderedFrameTick, this.InterpolationEndSnapshot.ServerFrameTick + this.MaxExtrapolationTicks);
+				this.RenderedSnapshot.Interpolate(this.InterpolationStartSnapshot, this.InterpolationEndSnapshot, interpolationFrameTick, renderedFrameTick);
 
 				if (interpolationFrameTick < renderedFrameTick) { this.NumberOfNoInterpolationFrames++; }
-				else if (this.InterpolationEndState.ServerFrameTick < renderedFrameTick) { this.NumberOfExtrapolatedFrames++; }
+				else if (this.InterpolationEndSnapshot.ServerFrameTick < renderedFrameTick) { this.NumberOfExtrapolatedFrames++; }
 			}
 			else
 			{
 				// Even though we aren't interpolating, we still want to use whatever the user picked as the render delay so
 				// use the end interpolation state and just snap to it
-				this.RenderedState = this.InterpolationEndState;
+				this.RenderedSnapshot.CopyFrom(this.InterpolationEndSnapshot);
 			}
+		}
+
+		/// <summary>
+		/// Returns the oldest entity snapshot that exists in the history buffer.
+		/// </summary>
+		private EntitySnapshot getOldestHistoryEntitySnapshot()
+		{
+			// Find the oldest entity snapshot
+			EntitySnapshot oldestEntitySnapshot = this.entitySnapshotHistory[0];
+			foreach (EntitySnapshot entitySnapshot in this.entitySnapshotHistory)
+			{
+				// The snapshot history isn't in any order so we need to check every snapshot
+				if (entitySnapshot.ServerFrameTick < oldestEntitySnapshot.ServerFrameTick)
+				{
+					oldestEntitySnapshot = entitySnapshot;
+				}
+			}
+			return oldestEntitySnapshot;
 		}
 
 		#endregion Methods
