@@ -133,6 +133,18 @@ namespace Entmoot.Engine
 		}
 
 		/// <summary>
+		/// Updates the state of all entities and components to represent an interpolation between two other entity arrays.
+		/// </summary>
+		public void Interpolate(EntityArray otherA, EntityArray otherB, float amount)
+		{
+			Array.Copy(otherA.entityStates, this.entityStates, this.Capacity);
+			for (int componentTypeID = 0; componentTypeID < this.componentArrays.Count; componentTypeID++)
+			{
+				this.componentArrays[componentTypeID].Interpolate(otherA.componentArrays[componentTypeID], otherB.componentArrays[componentTypeID], amount);
+			}
+		}
+
+		/// <summary>
 		/// Writes all entity and component data to a binary source.
 		/// </summary>
 		public void Serialize(BinaryWriter binaryWriter)

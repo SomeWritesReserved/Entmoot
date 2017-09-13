@@ -478,6 +478,12 @@ namespace Entmoot.UnitTests
 
 			#region Methods
 
+			public void Interpolate(PositionComponent2D otherA, PositionComponent2D otherB, float amount)
+			{
+				this.PositionX = otherA.PositionX + (otherB.PositionX - otherA.PositionX) * amount;
+				this.PositionY = otherA.PositionY + (otherB.PositionY - otherA.PositionY) * amount;
+			}
+
 			public void Serialize(BinaryWriter binaryWriter)
 			{
 				binaryWriter.Write(this.PositionX);
@@ -503,6 +509,11 @@ namespace Entmoot.UnitTests
 
 			#region Methods
 
+			public void Interpolate(HealthComponent otherA, HealthComponent otherB, float amount)
+			{
+				this.HealthAmount = otherA.HealthAmount;
+			}
+
 			public void Serialize(BinaryWriter binaryWriter)
 			{
 				binaryWriter.Write(this.HealthAmount);
@@ -525,6 +536,11 @@ namespace Entmoot.UnitTests
 			#endregion Fields
 
 			#region Methods
+
+			public void Interpolate(StringComponent otherA, StringComponent otherB, float amount)
+			{
+				this.StringValue = otherA.StringValue;
+			}
 
 			public void Serialize(BinaryWriter binaryWriter)
 			{

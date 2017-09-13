@@ -24,7 +24,7 @@ namespace Entmoot.Engine
 		private readonly Queue<ClientCommand<TCommandData>> clientCommandHistory;
 		/// <summary>The collection of systems that will update entities.</summary>
 		private readonly SystemCollection systemCollection;
-		/// <summary>The snapshot to use purely for deserializing incoming packets.</summary>
+		/// <summary>The snapshot to use purely for deserializing incoming packets, gets reused/overwritten for every new packet.</summary>
 		private readonly EntitySnapshot deserializedEntitySnapshot;
 
 		#endregion Fields
@@ -78,7 +78,7 @@ namespace Entmoot.Engine
 		public int OwnedEntity { get; private set; } = -1;
 
 		/// <summary>Gets whether or not the client has enough data from the server to start interpolation and that indeed interpolation has begun.</summary>
-		public bool HasInterpolationStarted { get { return (this.InterpolationStartSnapshot != null && this.InterpolationEndSnapshot != null); } }
+		public bool HasInterpolationStarted { get { return (this.InterpolationStartSnapshot.ServerFrameTick != -1 && this.InterpolationEndSnapshot.ServerFrameTick != -1); } }
 		/// <summary>Gets the number of total frames (over the course of the entire session) that had to be extrapolated (instead of interpolated) due to packet loss.</summary>
 		public int NumberOfExtrapolatedFrames { get; private set; }
 		/// <summary>Gets the number of total frames (over the course of the entire session) that had no interpolation or extrapolation due to severe packet loss and <see cref="MaxExtrapolationTicks"/>.</summary>
@@ -194,6 +194,8 @@ namespace Entmoot.Engine
 				EntitySnapshot newInterpolationEndSnapshot = null;
 				foreach (EntitySnapshot entitySnapshot in this.entitySnapshotHistory)
 				{
+					if (entitySnapshot.ServerFrameTick == -1) { continue; }
+
 					// The snapshot history isn't in any order so we need to check every snapshot for the closest ticks in both directions (start and end)
 					if (entitySnapshot.ServerFrameTick <= renderedFrameTick && (newInterpolationStartSnapshot == null || entitySnapshot.ServerFrameTick > newInterpolationStartSnapshot.ServerFrameTick))
 					{

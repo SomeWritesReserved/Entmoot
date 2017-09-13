@@ -9,6 +9,31 @@ using System.Threading.Tasks;
 namespace Entmoot.Engine
 {
 	/// <summary>
+	/// Represents a specific aspect or facet of data that entities can take on, to be  managed by a component array.
+	/// </summary>
+	public interface IComponent<TComponent>
+	{
+		#region Methods
+
+		/// <summary>
+		/// Updates this component to an interpolated value between two other components.
+		/// </summary>
+		void Interpolate(TComponent otherA, TComponent otherB, float amount);
+
+		/// <summary>
+		/// Writes the state of this specific component to a binary source.
+		/// </summary>
+		void Serialize(BinaryWriter binaryWriter);
+
+		/// <summary>
+		/// Reads and overwrites the current state of this specific component from a binary source.
+		/// </summary>
+		void Deserialize(BinaryReader binaryReader);
+
+		#endregion Methods
+	}
+
+	/// <summary>
 	/// Represents an array of identically typed components that define which entities have a specific component type.
 	/// </summary>
 	public interface IComponentArray
@@ -38,6 +63,11 @@ namespace Entmoot.Engine
 		/// Copies all component data to another component array.
 		/// </summary>
 		void CopyTo(IComponentArray other);
+
+		/// <summary>
+		/// Updates all component data to interpolated values between two other components.
+		/// </summary>
+		void Interpolate(IComponentArray otherA, IComponentArray otherB, float amount);
 
 		/// <summary>
 		/// Writes the state of all component data to a binary source.
@@ -151,6 +181,27 @@ namespace Entmoot.Engine
 		}
 
 		/// <summary>
+		/// Updates all <see cref="TComponent"/> data to interpolated values between two other components.
+		/// </summary>
+		public void Interpolate(ComponentArray<TComponent> otherA, ComponentArray<TComponent> otherB, float amount)
+		{
+			Array.Copy(otherA.components, this.components, this.Capacity);
+			otherA.componentStates.CopyTo(this.componentStates);
+			for (int componentIndex = 0; componentIndex < this.Capacity; componentIndex++)
+			{
+				this.components[componentIndex].Interpolate(otherA.components[componentIndex], otherB.components[componentIndex], amount);
+			}
+		}
+
+		/// <summary>
+		/// Updates all component data to interpolated values between two other components.
+		/// </summary>
+		void IComponentArray.Interpolate(IComponentArray otherA, IComponentArray otherB, float amount)
+		{
+			this.Interpolate((ComponentArray<TComponent>)otherA, (ComponentArray<TComponent>)otherB, amount);
+		}
+
+		/// <summary>
 		/// Writes the state of all component data to a binary source.
 		/// </summary>
 		public void Serialize(BinaryWriter binaryWriter)
@@ -173,26 +224,6 @@ namespace Entmoot.Engine
 				this.components[componentIndex].Deserialize(binaryReader);
 			}
 		}
-
-		#endregion Methods
-	}
-
-	/// <summary>
-	/// Represents a specific aspect or facet of data that entities can take on, to be  managed by a component array.
-	/// </summary>
-	public interface IComponent<TComponent>
-	{
-		#region Methods
-
-		/// <summary>
-		/// Writes the state of this specific component to a binary source.
-		/// </summary>
-		void Serialize(BinaryWriter binaryWriter);
-
-		/// <summary>
-		/// Reads and overwrites the current state of this specific component from a binary source.
-		/// </summary>
-		void Deserialize(BinaryReader binaryReader);
 
 		#endregion Methods
 	}

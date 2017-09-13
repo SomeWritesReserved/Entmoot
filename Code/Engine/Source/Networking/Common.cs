@@ -52,14 +52,20 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Updates this snapshot to be a new snapshot at a new point in time, given the new server frame tick and new entities.
 		/// </summary>
-		public void UpdateFrom(int serverFrameTick, EntityArray entityArray)
+		public void UpdateFrom(int serverFrameTick, EntityArray other)
 		{
 			this.ServerFrameTick = serverFrameTick;
-			entityArray.CopyTo(this.EntityArray);
+			other.CopyTo(this.EntityArray);
 		}
 
-		public void Interpolate(EntitySnapshot fromSnapshot, EntitySnapshot toSnapshot, int interpolationFrameTick, int serverFrameTick)
+		/// <summary>
+		/// Updates this snapshot to be a new snapshot that is an interpolated state between two other snapshots.
+		/// </summary>
+		public void Interpolate(EntitySnapshot otherA, EntitySnapshot otherB, int interpolationFrameTick, int serverFrameTick)
 		{
+			float amount = ((float)interpolationFrameTick - otherA.ServerFrameTick) / ((float)otherB.ServerFrameTick - otherA.ServerFrameTick);
+			this.EntityArray.Interpolate(otherA.EntityArray, otherB.EntityArray, amount);
+			this.ServerFrameTick = serverFrameTick;
 		}
 
 		/// <summary>
