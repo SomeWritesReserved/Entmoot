@@ -649,25 +649,27 @@ namespace Entmoot.UnitTests
 			mockClient.Update(keys);
 			Client<MockCommandData> engineClient = mockClient.EngineClient;
 			Assert.AreEqual(clientFrameTick, engineClient.FrameTick, "Unexpected FrameTick at tick " + mockClient.NetworkTick);
-			Assert.AreEqual(recievedServerFrameTick, engineClient.LatestReceivedServerTick, "Unexpected LatestReceivedServerTick at tick " + mockClient.NetworkTick);
+			Assert.AreEqual(recievedServerFrameTick, engineClient.LatestServerTickAcknowledgedByClient, "Unexpected LatestServerTickAcknowledgedByClient at tick " + mockClient.NetworkTick);
 			Assert.AreEqual(hasInterpStarted, engineClient.HasInterpolationStarted, "Unexpected HasInterpolationStarted at tick " + mockClient.NetworkTick);
-			Assert.AreEqual(hasInterpStarted, engineClient.InterpolationStartState != null, "Unexpected InterpolationStartState at tick " + mockClient.NetworkTick);
-			Assert.AreEqual(hasInterpStarted, engineClient.InterpolationEndState != null, "Unexpected InterpolationEndState at tick " + mockClient.NetworkTick);
+			Assert.AreEqual(hasInterpStarted, engineClient.InterpolationStartSnapshot != null, "Unexpected InterpolationStartSnapshot at tick " + mockClient.NetworkTick);
+			Assert.AreEqual(hasInterpStarted, engineClient.InterpolationEndSnapshot != null, "Unexpected InterpolationEndSnapshot at tick " + mockClient.NetworkTick);
 			Assert.AreEqual(extrapolatedFrames, engineClient.NumberOfExtrapolatedFrames, "Unexpected NumberOfExtrapolatedFrames at tick " + mockClient.NetworkTick);
 			Assert.AreEqual(noInterpFrames, engineClient.NumberOfNoInterpolationFrames, "Unexpected NumberOfNoInterpolationFrames at tick " + mockClient.NetworkTick);
-			Assert.AreEqual(position.HasValue, engineClient.RenderedState != null, "Unexpected RenderedState at tick " + mockClient.NetworkTick);
+			Assert.AreEqual(position.HasValue, engineClient.RenderedSnapshot != null, "Unexpected RenderedSnapshot at tick " + mockClient.NetworkTick);
 			if (position.HasValue)
 			{
 				if (engineClient.ShouldInterpolate)
 				{
-					Assert.AreEqual(engineClient.FrameTick - engineClient.InterpolationRenderDelay, engineClient.RenderedState.ServerFrameTick, "Unexpected RenderedFrameTick at tick " + mockClient.NetworkTick);
+					Assert.AreEqual(engineClient.FrameTick - engineClient.InterpolationRenderDelay, engineClient.RenderedSnapshot.ServerFrameTick, "Unexpected RenderedSnapshot at tick " + mockClient.NetworkTick);
 				}
 				else
 				{
 					// Todo: should the client's render frame always be frametick-interpolationRenderDelay? Seems fragile to have the rendered frame tick report the same number for several frames (even though its accurate)
-					Assert.AreEqual(engineClient.InterpolationEndState.ServerFrameTick, engineClient.RenderedState.ServerFrameTick, "Unexpected RenderedFrameTick at tick " + mockClient.NetworkTick);
+					Assert.AreEqual(engineClient.InterpolationEndSnapshot.ServerFrameTick, engineClient.RenderedSnapshot.ServerFrameTick, "Unexpected RenderedFrameTick at tick " + mockClient.NetworkTick);
 				}
-				Assert.AreEqual(position.Value, engineClient.RenderedState.Entities[0].Position.X, 0.001f, "Unexpected RenderedState at tick " + mockClient.NetworkTick);
+				Assert.IsTrue(engineClient.RenderedSnapshot.EntityArray.TryGetEntity(0, out Entity entity), "Expected RenderedState to have entity");
+				Assert.IsTrue(entity.HasComponent<MockComponent>(), "Expected RenderedState to have component");
+				Assert.AreEqual(position.Value, entity.GetComponent<MockComponent>().Position, 0.001f, "Unexpected RenderedState at tick " + mockClient.NetworkTick);
 			}
 		}
 
@@ -847,7 +849,7 @@ namespace Entmoot.UnitTests
 		#region Nested Types
 
 		/// <summary>
-		/// Represents a mock client that is "connected" to a server (data incoming from the server is, outgoing data is not mocked).
+		/// Represents a mock client that is "connected" to a server (data incoming from the server is mocked, outgoing data is not mocked).
 		/// Use this instead of using a <see cref="Client"/> object directly (since this offers deterministic simulated packet arrival).
 		/// Add mocked packets by calling <see cref="QueueIncomingStateUpdate"/> and they will "arrive" on the pre-determined tick you specify.
 		/// </summary>
@@ -865,7 +867,8 @@ namespace Entmoot.UnitTests
 		{
 			#region Fields
 
-			private Dictionary<int, Queue<StateSnapshot>> queuedStateSnapshots = new Dictionary<int, Queue<StateSnapshot>>();
+			private readonly Dictionary<int, Queue<ServerEntityUpdate>> serverEntityUpdates = new Dictionary<int, Queue<ServerEntityUpdate>>();
+			private EntitySnapshot serverEntitySnapshot;
 
 			#endregion Fields
 
@@ -886,8 +889,15 @@ namespace Entmoot.UnitTests
 			/// </summary>
 			public static MockClient CreateMockClient()
 			{
-				MockClient mockClient = new MockClient();
-				Client<MockCommandData> engineClient = new Client<MockCommandData>(mockClient);
+				ComponentsDefinition componentsDefinition = new ComponentsDefinition();
+				componentsDefinition.RegisterComponentType<MockComponent>();
+				MockClient mockClient = new MockClient()
+				{
+					serverEntitySnapshot = new EntitySnapshot(10, componentsDefinition),
+				};
+				Assert.IsTrue(mockClient.serverEntitySnapshot.EntityArray.TryCreateEntity(out _));
+				mockClient.serverEntitySnapshot.EntityArray.EndUpdate();
+				Client<MockCommandData> engineClient = new Client<MockCommandData>(mockClient, 10, mockClient.serverEntitySnapshot.EntityArray.Capacity, componentsDefinition, new ISystem[0]);
 				mockClient.EngineClient = engineClient;
 				return mockClient;
 			}
@@ -904,41 +914,54 @@ namespace Entmoot.UnitTests
 			}
 
 			/// <summary>
-			/// Creates and adds a new <see cref="StateSnapshot"/> to the network that will "arrive" for the client at a specified network tick
-			/// (i.e. after that many calls to <see cref="Update"/> the given <see cref="StateSnapshot"/> packet will "arrive" for the underlying
+			/// Creates and adds a new <see cref="EntitySnapshot"/> to the network that will "arrive" for the client at a specified network tick
+			/// (i.e. after that many calls to <see cref="Update"/> the given <see cref="EntitySnapshot"/> packet will "arrive" for the underlying
 			/// <see cref="Client"/>).
 			/// </summary>
 			public void QueueIncomingStateUpdate(int networkTickToArriveOn, int serverFrameTick, float entityPosition)
 			{
 				// Create a new state snapshot and use its acked tick so we always use whatever the default should be
-				this.QueueIncomingStateUpdate(networkTickToArriveOn, serverFrameTick, new StateSnapshot().AcknowledgedClientTick, entityPosition);
+				this.QueueIncomingStateUpdate(networkTickToArriveOn, serverFrameTick, -1, entityPosition);
 			}
 
 			/// <summary>
-			/// Creates and adds a new <see cref="StateSnapshot"/> to the network that will "arrive" for the client at a specified network tick
-			/// (i.e. after that many calls to <see cref="Update"/> the given <see cref="StateSnapshot"/> packet will "arrive" for the underlying
+			/// Creates and adds a new <see cref="EntitySnapshot"/> to the network that will "arrive" for the client at a specified network tick
+			/// (i.e. after that many calls to <see cref="Update"/> the given <see cref="EntitySnapshot"/> packet will "arrive" for the underlying
 			/// <see cref="Client"/>).
 			/// </summary>
 			public void QueueIncomingStateUpdate(int networkTickToArriveOn, int serverFrameTick, int acknowledgedClientFrameTick, float entityPosition)
 			{
-				if (!this.queuedStateSnapshots.ContainsKey(networkTickToArriveOn))
+				if (!this.serverEntityUpdates.ContainsKey(networkTickToArriveOn))
 				{
-					this.queuedStateSnapshots[networkTickToArriveOn] = new Queue<StateSnapshot>();
+					this.serverEntityUpdates[networkTickToArriveOn] = new Queue<ServerEntityUpdate>();
 				}
-				StateSnapshot stateSnapshot = new StateSnapshot()
+				this.serverEntityUpdates[networkTickToArriveOn].Enqueue(new ServerEntityUpdate()
 				{
 					ServerFrameTick = serverFrameTick,
-					AcknowledgedClientTick = acknowledgedClientFrameTick,
-					ClientOwnedEntity = 0,
-					Entities = new Entity[] { new Entity() { Position = new Vector3(entityPosition, 0, 0) } },
-				};
-				this.queuedStateSnapshots[networkTickToArriveOn].Enqueue(stateSnapshot);
+					LatestClientTickAcknowledgedByServer = acknowledgedClientFrameTick,
+					OwnedEntity = 0,
+					NewPosition = entityPosition,
+				});
 			}
 
 			byte[] INetworkConnection.GetNextIncomingPacket()
 			{
-				if (!this.queuedStateSnapshots.ContainsKey(this.NetworkTick) || !this.queuedStateSnapshots[this.NetworkTick].Any()) { return null; }
-				return this.queuedStateSnapshots[this.NetworkTick].Dequeue().SerializePacket();
+				if (!this.serverEntityUpdates.ContainsKey(this.NetworkTick) || !this.serverEntityUpdates[this.NetworkTick].Any()) { return null; }
+				using (MemoryStream memoryStream = new MemoryStream())
+				{
+					using (BinaryWriter binaryWriter = new BinaryWriter(memoryStream))
+					{
+						ServerEntityUpdate serverEntityUpdate = this.serverEntityUpdates[this.NetworkTick].Dequeue();
+						this.serverEntitySnapshot.EntityArray.TryGetEntity(0, out Entity entity);
+						entity.AddComponent<MockComponent>().Position = serverEntityUpdate.NewPosition;
+						this.serverEntitySnapshot.UpdateFrom(serverEntityUpdate.ServerFrameTick, this.serverEntitySnapshot.EntityArray);
+
+						binaryWriter.Write(serverEntityUpdate.LatestClientTickAcknowledgedByServer);
+						binaryWriter.Write(serverEntityUpdate.OwnedEntity);
+						this.serverEntitySnapshot.Serialize(binaryWriter);
+						return memoryStream.ToArray();
+					}
+				}
 			}
 
 			void INetworkConnection.SendPacket(byte[] packet)
@@ -947,6 +970,18 @@ namespace Entmoot.UnitTests
 			}
 
 			#endregion Methods
+
+			#region Nested Types
+
+			private class ServerEntityUpdate
+			{
+				public int ServerFrameTick;
+				public int LatestClientTickAcknowledgedByServer;
+				public int OwnedEntity;
+				public float NewPosition;
+			}
+
+			#endregion Nested Types
 		}
 
 		private struct MockCommandData : ICommandData
@@ -971,10 +1006,33 @@ namespace Entmoot.UnitTests
 
 			public void ApplyToEntity(Entity entity)
 			{
-				if ((this.CommandKeys & MockCommandKeys.MoveForward) != 0) { entity.Position.Y -= 5; }
-				if ((this.CommandKeys & MockCommandKeys.MoveBackward) != 0) { entity.Position.Y += 5; }
-				if ((this.CommandKeys & MockCommandKeys.MoveLeft) != 0) { entity.Position.X -= 5; }
-				if ((this.CommandKeys & MockCommandKeys.MoveRight) != 0) { entity.Position.X += 5; }
+				//if ((this.CommandKeys & MockCommandKeys.MoveForward) != 0) { entity.Position.Y -= 5; }
+				//if ((this.CommandKeys & MockCommandKeys.MoveBackward) != 0) { entity.Position.Y += 5; }
+				//if ((this.CommandKeys & MockCommandKeys.MoveLeft) != 0) { entity.Position.X -= 5; }
+				//if ((this.CommandKeys & MockCommandKeys.MoveRight) != 0) { entity.Position.X += 5; }
+			}
+
+			#endregion Methods
+		}
+
+		private struct MockComponent : IComponent<MockComponent>
+		{
+			#region Fields
+
+			public float Position;
+
+			#endregion Fields
+
+			#region Methods
+
+			public void Serialize(BinaryWriter binaryWriter)
+			{
+				binaryWriter.Write(this.Position);
+			}
+
+			public void Deserialize(BinaryReader binaryReader)
+			{
+				this.Position = binaryReader.ReadSingle();
 			}
 
 			#endregion Methods
