@@ -133,6 +133,18 @@ namespace Entmoot.Engine
 		}
 
 		/// <summary>
+		/// Copies the given entity and its component data to another entity in another entity array.
+		/// </summary>
+		public void CopyTo(int thisEntityID, EntityArray otherEntityArray, int otherEntityID)
+		{
+			// I don't like this, clumsy API...
+			for (int componentTypeID = 0; componentTypeID < this.componentArrays.Count; componentTypeID++)
+			{
+				this.componentArrays[componentTypeID].CopyTo(thisEntityID, otherEntityArray.componentArrays[componentTypeID], otherEntityID);
+			}
+		}
+
+		/// <summary>
 		/// Updates the state of all entities and components to represent an interpolation between two other entity arrays.
 		/// </summary>
 		public void Interpolate(EntityArray otherA, EntityArray otherB, float amount)

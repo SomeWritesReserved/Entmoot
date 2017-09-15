@@ -85,6 +85,16 @@ namespace Entmoot.Engine
 			this.parentEntityArray.GetComponentArray<TComponent>().RemoveComponent(this);
 		}
 
+		/// <summary>
+		/// Copies this entity and its component data to another entity (the other entity need not be
+		/// in the same entity array).
+		/// </summary>
+		public void CopyTo(Entity other)
+		{
+			// I don't like this, clumsy API...
+			this.parentEntityArray.CopyTo(this.ID, other.parentEntityArray, other.ID);
+		}
+
 		#endregion Methods
 	}
 }

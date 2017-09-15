@@ -65,6 +65,11 @@ namespace Entmoot.Engine
 		void CopyTo(IComponentArray other);
 
 		/// <summary>
+		/// Copies a single entity's component data to another entity's components in another component array.
+		/// </summary>
+		void CopyTo(int thisEntityID, IComponentArray otherComponentArray, int otherEntityID);
+
+		/// <summary>
 		/// Updates all component data to interpolated values between two other components.
 		/// </summary>
 		void Interpolate(IComponentArray otherA, IComponentArray otherB, float amount);
@@ -178,6 +183,23 @@ namespace Entmoot.Engine
 		void IComponentArray.CopyTo(IComponentArray other)
 		{
 			this.CopyTo((ComponentArray<TComponent>)other);
+		}
+
+		/// <summary>
+		/// Copies a single entity's <see cref="TComponent"/> data to another entity's components in another component array.
+		/// </summary>
+		public void CopyTo(int thisEntityID, ComponentArray<TComponent> otherComponentArray, int otherEntityID)
+		{
+			otherComponentArray.components[otherEntityID] = this.components[thisEntityID];
+			otherComponentArray.componentStates[otherEntityID] = this.componentStates[thisEntityID];
+		}
+
+		/// <summary>
+		/// Copies a single entity's component data to another entity's components in another component array.
+		/// </summary>
+		void IComponentArray.CopyTo(int thisEntityID, IComponentArray otherComponentArray, int otherEntityID)
+		{
+			this.CopyTo(thisEntityID, (ComponentArray<TComponent>)otherComponentArray, otherEntityID);
 		}
 
 		/// <summary>
