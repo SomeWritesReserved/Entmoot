@@ -16,10 +16,6 @@ namespace Entmoot.Engine
 	{
 		#region Fields
 
-		/// <summary>The array of entities that are controlled and simulated by this server.</summary>
-		private readonly EntityArray entityArray;
-		/// <summary>The collection of systems that will update entities.</summary>
-		private readonly SystemCollection systemCollection;
 		/// <summary>The history of entity state snapshots taken over the past N ticks.</summary>
 		private readonly Queue<EntitySnapshot> entitySnapshotHistory;
 		/// <summary>The list of clients currently connected to this server.</summary>
@@ -34,8 +30,8 @@ namespace Entmoot.Engine
 		/// </summary>
 		public Server(int maxHistory, int entityCapacity, ComponentsDefinition componentsDefinition, IEnumerable<ISystem> systems)
 		{
-			this.entityArray = new EntityArray(entityCapacity, componentsDefinition);
-			this.systemCollection = new SystemCollection(systems);
+			this.EntityArray = new EntityArray(entityCapacity, componentsDefinition);
+			this.SystemCollection = new SystemCollection(systems);
 
 			// Populate the whole history buffer with data that will be overwritten as needed
 			this.entitySnapshotHistory = new Queue<EntitySnapshot>(maxHistory);
@@ -49,11 +45,17 @@ namespace Entmoot.Engine
 
 		#region Properties
 
+		/// <summary>Gets or sets the rate at which the server will send updates to the clients (i.e. every Nth frame updates will be sent).</summary>
+		public int NetworkSendRate { get; set; } = 3;
+
 		/// <summary>Gets the current frame tick of the server.</summary>
 		public int FrameTick { get; private set; }
 
-		/// <summary>Gets or sets the rate at which the server will send updates to the clients (i.e. every Nth frame updates will be sent).</summary>
-		public int NetworkSendRate { get; set; } = 3;
+		/// <summary>Gets the array of entities that are controlled and simulated by this server.</summary>
+		public EntityArray EntityArray { get; }
+
+		/// <summary>Gets the collection of systems that will update entities.</summary>
+		public SystemCollection SystemCollection { get; }
 
 		#endregion Properties
 
@@ -82,11 +84,11 @@ namespace Entmoot.Engine
 				client.RecieveClientCommands();
 			}
 
-			this.systemCollection.Update(this.entityArray);
+			this.SystemCollection.Update(this.EntityArray);
 
 			// Take a snapshot of the latest entity state (recycle old snapshots) and add it to the snapshot history buffer
 			EntitySnapshot entitySnapshot = this.entitySnapshotHistory.Dequeue();
-			entitySnapshot.UpdateFrom(this.FrameTick, this.entityArray);
+			entitySnapshot.UpdateFrom(this.FrameTick, this.EntityArray);
 			this.entitySnapshotHistory.Enqueue(entitySnapshot);
 
 			if (this.FrameTick % this.NetworkSendRate == 0)
