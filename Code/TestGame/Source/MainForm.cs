@@ -39,10 +39,22 @@ namespace Entmoot.TestGame
 				SimulatedJitter = 0,
 				SimulatedPacketLoss = 0,
 			};
-			this.client = new Client<TestCommandData>(this.clientServerNetworkConnection);
-			this.server = new Server<TestCommandData>(new EntityManager(10, new IEntitySystem[] { new TestInputSystem() }));
-			this.server.EntityManager.CreateEntity<EntityWithInput>().Position = new Vector3(100, 50, 0);
-			this.server.EntityManager.CreateEntity<Entity>().Position = new Vector3(0, 0, 0);
+
+			ComponentsDefinition componentsDefinition = new ComponentsDefinition();
+			componentsDefinition.RegisterComponentType<PositionComponent>();
+
+			this.client = new Client<TestCommandData>(this.clientServerNetworkConnection, 10, 5, componentsDefinition, new ISystem[0]);
+			this.server = new Server<TestCommandData>(10, 5, componentsDefinition, new ISystem[] { new TestSystem(1) });
+			{
+				this.server.EntityArray.TryCreateEntity(out Entity entity1);
+				entity1.AddComponent<PositionComponent>().Position = new Vector3(100, 50, 0);
+				this.server.EntityArray.TryCreateEntity(out Entity entity2);
+				entity2.AddComponent<PositionComponent>().Position = new Vector3(0, 0, 0);
+				this.server.EntityArray.TryCreateEntity(out Entity entity3);
+				this.server.EntityArray.RemoveEntity(entity3);
+				this.server.EntityArray.TryCreateEntity(out Entity entity4);
+				entity4.AddComponent<PositionComponent>().Position = new Vector3(200, 350, 0);
+			}
 			this.server.AddConnectedClient(this.clientServerNetworkConnection);
 
 			this.clientServerNetworkConnection.Client = this.client;
@@ -64,13 +76,6 @@ namespace Entmoot.TestGame
 			if (this.serverStepsRemaining == 0) { return; }
 
 			this.clientServerNetworkConnection.CurrentContext = ClientServerContext.Server;
-
-			if (this.server.EntityManager.Entities.Count > 0)
-			{
-				this.server.EntityManager.Entities[1].Position.X = (float)Math.Cos(this.server.FrameTick * 0.15) * 50 + 100;
-				this.server.EntityManager.Entities[1].Position.Y = (float)Math.Sin(this.server.FrameTick * 0.15) * 50 + 100;
-			}
-
 			this.clientServerNetworkConnection.UpdateServer();
 			this.serverGroupBox.Refresh();
 			this.clientPacketTimelineDisplay.Refresh();
@@ -154,27 +159,31 @@ namespace Entmoot.TestGame
 		{
 			ClientServerContext clientServerContext = (ClientServerContext)((Control)sender).Tag;
 			int now = (clientServerContext == ClientServerContext.Client) ? this.client.FrameTick : this.server.FrameTick;
-			IList<Entity> entities = (clientServerContext == ClientServerContext.Client) ? this.client.RenderedState?.Entities : this.server.CurrentState?.Entities;
+			EntityArray entityArray = (clientServerContext == ClientServerContext.Client) ? this.client.RenderedSnapshot.EntityArray : this.server.EntityArray;
 
 			e.Graphics.DrawString(now.ToString(), this.Font, Brushes.Black, 10, 10);
 			if (this.drawInterpolationCheckBox.Checked && clientServerContext == ClientServerContext.Client &&
-				this.client.InterpolationStartState != null && this.client.InterpolationEndState != null)
+				this.client.InterpolationStartSnapshot.ServerFrameTick != -1 && this.client.InterpolationEndSnapshot.ServerFrameTick != -1)
 			{
-				foreach (Entity entity in this.client.InterpolationStartState.Entities)
+				foreach (Entity entity in this.client.InterpolationStartSnapshot.EntityArray)
 				{
-					e.Graphics.FillRectangle(Brushes.Gainsboro, entity.Position.X, entity.Position.Y, 3, 3);
+					if (!entity.HasComponent<PositionComponent>()) { continue; }
+
+					ref PositionComponent component = ref entity.GetComponent<PositionComponent>();
+					e.Graphics.FillRectangle(Brushes.Gainsboro, component.Position.X, component.Position.Y, 3, 3);
 				}
-				foreach (Entity entity in this.client.InterpolationEndState.Entities)
+				foreach (Entity entity in this.client.InterpolationEndSnapshot.EntityArray)
 				{
-					e.Graphics.FillRectangle(Brushes.Gainsboro, entity.Position.X, entity.Position.Y, 3, 3);
+					ref PositionComponent component = ref entity.GetComponent<PositionComponent>();
+					e.Graphics.FillRectangle(Brushes.Gainsboro, component.Position.X, component.Position.Y, 3, 3);
 				}
 			}
-			if (entities != null)
+			foreach (Entity entity in entityArray)
 			{
-				foreach (Entity entity in entities)
-				{
-					e.Graphics.FillRectangle(Brushes.Black, entity.Position.X, entity.Position.Y, 3, 3);
-				}
+				if (!entity.HasComponent<PositionComponent>()) { continue; }
+
+				ref PositionComponent component = ref entity.GetComponent<PositionComponent>();
+				e.Graphics.FillRectangle(Brushes.Black, component.Position.X, component.Position.Y, 3, 3);
 			}
 		}
 
@@ -363,7 +372,7 @@ namespace Entmoot.TestGame
 		{
 			if (this.NetworkConnection == null) { return; }
 
-			float centerX = this.Width / 2.0f;
+			/*float centerX = this.Width / 2.0f;
 			float centerY = this.Height / 2.0f;
 			int nowTick = (this.ClientServerContext == ClientServerContext.Client) ? this.NetworkConnection.Client.FrameTick : this.NetworkConnection.Server.FrameTick;
 			int nowNetworkTick = (this.ClientServerContext == ClientServerContext.Client) ? this.NetworkConnection.NetworkClientTick : this.NetworkConnection.NetworkServerTick;
@@ -429,7 +438,74 @@ namespace Entmoot.TestGame
 					e.Graphics.DrawLine(Pens.Red, engineTickToX(this.NetworkConnection.Client.RenderedState.ServerFrameTick), 0, engineTickToX(this.NetworkConnection.Client.RenderedState.ServerFrameTick), this.Height);
 				}
 			}
-			e.Graphics.DrawLine(Pens.Blue, engineTickToX(nowTick), 0, engineTickToX(nowTick), this.Height);
+			e.Graphics.DrawLine(Pens.Blue, engineTickToX(nowTick), 0, engineTickToX(nowTick), this.Height);*/
+		}
+
+		#endregion Methods
+	}
+
+	public struct PositionComponent : IComponent<PositionComponent>
+	{
+		#region Fields
+
+		public Vector3 Position;
+
+		#endregion Fields
+
+		#region Methods
+
+		public void Interpolate(PositionComponent otherA, PositionComponent otherB, float amount)
+		{
+			this.Position = Vector3.Interpolate(otherA.Position, otherB.Position, amount);
+		}
+
+		public void Serialize(BinaryWriter binaryWriter)
+		{
+			binaryWriter.Write(this.Position.X);
+			binaryWriter.Write(this.Position.Y);
+			binaryWriter.Write(this.Position.Z);
+		}
+
+		public void Deserialize(BinaryReader binaryReader)
+		{
+			this.Position.X = binaryReader.ReadSingle();
+			this.Position.Y = binaryReader.ReadSingle();
+			this.Position.Z = binaryReader.ReadSingle();
+		}
+
+		#endregion Methods
+	}
+
+	public class TestSystem : ISystem
+	{
+		#region Constructors
+
+		public TestSystem(int entityToMoveID)
+		{
+			this.EntityToMoveID = entityToMoveID;
+		}
+
+		#endregion Constructors
+
+		#region Properties
+
+		public int EntityToMoveID { get; set; }
+
+		public int Tick { get; set; }
+
+		#endregion Properties
+
+		#region Methods
+
+		public void Update(EntityArray entityArray)
+		{
+			if (!entityArray.TryGetEntity(this.EntityToMoveID, out Entity entity)) { return; }
+			if (!entity.HasComponent<PositionComponent>()) { return; }
+
+			ref PositionComponent component = ref entity.GetComponent<PositionComponent>();
+			component.Position.X = (float)Math.Cos(this.Tick * 0.15) * 50 + 100;
+			component.Position.Y = (float)Math.Sin(this.Tick * 0.15) * 50 + 100;
+			this.Tick++;
 		}
 
 		#endregion Methods
@@ -457,55 +533,13 @@ namespace Entmoot.TestGame
 
 		public void ApplyToEntity(Entity entity)
 		{
-			IEntityWithInput entityWithInput = entity as IEntityWithInput;
-			if (entityWithInput == null) { return; }
+			if (!entity.HasComponent<PositionComponent>()) { return; }
 
-			entityWithInput.CommandKeys = this.CommandKeys;
-		}
-
-		#endregion Methods
-	}
-
-	public interface IEntityWithInput
-	{
-		#region Properties
-
-		TestCommandKeys CommandKeys { get; set; }
-
-		#endregion Properties
-	}
-
-	public class EntityWithInput : Entity, IEntityWithInput
-	{
-		#region Properties
-
-		public TestCommandKeys CommandKeys { get; set; }
-
-		#endregion Properties
-	}
-
-	public class TestInputSystem : IEntitySystem
-	{
-		#region Methods
-
-		public void Update(IEntityCollection entityCollection)
-		{
-			foreach (Entity entity in entityCollection.Entities)
-			{
-				IEntityWithInput entityWithInput = entity as IEntityWithInput;
-				if (entityWithInput == null) { continue; }
-
-				this.UpdateEntity((IEntityWithInput)entity);
-			}
-		}
-
-		public void UpdateEntity(IEntityWithInput entityWithInput)
-		{
-			Entity entity = (Entity)entityWithInput;
-			if ((entityWithInput.CommandKeys & TestCommandKeys.MoveForward) != 0) { entity.Position.Y -= 5; }
-			if ((entityWithInput.CommandKeys & TestCommandKeys.MoveBackward) != 0) { entity.Position.Y += 5; }
-			if ((entityWithInput.CommandKeys & TestCommandKeys.MoveLeft) != 0) { entity.Position.X -= 5; }
-			if ((entityWithInput.CommandKeys & TestCommandKeys.MoveRight) != 0) { entity.Position.X += 5; }
+			ref PositionComponent component = ref entity.GetComponent<PositionComponent>();
+			if ((this.CommandKeys & TestCommandKeys.MoveForward) != 0) { component.Position.Y -= 5; }
+			if ((this.CommandKeys & TestCommandKeys.MoveBackward) != 0) { component.Position.Y += 5; }
+			if ((this.CommandKeys & TestCommandKeys.MoveLeft) != 0) { component.Position.X -= 5; }
+			if ((this.CommandKeys & TestCommandKeys.MoveRight) != 0) { component.Position.X += 5; }
 		}
 
 		#endregion Methods
