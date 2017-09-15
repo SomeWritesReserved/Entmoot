@@ -406,6 +406,97 @@ namespace Entmoot.UnitTests
 			EntityTests.assertStandardEntityArray(destinationEntityArray);
 		}
 
+		[Test]
+		public void EntityArray_GetEnumerator_Empty()
+		{
+			EntityArray entityArray = new EntityArray(3, new ComponentsDefinition());
+			entityArray.EndUpdate();
+			IEnumerator<Entity> enumerator = entityArray.GetEnumerator();
+			Assert.IsNotNull(enumerator);
+			Assert.AreEqual(Entity.NoEntity, enumerator.Current);
+			Assert.IsFalse(enumerator.MoveNext());
+			Assert.AreEqual(Entity.NoEntity, enumerator.Current);
+		}
+
+		[Test]
+		public void EntityArray_GetEnumerator_Full()
+		{
+			EntityArray entityArray = new EntityArray(5, new ComponentsDefinition());
+			entityArray.BeginUpdate();
+			entityArray.TryCreateEntity(out Entity entity1);
+			entityArray.TryCreateEntity(out Entity entity2);
+			entityArray.TryCreateEntity(out Entity entity3);
+			entityArray.TryCreateEntity(out Entity entity4);
+			entityArray.TryCreateEntity(out Entity entity5);
+			entityArray.EndUpdate();
+			IEnumerator<Entity> enumerator = entityArray.GetEnumerator();
+			Assert.IsNotNull(enumerator);
+			Assert.AreEqual(Entity.NoEntity, enumerator.Current);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(entity1, enumerator.Current);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(entity2, enumerator.Current);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(entity3, enumerator.Current);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(entity4, enumerator.Current);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(entity5, enumerator.Current);
+			Assert.IsFalse(enumerator.MoveNext());
+			Assert.AreEqual(Entity.NoEntity, enumerator.Current);
+		}
+
+		[Test]
+		public void EntityArray_GetEnumerator_Holes1()
+		{
+			EntityArray entityArray = new EntityArray(5, new ComponentsDefinition());
+			entityArray.BeginUpdate();
+			entityArray.TryCreateEntity(out Entity entity1);
+			entityArray.TryCreateEntity(out Entity entity2);
+			entityArray.RemoveEntity(entity2);
+			entityArray.TryCreateEntity(out Entity entity3);
+			entityArray.TryCreateEntity(out Entity entity4);
+			entityArray.RemoveEntity(entity4);
+			entityArray.TryCreateEntity(out Entity entity5);
+			entityArray.EndUpdate();
+			IEnumerator<Entity> enumerator = entityArray.GetEnumerator();
+			Assert.IsNotNull(enumerator);
+			Assert.AreEqual(Entity.NoEntity, enumerator.Current);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(entity1, enumerator.Current);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(entity3, enumerator.Current);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(entity5, enumerator.Current);
+			Assert.IsFalse(enumerator.MoveNext());
+			Assert.AreEqual(Entity.NoEntity, enumerator.Current);
+		}
+
+		[Test]
+		public void EntityArray_GetEnumerator_Holes2()
+		{
+			EntityArray entityArray = new EntityArray(5, new ComponentsDefinition());
+			entityArray.BeginUpdate();
+			entityArray.TryCreateEntity(out Entity entity1);
+			entityArray.RemoveEntity(entity1);
+			entityArray.TryCreateEntity(out Entity entity2);
+			entityArray.TryCreateEntity(out Entity entity3);
+			entityArray.RemoveEntity(entity3);
+			entityArray.TryCreateEntity(out Entity entity4);
+			entityArray.TryCreateEntity(out Entity entity5);
+			entityArray.RemoveEntity(entity5);
+			entityArray.EndUpdate();
+			IEnumerator<Entity> enumerator = entityArray.GetEnumerator();
+			Assert.IsNotNull(enumerator);
+			Assert.AreEqual(Entity.NoEntity, enumerator.Current);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(entity2, enumerator.Current);
+			Assert.IsTrue(enumerator.MoveNext());
+			Assert.AreEqual(entity4, enumerator.Current);
+			Assert.IsFalse(enumerator.MoveNext());
+			Assert.AreEqual(Entity.NoEntity, enumerator.Current);
+		}
+
 		#endregion Tests
 
 		#region Helpers

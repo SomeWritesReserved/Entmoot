@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -11,7 +12,7 @@ namespace Entmoot.Engine
 	/// <summary>
 	/// Represents an array of entities and their components.
 	/// </summary>
-	public class EntityArray
+	public class EntityArray : IEnumerable<Entity>, IEnumerable
 	{
 		#region Fields
 
@@ -180,6 +181,22 @@ namespace Entmoot.Engine
 			}
 		}
 
+		/// <summary>
+		/// Returns an enumerator that iterates only over the entities in this entity array that exist.
+		/// </summary>
+		public IEnumerator<Entity> GetEnumerator()
+		{
+			return new Enumerator(this);
+		}
+
+		/// <summary>
+		/// Returns an enumerator that iterates only over the entities in this entity array that exist.
+		/// </summary>
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return this.GetEnumerator();
+		}
+
 		#endregion Methods
 
 		#region Nested Types
@@ -197,6 +214,90 @@ namespace Entmoot.Engine
 			Active,
 			/// <summary>The entity is still active but is scheduled to be removed at the end of the next update.</summary>
 			Removing,
+		}
+
+		/// <summary>
+		/// An enumerator that will enumerate only over the entities that exist within an entity array.
+		/// </summary>
+		public struct Enumerator : IEnumerator<Entity>, IEnumerator
+		{
+			#region Fields
+
+			/// <summary>The parent entity array this enumerates over.</summary>
+			private readonly EntityArray parent;
+			/// <summary>The current entity index the enumerator is sitting on.</summary>
+			private int currentEntityID;
+
+			#endregion Fields
+
+			#region Constructors
+
+			/// <summary>
+			/// Constructor.
+			/// </summary>
+			public Enumerator(EntityArray parent)
+			{
+				this.parent = parent;
+				this.currentEntityID = -1;
+				this.Current = Entity.NoEntity;
+			}
+
+			#endregion Constructors
+
+			#region Properties
+
+			/// <summary>
+			/// Gets the current entity in the entity array.
+			/// </summary>
+			public Entity Current { get; private set; }
+
+			/// <summary>
+			/// Gets the current element in the entity array.
+			/// </summary>
+			object IEnumerator.Current { get { return this.Current; } }
+
+			#endregion Properties
+
+			#region Methods
+
+			/// <summary>
+			/// Sets the enumerator to its initial position, which is before the first entity in the entity array.
+			/// </summary>
+			public void Reset()
+			{
+				this.currentEntityID = -1;
+				this.Current = Entity.NoEntity;
+			}
+
+			/// <summary>
+			/// Advances the enumerator to the next entity of the entity array.
+			/// </summary>
+			public bool MoveNext()
+			{
+				do
+				{
+					this.currentEntityID++;
+					if (this.currentEntityID >= this.parent.Capacity)
+					{
+						this.Current = Entity.NoEntity;
+						return false;
+					}
+					else if (this.parent.TryGetEntity(this.currentEntityID, out Entity entity))
+					{
+						this.Current = entity;
+						return true;
+					}
+				} while (true);
+			}
+
+			/// <summary>
+			/// Nothing to dispose.
+			/// </summary>
+			void IDisposable.Dispose()
+			{
+			}
+
+			#endregion Methods
 		}
 
 		#endregion Nested Types
