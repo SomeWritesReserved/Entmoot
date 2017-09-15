@@ -161,21 +161,23 @@ namespace Entmoot.Engine
 			this.setupRenderSnapshot();
 
 			// Client side prediction
-			if (this.ShouldPredictInput && this.RenderedSnapshot != null && this.OwnedEntity != -1)
+			if (this.ShouldPredictInput && this.RenderedSnapshot.ServerFrameTick != -1 && this.OwnedEntity != -1 && this.RenderedSnapshot.EntityArray.TryGetEntity(this.OwnedEntity, out Entity predictedEntity))
 			{
-				/*StateSnapshot latestStateSnapshot = this.ReceivedStateSnapshots.Last().Value;
-				Entity predictedEntity = new Entity() { Position = latestStateSnapshot.Entities[this.CurrentOwnedEntity].Position };
-				foreach (ClientCommand<TCommandData> clientCommandNotAckedByServer in this.SentClientCommands.Where((cmd) => cmd.ClientFrameTick > latestStateSnapshot.AcknowledgedClientTick))
+				// Get the latest entity snapshot in the buffer we will start predicting from
+				EntitySnapshot latestHistoryEntitySnapshot = this.getLatestHistoryEntitySnapshot();
+				if (latestHistoryEntitySnapshot.EntityArray.TryGetEntity(this.OwnedEntity, out Entity latestHistoryEntity))
 				{
-					// Don't use this command for prediction since its an old command that applied to some other owned entity
-					if (clientCommandNotAckedByServer.CommandingEntity != this.CurrentOwnedEntity) { continue; }
+					latestHistoryEntity.CopyTo(predictedEntity);
+					foreach (ClientCommand<TCommandData> clientCommand in this.clientCommandHistory)
+					{
+						// This command has either been processed by the server or was for a different commanded entity, either way don't use it for prediction
+						if (clientCommand.ClientFrameTick <= this.LatestClientTickAcknowledgedByServer || clientCommand.CommandingEntity != this.OwnedEntity) { continue; }
 
-					// Reapply all the commands we've sent that the server hasn't processed yet to get us back to where we predicted we should be, starting
-					// from where the server last gave us an authoritative response
-					clientCommandNotAckedByServer.CommandData.ApplyToEntity(predictedEntity);
+						// Reapply all the commands we've sent that the server hasn't processed yet to get us back to where we predicted we should be, starting
+						// from where the server last gave us an authoritative response
+						clientCommand.CommandData.ApplyToEntity(predictedEntity);
+					}
 				}
-				this.RenderedState.Entities[this.CurrentOwnedEntity].Position = predictedEntity.Position;
-				this.predictedPositions.Add(this.FrameTick, predictedEntity.Position);*/
 			}
 		}
 
@@ -190,13 +192,13 @@ namespace Entmoot.Engine
 			{
 				// We haven't received enough data from the server yet to start interpolation rendering,
 				// so keep polling until we get enough data, once we have enough data we can begin rendering.
+				// The snapshot history isn't in any order so we need to check every snapshot for the closest ticks in both directions (start and end)
 				EntitySnapshot newInterpolationStartSnapshot = null;
 				EntitySnapshot newInterpolationEndSnapshot = null;
 				foreach (EntitySnapshot entitySnapshot in this.entitySnapshotHistory)
 				{
 					if (entitySnapshot.ServerFrameTick == -1) { continue; }
 
-					// The snapshot history isn't in any order so we need to check every snapshot for the closest ticks in both directions (start and end)
 					if (entitySnapshot.ServerFrameTick <= renderedFrameTick && (newInterpolationStartSnapshot == null || entitySnapshot.ServerFrameTick > newInterpolationStartSnapshot.ServerFrameTick))
 					{
 						newInterpolationStartSnapshot = entitySnapshot;
@@ -219,10 +221,10 @@ namespace Entmoot.Engine
 			if (renderedFrameTick > this.InterpolationEndSnapshot.ServerFrameTick)
 			{
 				// Find the next closest entity snapshot to start interpolating to
+				// The snapshot history isn't in any order so we need to check every snapshot closest next tick
 				EntitySnapshot newInterpolationEndSnapshot = null;
 				foreach (EntitySnapshot entitySnapshot in this.entitySnapshotHistory)
 				{
-					// The snapshot history isn't in any order so we need to check every snapshot closest next tick
 					if (entitySnapshot.ServerFrameTick > renderedFrameTick && (newInterpolationEndSnapshot == null || entitySnapshot.ServerFrameTick < newInterpolationEndSnapshot.ServerFrameTick))
 					{
 						newInterpolationEndSnapshot = entitySnapshot;
@@ -257,13 +259,29 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Returns the oldest entity snapshot that exists in the history buffer.
 		/// </summary>
+		private EntitySnapshot getLatestHistoryEntitySnapshot()
+		{
+			// The snapshot history isn't in any order so we need to check every snapshot
+			EntitySnapshot latestEntitySnapshot = this.entitySnapshotHistory[0];
+			foreach (EntitySnapshot entitySnapshot in this.entitySnapshotHistory)
+			{
+				if (entitySnapshot.ServerFrameTick > latestEntitySnapshot.ServerFrameTick)
+				{
+					latestEntitySnapshot = entitySnapshot;
+				}
+			}
+			return latestEntitySnapshot;
+		}
+
+		/// <summary>
+		/// Returns the oldest entity snapshot that exists in the history buffer.
+		/// </summary>
 		private EntitySnapshot getOldestHistoryEntitySnapshot()
 		{
-			// Find the oldest entity snapshot
+			// The snapshot history isn't in any order so we need to check every snapshot
 			EntitySnapshot oldestEntitySnapshot = this.entitySnapshotHistory[0];
 			foreach (EntitySnapshot entitySnapshot in this.entitySnapshotHistory)
 			{
-				// The snapshot history isn't in any order so we need to check every snapshot
 				if (entitySnapshot.ServerFrameTick < oldestEntitySnapshot.ServerFrameTick)
 				{
 					oldestEntitySnapshot = entitySnapshot;

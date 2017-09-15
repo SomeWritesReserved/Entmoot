@@ -1006,10 +1006,13 @@ namespace Entmoot.UnitTests
 
 			public void ApplyToEntity(Entity entity)
 			{
-				//if ((this.CommandKeys & MockCommandKeys.MoveForward) != 0) { entity.Position.Y -= 5; }
-				//if ((this.CommandKeys & MockCommandKeys.MoveBackward) != 0) { entity.Position.Y += 5; }
-				//if ((this.CommandKeys & MockCommandKeys.MoveLeft) != 0) { entity.Position.X -= 5; }
-				//if ((this.CommandKeys & MockCommandKeys.MoveRight) != 0) { entity.Position.X += 5; }
+				if (!entity.HasComponent<MockComponent>()) { return; }
+
+				ref MockComponent component = ref entity.GetComponent<MockComponent>();
+				if ((this.CommandKeys & MockCommandKeys.MoveForward) != 0) { component.Position -= 5; }
+				if ((this.CommandKeys & MockCommandKeys.MoveBackward) != 0) { component.Position += 5; }
+				if ((this.CommandKeys & MockCommandKeys.MoveLeft) != 0) { component.Position -= 5; }
+				if ((this.CommandKeys & MockCommandKeys.MoveRight) != 0) { component.Position += 5; }
 			}
 
 			#endregion Methods
