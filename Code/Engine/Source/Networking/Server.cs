@@ -80,7 +80,7 @@ namespace Entmoot.Engine
 
 			foreach (ClientConnection client in this.clients)
 			{
-				client.RecieveClientCommands();
+				client.ProcessClientCommands(this.EntityArray);
 			}
 
 			this.SystemCollection.Update(this.EntityArray);
@@ -154,7 +154,7 @@ namespace Entmoot.Engine
 			/// <summary>
 			/// Checks for and processes any new commands coming in from the client.
 			/// </summary>
-			public void RecieveClientCommands()
+			public void ProcessClientCommands(EntityArray entityArray)
 			{
 				byte[] packet;
 				while ((packet = this.clientNetworkConnection.GetNextIncomingPacket()) != null)
@@ -166,12 +166,10 @@ namespace Entmoot.Engine
 
 					foreach (ClientCommand<TCommandData> clientCommand in clientCommands)
 					{
-						// Ignore the commands that were for some other owned entity (these are old commands the client was trying to execute before it knew of its new entity)
-						if (clientCommand.CommandingEntity != this.CommandingEntity) { continue; }
-
-						if (this.CommandingEntity != -1)
+						// Make sure we have an entity to command, that the client thinks its commanding the same entity, and that the entity exists
+						if (this.CommandingEntity != -1 && clientCommand.CommandingEntity == this.CommandingEntity && entityArray.TryGetEntity(this.CommandingEntity, out Entity entity))
 						{
-							//clientCommand.CommandData.ApplyToEntity(this.parentServer.CurrentState.Entities[this.OwnedEntity]);
+							clientCommand.CommandData.ApplyToEntity(entity);
 						}
 
 						if (this.LatestClientTickReceived < clientCommand.ClientFrameTick) { this.LatestClientTickReceived = clientCommand.ClientFrameTick; }
