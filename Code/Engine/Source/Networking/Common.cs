@@ -42,7 +42,7 @@ namespace Entmoot.Engine
 		#region Methods
 
 		/// <summary>
-		/// Updates this snapshot to be the same as the given other snapshot.
+		/// Updates this entity snapshot to be the same as the given other snapshot.
 		/// </summary>
 		public void CopyFrom(EntitySnapshot other)
 		{
@@ -50,7 +50,7 @@ namespace Entmoot.Engine
 		}
 
 		/// <summary>
-		/// Updates this snapshot to be a new snapshot at a new point in time, given the new server frame tick and new entities.
+		/// Updates this entity snapshot to be a new snapshot at a new point in time, given the new server frame tick and new entities.
 		/// </summary>
 		public void UpdateFrom(int serverFrameTick, EntityArray other)
 		{
@@ -59,7 +59,7 @@ namespace Entmoot.Engine
 		}
 
 		/// <summary>
-		/// Updates this snapshot to be a new snapshot that is an interpolated state between two other snapshots.
+		/// Updates this entity snapshot to be a new snapshot that is an interpolated state between two other snapshots.
 		/// </summary>
 		public void Interpolate(EntitySnapshot otherA, EntitySnapshot otherB, int interpolationFrameTick, int serverFrameTick)
 		{
@@ -69,7 +69,7 @@ namespace Entmoot.Engine
 		}
 
 		/// <summary>
-		/// Writes this snapshot's data to a binary source.
+		/// Writes this entity snapshot's data to a binary source.
 		/// </summary>
 		public void Serialize(BinaryWriter binaryWriter)
 		{
@@ -78,12 +78,94 @@ namespace Entmoot.Engine
 		}
 
 		/// <summary>
-		/// Reads and overwrites this snapshot with data from a binary source.
+		/// Reads and overwrites this entity snapshot with data from a binary source.
 		/// </summary>
 		public void Deserialize(BinaryReader binaryReader)
 		{
 			this.ServerFrameTick = binaryReader.ReadInt32();
 			this.EntityArray.Deserialize(binaryReader);
+		}
+
+		/// <summary>
+		/// Reads and overwrites this entity snapshot with data from a binary source, but only if the binary source represents a newer snapshot.
+		/// Returns true if this snapshot was actually updated from the deserialied binary source.
+		/// </summary>
+		public bool DeserializeIfNewer(BinaryReader binaryReader)
+		{
+			int newServerFrameTick = binaryReader.ReadInt32();
+			if (newServerFrameTick <= this.ServerFrameTick) { return false; }
+
+			this.ServerFrameTick = newServerFrameTick;
+			this.EntityArray.Deserialize(binaryReader);
+			return true;
+		}
+
+		#endregion Methods
+	}
+
+	/// <summary>
+	/// A helper class for serializing and deserializing server updates (entity snapshot and client-specific data) to clients.
+	/// </summary>
+	public static class ServerUpdateSerializer
+	{
+		#region Methods
+
+		/// <summary>
+		/// Serializes the given server update (entity snapshot and client-specific data) and immediately sends a packet.
+		/// </summary>
+		public static void Serialize(INetworkConnection clientNetworkConnection, EntitySnapshot entitySnapshot, int latestClientTickReceived, int clientCommandingEntity)
+		{
+			clientNetworkConnection.SendPacket(ServerUpdateSerializer.Serialize(entitySnapshot, latestClientTickReceived, clientCommandingEntity));
+		}
+
+		/// <summary>
+		/// Returns a serialized byte array for the given server update (entity snapshot and client-specific data).
+		/// </summary>
+		public static byte[] Serialize(EntitySnapshot entitySnapshot, int latestClientTickReceived, int clientCommandingEntity)
+		{
+			using (MemoryStream memoryStream = new MemoryStream())
+			{
+				using (BinaryWriter binaryWriter = new BinaryWriter(memoryStream))
+				{
+					binaryWriter.Write(latestClientTickReceived);
+					binaryWriter.Write(clientCommandingEntity);
+					entitySnapshot.Serialize(binaryWriter);
+					return memoryStream.ToArray();
+				}
+			}
+		}
+
+		/// <summary>
+		/// Deserializes a server update (entity snapshot and client-specific data) based on the given byte array.
+		/// </summary>
+		public static void Deserialize(byte[] packet, EntitySnapshot entitySnapshot, out int latestClientTickAcknowledgedByServer, out int clientCommandingEntity)
+		{
+			using (MemoryStream memoryStream = new MemoryStream(packet))
+			{
+				using (BinaryReader binaryReader = new BinaryReader(memoryStream))
+				{
+					latestClientTickAcknowledgedByServer = binaryReader.ReadInt32();
+					clientCommandingEntity = binaryReader.ReadInt32();
+					entitySnapshot.Deserialize(binaryReader);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Deserializes a server update (entity snapshot and client-specific data) based on the given byte array, but only if the byte array represents a newer server update.
+		/// Returns true if the entity snapshot was actually updated from the byte array.
+		/// </summary>
+		public static bool DeserializeIfNewer(byte[] packet, EntitySnapshot entitySnapshot, out int latestClientTickAcknowledgedByServer, out int clientCommandingEntity)
+		{
+			using (MemoryStream memoryStream = new MemoryStream(packet))
+			{
+				using (BinaryReader binaryReader = new BinaryReader(memoryStream))
+				{
+					latestClientTickAcknowledgedByServer = binaryReader.ReadInt32();
+					clientCommandingEntity = binaryReader.ReadInt32();
+					return entitySnapshot.DeserializeIfNewer(binaryReader);
+				}
+			}
 		}
 
 		#endregion Methods

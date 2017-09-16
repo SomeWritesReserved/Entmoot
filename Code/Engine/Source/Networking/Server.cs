@@ -16,7 +16,7 @@ namespace Entmoot.Engine
 	{
 		#region Fields
 
-		/// <summary>The history of entity state snapshots taken over the past N ticks.</summary>
+		/// <summary>The ordered history of entity state snapshots taken over the past N frame ticks.</summary>
 		private readonly Queue<EntitySnapshot> entitySnapshotHistory;
 		/// <summary>The list of clients currently connected to this server.</summary>
 		private readonly List<ClientConnection> clients = new List<ClientConnection>(16);
@@ -53,7 +53,6 @@ namespace Entmoot.Engine
 
 		/// <summary>Gets the array of entities that are controlled and simulated by this server.</summary>
 		public EntityArray EntityArray { get; }
-
 		/// <summary>Gets the collection of systems that will update entities.</summary>
 		public SystemCollection SystemCollection { get; }
 
@@ -68,7 +67,7 @@ namespace Entmoot.Engine
 		{
 			this.clients.Add(new ClientConnection(this, clientNetworkConnection)
 			{
-				OwnedEntity = this.clients.Count,
+				CommandingEntity = this.clients.Count,
 			});
 		}
 
@@ -87,15 +86,15 @@ namespace Entmoot.Engine
 			this.SystemCollection.Update(this.EntityArray);
 
 			// Take a snapshot of the latest entity state (recycle old snapshots) and add it to the snapshot history buffer
-			EntitySnapshot entitySnapshot = this.entitySnapshotHistory.Dequeue();
-			entitySnapshot.UpdateFrom(this.FrameTick, this.EntityArray);
-			this.entitySnapshotHistory.Enqueue(entitySnapshot);
+			EntitySnapshot newEntitySnapshot = this.entitySnapshotHistory.Dequeue();
+			newEntitySnapshot.UpdateFrom(this.FrameTick, this.EntityArray);
+			this.entitySnapshotHistory.Enqueue(newEntitySnapshot);
 
 			if (this.FrameTick % this.NetworkSendRate == 0)
 			{
 				foreach (ClientConnection client in this.clients)
 				{
-					client.SendClientUpdate(entitySnapshot);
+					client.SendClientUpdate(newEntitySnapshot);
 				}
 			}
 		}
@@ -133,13 +132,12 @@ namespace Entmoot.Engine
 
 			#region Properties
 
-			/// <summary>Gets the last client tick that was actually received and acknowledged from the client.</summary>
-			public int LatestClientTickAcknowledgedByServer { get; private set; } = -1;
-			/// <summary>Gets the last server tick that was acknowledged by the client.</summary>
-			public int LatestServerTickAcknowledgedByClient { get; private set; } = -1;
-
+			/// <summary>Gets the most recent client tick that we got from the client.</summary>
+			public int LatestClientTickReceived { get; private set; } = -1;
+			/// <summary>Gets the most recent frame tick we sent that we know was received by the client.</summary>
+			public int LatestFrameTickAcknowledgedByClient { get; private set; } = -1;
 			/// <summary>Gets or sets the entity that this client currently commands.</summary>
-			public int OwnedEntity { get; set; } = -1;
+			public int CommandingEntity { get; set; } = -1;
 
 			#endregion Properties
 
@@ -150,16 +148,7 @@ namespace Entmoot.Engine
 			/// </summary>
 			public void SendClientUpdate(EntitySnapshot entitySnapshot)
 			{
-				using (MemoryStream memoryStream = new MemoryStream())
-				{
-					using (BinaryWriter binaryWriter = new BinaryWriter(memoryStream))
-					{
-						binaryWriter.Write(this.LatestClientTickAcknowledgedByServer);
-						binaryWriter.Write(this.OwnedEntity);
-						entitySnapshot.Serialize(binaryWriter);
-						this.clientNetworkConnection.SendPacket(memoryStream.ToArray());
-					}
-				}
+				ServerUpdateSerializer.Serialize(this.clientNetworkConnection, entitySnapshot, this.LatestClientTickReceived, this.CommandingEntity);
 			}
 
 			/// <summary>
@@ -172,20 +161,20 @@ namespace Entmoot.Engine
 				{
 					// Todo: handle out of order packets here and make sure we only execute each command once (drop old packets)
 					ClientCommand<TCommandData>[] clientCommands = ClientCommand<TCommandData>.DeserializePacket(packet)
-						.Where((cmd) => cmd.ClientFrameTick > this.LatestClientTickAcknowledgedByServer)
+						.Where((cmd) => cmd.ClientFrameTick > this.LatestClientTickReceived)
 						.ToArray();
 
 					foreach (ClientCommand<TCommandData> clientCommand in clientCommands)
 					{
 						// Ignore the commands that were for some other owned entity (these are old commands the client was trying to execute before it knew of its new entity)
-						if (clientCommand.CommandingEntity != this.OwnedEntity) { continue; }
+						if (clientCommand.CommandingEntity != this.CommandingEntity) { continue; }
 
-						if (this.OwnedEntity != -1)
+						if (this.CommandingEntity != -1)
 						{
 							//clientCommand.CommandData.ApplyToEntity(this.parentServer.CurrentState.Entities[this.OwnedEntity]);
 						}
 
-						if (this.LatestClientTickAcknowledgedByServer < clientCommand.ClientFrameTick) { this.LatestClientTickAcknowledgedByServer = clientCommand.ClientFrameTick; }
+						if (this.LatestClientTickReceived < clientCommand.ClientFrameTick) { this.LatestClientTickReceived = clientCommand.ClientFrameTick; }
 					}
 				}
 			}

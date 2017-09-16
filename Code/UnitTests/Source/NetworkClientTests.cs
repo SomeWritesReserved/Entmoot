@@ -649,7 +649,7 @@ namespace Entmoot.UnitTests
 			mockClient.Update(keys);
 			Client<MockCommandData> engineClient = mockClient.EngineClient;
 			Assert.AreEqual(clientFrameTick, engineClient.FrameTick, "Unexpected FrameTick at tick " + mockClient.NetworkTick);
-			Assert.AreEqual(recievedServerFrameTick, engineClient.LatestServerTickAcknowledgedByClient, "Unexpected LatestServerTickAcknowledgedByClient at tick " + mockClient.NetworkTick);
+			Assert.AreEqual(recievedServerFrameTick, engineClient.LatestServerTickReceived, "Unexpected LatestServerTickAcknowledgedByClient at tick " + mockClient.NetworkTick);
 			Assert.AreEqual(hasInterpStarted, engineClient.HasInterpolationStarted, "Unexpected HasInterpolationStarted at tick " + mockClient.NetworkTick);
 			Assert.AreEqual(hasInterpStarted, engineClient.InterpolationStartSnapshot.ServerFrameTick != -1, "Unexpected InterpolationStartSnapshot at tick " + mockClient.NetworkTick);
 			Assert.AreEqual(hasInterpStarted, engineClient.InterpolationEndSnapshot.ServerFrameTick != -1, "Unexpected InterpolationEndSnapshot at tick " + mockClient.NetworkTick);
@@ -867,7 +867,7 @@ namespace Entmoot.UnitTests
 		{
 			#region Fields
 
-			private readonly Dictionary<int, Queue<ServerEntityUpdate>> serverEntityUpdates = new Dictionary<int, Queue<ServerEntityUpdate>>();
+			private readonly Dictionary<int, Queue<MockServerUpdate>> mockServerUpdates = new Dictionary<int, Queue<MockServerUpdate>>();
 			private EntitySnapshot serverEntitySnapshot;
 
 			#endregion Fields
@@ -931,37 +931,28 @@ namespace Entmoot.UnitTests
 			/// </summary>
 			public void QueueIncomingStateUpdate(int networkTickToArriveOn, int serverFrameTick, int acknowledgedClientFrameTick, float entityPosition)
 			{
-				if (!this.serverEntityUpdates.ContainsKey(networkTickToArriveOn))
+				if (!this.mockServerUpdates.ContainsKey(networkTickToArriveOn))
 				{
-					this.serverEntityUpdates[networkTickToArriveOn] = new Queue<ServerEntityUpdate>();
+					this.mockServerUpdates[networkTickToArriveOn] = new Queue<MockServerUpdate>();
 				}
-				this.serverEntityUpdates[networkTickToArriveOn].Enqueue(new ServerEntityUpdate()
+				this.mockServerUpdates[networkTickToArriveOn].Enqueue(new MockServerUpdate()
 				{
+					LatestClientTickReceived = acknowledgedClientFrameTick,
+					CommandingEntity = 0,
 					ServerFrameTick = serverFrameTick,
-					LatestClientTickAcknowledgedByServer = acknowledgedClientFrameTick,
-					OwnedEntity = 0,
 					NewPosition = entityPosition,
 				});
 			}
 
 			byte[] INetworkConnection.GetNextIncomingPacket()
 			{
-				if (!this.serverEntityUpdates.ContainsKey(this.NetworkTick) || !this.serverEntityUpdates[this.NetworkTick].Any()) { return null; }
-				using (MemoryStream memoryStream = new MemoryStream())
-				{
-					using (BinaryWriter binaryWriter = new BinaryWriter(memoryStream))
-					{
-						ServerEntityUpdate serverEntityUpdate = this.serverEntityUpdates[this.NetworkTick].Dequeue();
-						this.serverEntitySnapshot.EntityArray.TryGetEntity(0, out Entity entity);
-						entity.AddComponent<MockComponent>().Position = serverEntityUpdate.NewPosition;
-						this.serverEntitySnapshot.UpdateFrom(serverEntityUpdate.ServerFrameTick, this.serverEntitySnapshot.EntityArray);
+				if (!this.mockServerUpdates.ContainsKey(this.NetworkTick) || !this.mockServerUpdates[this.NetworkTick].Any()) { return null; }
 
-						binaryWriter.Write(serverEntityUpdate.LatestClientTickAcknowledgedByServer);
-						binaryWriter.Write(serverEntityUpdate.OwnedEntity);
-						this.serverEntitySnapshot.Serialize(binaryWriter);
-						return memoryStream.ToArray();
-					}
-				}
+				MockServerUpdate mockServerUpdate = this.mockServerUpdates[this.NetworkTick].Dequeue();
+				this.serverEntitySnapshot.EntityArray.TryGetEntity(0, out Entity entity);
+				entity.AddComponent<MockComponent>().Position = mockServerUpdate.NewPosition;
+				this.serverEntitySnapshot.UpdateFrom(mockServerUpdate.ServerFrameTick, this.serverEntitySnapshot.EntityArray);
+				return ServerUpdateSerializer.Serialize(this.serverEntitySnapshot, mockServerUpdate.LatestClientTickReceived, mockServerUpdate.CommandingEntity);
 			}
 
 			void INetworkConnection.SendPacket(byte[] packet)
@@ -973,11 +964,11 @@ namespace Entmoot.UnitTests
 
 			#region Nested Types
 
-			private class ServerEntityUpdate
+			private class MockServerUpdate
 			{
+				public int LatestClientTickReceived;
+				public int CommandingEntity;
 				public int ServerFrameTick;
-				public int LatestClientTickAcknowledgedByServer;
-				public int OwnedEntity;
 				public float NewPosition;
 			}
 

@@ -18,14 +18,12 @@ namespace Entmoot.Engine
 
 		/// <summary>The network connect to the host server.</summary>
 		private readonly INetworkConnection serverNetworkConnection;
-		/// <summary>The history of entity state snapshots received from the server, note that these are not in any order at all.</summary>
+		/// <summary>The unordered history of entity state snapshots received from the server (note that these are not order but are always the most recent N snapshots).</summary>
 		private readonly EntitySnapshot[] entitySnapshotHistory;
-		/// <summary>The history of client commands recoreded and sent to the server.</summary>
+		/// <summary>The ordered history of client commands sent to the server.</summary>
 		private readonly Queue<ClientCommand<TCommandData>> clientCommandHistory;
 		/// <summary>The collection of systems that will update entities.</summary>
 		private readonly SystemCollection systemCollection;
-		/// <summary>The snapshot to use purely for deserializing incoming packets, gets reused/overwritten for every new packet.</summary>
-		private readonly EntitySnapshot deserializedEntitySnapshot;
 
 		#endregion Fields
 
@@ -43,7 +41,6 @@ namespace Entmoot.Engine
 			this.InterpolationStartSnapshot = new EntitySnapshot(entityCapacity, componentsDefinition);
 			this.InterpolationEndSnapshot = new EntitySnapshot(entityCapacity, componentsDefinition);
 			this.RenderedSnapshot = new EntitySnapshot(entityCapacity, componentsDefinition);
-			this.deserializedEntitySnapshot = new EntitySnapshot(entityCapacity, componentsDefinition);
 
 			// Populate the whole history buffer with data that will be overwritten as needed
 			this.entitySnapshotHistory = new EntitySnapshot[maxHistory];
@@ -70,12 +67,12 @@ namespace Entmoot.Engine
 
 		/// <summary>Gets the current frame tick of the client (which may or may not be ahead of the tick that is currently being rendered).</summary>
 		public int FrameTick { get; private set; }
-		/// <summary>Gets the last server tick that was actually received from the server.</summary>
-		public int LatestServerTickAcknowledgedByClient { get; private set; } = -1;
-		/// <summary>Gets the last client tick that was acknowledged by the server.</summary>
-		public int LatestClientTickAcknowledgedByServer { get; private set; } = -1;
+		/// <summary>Gets the most recent server tick that we got from the server.</summary>
+		public int LatestServerTickReceived { get; private set; } = -1;
+		/// <summary>Gets the most recent frame tick we sent that we know was received by the server.</summary>
+		public int LatestFrameTickAcknowledgedByServer { get; private set; } = -1;
 		/// <summary>Gets the entity that is currently owned by this client (and might take part in client-side prediction).</summary>
-		public int OwnedEntity { get; private set; } = -1;
+		public int CommandingEntity { get; private set; } = -1;
 
 		/// <summary>Gets whether or not the client has enough data from the server to start interpolation and that indeed interpolation has begun.</summary>
 		public bool HasInterpolationStarted { get { return (this.InterpolationStartSnapshot.ServerFrameTick != -1 && this.InterpolationEndSnapshot.ServerFrameTick != -1); } }
@@ -97,7 +94,7 @@ namespace Entmoot.Engine
 
 		public void Update(TCommandData commandData)
 		{
-			if (this.LatestServerTickAcknowledgedByClient >= 0)
+			if (this.LatestServerTickReceived >= 0)
 			{
 				// Only tick the client if we started getting info from the server
 				this.FrameTick++;
@@ -106,39 +103,22 @@ namespace Entmoot.Engine
 			byte[] packet;
 			while ((packet = this.serverNetworkConnection.GetNextIncomingPacket()) != null)
 			{
-				int newLatestClientTickAcknowledgedByServer;
-				int newOwnedEntity;
-				using (MemoryStream memoryStream = new MemoryStream(packet))
+				// Get the oldest entity snapshot in the history that should be overwritten with the new incoming data, but only if the incoming data is actually newer
+				EntitySnapshot newEntitySnapshot = this.getOldestHistoryEntitySnapshot();
+				if (!ServerUpdateSerializer.DeserializeIfNewer(packet, newEntitySnapshot, out int newLatestClientTickAcknowledgedByServer, out int newCommandingEntity)) { continue; }
+
+				if (this.LatestServerTickReceived < 0)
 				{
-					using (BinaryReader binaryReader = new BinaryReader(memoryStream))
-					{
-						newLatestClientTickAcknowledgedByServer = binaryReader.ReadInt32();
-						newOwnedEntity = binaryReader.ReadInt32();
-						this.deserializedEntitySnapshot.Deserialize(binaryReader);
-					}
+					// This must be our first update from the server, so sync our ticks with the server's ticks once we start getting data flow from the server
+					this.FrameTick = newEntitySnapshot.ServerFrameTick;
 				}
-
-				// Get the oldest entity snapshot in the buffer that will be overwritten with the new incoming data
-				EntitySnapshot oldestHistoryEntitySnapshot = this.getOldestHistoryEntitySnapshot();
-
-				// If the new packet isn't actually new, ignore it
-				if (this.deserializedEntitySnapshot.ServerFrameTick <= oldestHistoryEntitySnapshot.ServerFrameTick) { continue; }
-
-				// Replace the snapshot in the history buffer with what we just got from the server
-				oldestHistoryEntitySnapshot.CopyFrom(this.deserializedEntitySnapshot);
-
-				if (this.LatestServerTickAcknowledgedByClient < 0)
+				
+				if (this.LatestServerTickReceived < newEntitySnapshot.ServerFrameTick)
 				{
-					// Sync our ticks with the server's ticks once we start getting some data from the server
-					this.FrameTick = this.deserializedEntitySnapshot.ServerFrameTick;
-				}
-
-				if (this.LatestServerTickAcknowledgedByClient < this.deserializedEntitySnapshot.ServerFrameTick)
-				{
-					// This snapshot is the latest update we've gotten from the server so update our state accordingly
-					this.LatestServerTickAcknowledgedByClient = this.deserializedEntitySnapshot.ServerFrameTick;
-					this.LatestClientTickAcknowledgedByServer = newLatestClientTickAcknowledgedByServer;
-					this.OwnedEntity = newOwnedEntity;
+					// This snapshot is the most recent, up-to-date server update we've gotten so update our state accordingly
+					this.LatestServerTickReceived = newEntitySnapshot.ServerFrameTick;
+					this.LatestFrameTickAcknowledgedByServer = newLatestClientTickAcknowledgedByServer;
+					this.CommandingEntity = newCommandingEntity;
 				}
 			}
 
@@ -148,30 +128,30 @@ namespace Entmoot.Engine
 				this.clientCommandHistory.Enqueue(new ClientCommand<TCommandData>()
 				{
 					ClientFrameTick = this.FrameTick,
-					AcknowledgedServerTick = this.LatestServerTickAcknowledgedByClient,
+					AcknowledgedServerTick = this.LatestServerTickReceived,
 					InterpolationStartTick = this.InterpolationStartSnapshot.ServerFrameTick,
 					InterpolationEndTick = this.InterpolationEndSnapshot.ServerFrameTick,
 					RenderedFrameTick = this.FrameTick - this.InterpolationRenderDelay,
-					CommandingEntity = this.OwnedEntity,
+					CommandingEntity = this.CommandingEntity,
 					CommandData = commandData,
 				});
-				this.serverNetworkConnection.SendPacket(ClientCommand<TCommandData>.SerializeCommands(this.clientCommandHistory.Where((cmd) => cmd.ClientFrameTick > this.LatestClientTickAcknowledgedByServer).ToArray()));
+				this.serverNetworkConnection.SendPacket(ClientCommand<TCommandData>.SerializeCommands(this.clientCommandHistory.Where((cmd) => cmd.ClientFrameTick > this.LatestFrameTickAcknowledgedByServer).ToArray()));
 			}
 
 			this.setupRenderSnapshot();
 
 			// Client side prediction
-			if (this.ShouldPredictInput && this.RenderedSnapshot.ServerFrameTick != -1 && this.OwnedEntity != -1 && this.RenderedSnapshot.EntityArray.TryGetEntity(this.OwnedEntity, out Entity predictedEntity))
+			if (this.ShouldPredictInput && this.RenderedSnapshot.ServerFrameTick != -1 && this.CommandingEntity != -1 && this.RenderedSnapshot.EntityArray.TryGetEntity(this.CommandingEntity, out Entity predictedEntity))
 			{
 				// Get the latest entity snapshot in the buffer we will start predicting from
 				EntitySnapshot latestHistoryEntitySnapshot = this.getLatestHistoryEntitySnapshot();
-				if (latestHistoryEntitySnapshot.EntityArray.TryGetEntity(this.OwnedEntity, out Entity latestHistoryEntity))
+				if (latestHistoryEntitySnapshot.EntityArray.TryGetEntity(this.CommandingEntity, out Entity latestHistoryEntity))
 				{
 					latestHistoryEntity.CopyTo(predictedEntity);
 					foreach (ClientCommand<TCommandData> clientCommand in this.clientCommandHistory)
 					{
 						// This command has either been processed by the server or was for a different commanded entity, either way don't use it for prediction
-						if (clientCommand.ClientFrameTick <= this.LatestClientTickAcknowledgedByServer || clientCommand.CommandingEntity != this.OwnedEntity) { continue; }
+						if (clientCommand.ClientFrameTick <= this.LatestFrameTickAcknowledgedByServer || clientCommand.CommandingEntity != this.CommandingEntity) { continue; }
 
 						// Reapply all the commands we've sent that the server hasn't processed yet to get us back to where we predicted we should be, starting
 						// from where the server last gave us an authoritative response
