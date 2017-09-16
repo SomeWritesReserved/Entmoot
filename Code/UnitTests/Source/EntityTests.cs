@@ -304,6 +304,60 @@ namespace Entmoot.UnitTests
 		}
 
 		[Test]
+		public void Entity_CopyTo_EmptyOne()
+		{
+			EntityArray sourceEntityArray = EntityTests.createStandardEntityArray();
+			Assert.IsTrue(sourceEntityArray.TryGetEntity(0, out Entity sourceEntity0));
+			EntityArray destinationEntityArray = new EntityArray(3, EntityTests.createComponentsDefinition());
+			Assert.IsTrue(destinationEntityArray.TryCreateEntity(out Entity destinationEntity0));
+			Assert.IsTrue(destinationEntityArray.TryCreateEntity(out Entity _));
+			Assert.IsTrue(destinationEntityArray.TryCreateEntity(out Entity _));
+			sourceEntity0.CopyTo(destinationEntity0);
+			Assert.IsTrue(destinationEntity0.HasComponent<PositionComponent2D>());
+			Assert.IsFalse(destinationEntity0.HasComponent<HealthComponent>());
+			Assert.IsTrue(destinationEntity0.HasComponent<StringComponent>());
+			Assert.AreEqual(60.5f, destinationEntity0.GetComponent<PositionComponent2D>().PositionX);
+			Assert.AreEqual(60.9f, destinationEntity0.GetComponent<PositionComponent2D>().PositionY);
+			Assert.AreEqual("entity0", destinationEntity0.GetComponent<StringComponent>().StringValue);
+		}
+
+		[Test]
+		public void Entity_CopyTo_EmptyOne_DiffIndex()
+		{
+			EntityArray sourceEntityArray = EntityTests.createStandardEntityArray();
+			Assert.IsTrue(sourceEntityArray.TryGetEntity(0, out Entity sourceEntity0));
+			EntityArray destinationEntityArray = new EntityArray(3, EntityTests.createComponentsDefinition());
+			Assert.IsTrue(destinationEntityArray.TryCreateEntity(out Entity _));
+			Assert.IsTrue(destinationEntityArray.TryCreateEntity(out Entity _));
+			Assert.IsTrue(destinationEntityArray.TryCreateEntity(out Entity destinationEntity2));
+			sourceEntity0.CopyTo(destinationEntity2);
+			Assert.IsTrue(destinationEntity2.HasComponent<PositionComponent2D>());
+			Assert.IsFalse(destinationEntity2.HasComponent<HealthComponent>());
+			Assert.IsTrue(destinationEntity2.HasComponent<StringComponent>());
+			Assert.AreEqual(60.5f, destinationEntity2.GetComponent<PositionComponent2D>().PositionX);
+			Assert.AreEqual(60.9f, destinationEntity2.GetComponent<PositionComponent2D>().PositionY);
+			Assert.AreEqual("entity0", destinationEntity2.GetComponent<StringComponent>().StringValue);
+		}
+
+		[Test]
+		public void Entity_CopyTo_EmptyAll()
+		{
+			EntityArray sourceEntityArray = EntityTests.createStandardEntityArray();
+			Assert.IsTrue(sourceEntityArray.TryGetEntity(0, out Entity sourceEntity0));
+			Assert.IsTrue(sourceEntityArray.TryGetEntity(2, out Entity sourceEntity2));
+			EntityArray destinationEntityArray = new EntityArray(3, EntityTests.createComponentsDefinition());
+			destinationEntityArray.BeginUpdate();
+			Assert.IsTrue(destinationEntityArray.TryCreateEntity(out Entity destinationEntity0));
+			Assert.IsTrue(destinationEntityArray.TryCreateEntity(out Entity destinationEntity1));
+			Assert.IsTrue(destinationEntityArray.TryCreateEntity(out Entity destinationEntity2));
+			destinationEntityArray.RemoveEntity(destinationEntity1);
+			destinationEntityArray.EndUpdate();
+			sourceEntity0.CopyTo(destinationEntity0);
+			sourceEntity2.CopyTo(destinationEntity2);
+			EntityTests.assertStandardEntityArray(destinationEntityArray);
+		}
+
+		[Test]
 		public void EntityArray_CopyTo_Empty()
 		{
 			EntityArray sourceEntityArray = EntityTests.createStandardEntityArray();
