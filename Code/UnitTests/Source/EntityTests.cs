@@ -276,7 +276,7 @@ namespace Entmoot.UnitTests
 		[Test]
 		public void Components_ResetOnEntityCreate()
 		{
-			EntityArray entityArray = new EntityArray(1, EntityTests.createComponentsDefinition());
+			EntityArray entityArray = new EntityArray(1, EntityTests.CreateComponentsDefinition());
 			Assert.IsTrue(entityArray.TryCreateEntity(out Entity newEntityA));
 			ref PositionComponent2D positionComponentA = ref entityArray.GetComponentArray<PositionComponent2D>().AddComponent(newEntityA);
 			ref HealthComponent healthComponentA = ref entityArray.GetComponentArray<HealthComponent>().AddComponent(newEntityA);
@@ -306,9 +306,9 @@ namespace Entmoot.UnitTests
 		[Test]
 		public void Entity_CopyTo_EmptyOne()
 		{
-			EntityArray sourceEntityArray = EntityTests.createStandardEntityArray();
+			EntityArray sourceEntityArray = EntityTests.CreateStandardEntityArray();
 			Assert.IsTrue(sourceEntityArray.TryGetEntity(0, out Entity sourceEntity0));
-			EntityArray destinationEntityArray = new EntityArray(3, EntityTests.createComponentsDefinition());
+			EntityArray destinationEntityArray = new EntityArray(3, EntityTests.CreateComponentsDefinition());
 			Assert.IsTrue(destinationEntityArray.TryCreateEntity(out Entity destinationEntity0));
 			Assert.IsTrue(destinationEntityArray.TryCreateEntity(out Entity _));
 			Assert.IsTrue(destinationEntityArray.TryCreateEntity(out Entity _));
@@ -324,9 +324,9 @@ namespace Entmoot.UnitTests
 		[Test]
 		public void Entity_CopyTo_EmptyOne_DiffIndex()
 		{
-			EntityArray sourceEntityArray = EntityTests.createStandardEntityArray();
+			EntityArray sourceEntityArray = EntityTests.CreateStandardEntityArray();
 			Assert.IsTrue(sourceEntityArray.TryGetEntity(0, out Entity sourceEntity0));
-			EntityArray destinationEntityArray = new EntityArray(3, EntityTests.createComponentsDefinition());
+			EntityArray destinationEntityArray = new EntityArray(3, EntityTests.CreateComponentsDefinition());
 			Assert.IsTrue(destinationEntityArray.TryCreateEntity(out Entity _));
 			Assert.IsTrue(destinationEntityArray.TryCreateEntity(out Entity _));
 			Assert.IsTrue(destinationEntityArray.TryCreateEntity(out Entity destinationEntity2));
@@ -342,10 +342,10 @@ namespace Entmoot.UnitTests
 		[Test]
 		public void Entity_CopyTo_EmptyAll()
 		{
-			EntityArray sourceEntityArray = EntityTests.createStandardEntityArray();
+			EntityArray sourceEntityArray = EntityTests.CreateStandardEntityArray();
 			Assert.IsTrue(sourceEntityArray.TryGetEntity(0, out Entity sourceEntity0));
 			Assert.IsTrue(sourceEntityArray.TryGetEntity(2, out Entity sourceEntity2));
-			EntityArray destinationEntityArray = new EntityArray(3, EntityTests.createComponentsDefinition());
+			EntityArray destinationEntityArray = new EntityArray(3, EntityTests.CreateComponentsDefinition());
 			destinationEntityArray.BeginUpdate();
 			Assert.IsTrue(destinationEntityArray.TryCreateEntity(out Entity destinationEntity0));
 			Assert.IsTrue(destinationEntityArray.TryCreateEntity(out Entity destinationEntity1));
@@ -354,23 +354,23 @@ namespace Entmoot.UnitTests
 			destinationEntityArray.EndUpdate();
 			sourceEntity0.CopyTo(destinationEntity0);
 			sourceEntity2.CopyTo(destinationEntity2);
-			EntityTests.assertStandardEntityArray(destinationEntityArray);
+			EntityTests.AssertStandardEntityArray(destinationEntityArray);
 		}
 
 		[Test]
 		public void EntityArray_CopyTo_Empty()
 		{
-			EntityArray sourceEntityArray = EntityTests.createStandardEntityArray();
-			EntityArray destinationEntityArray = new EntityArray(3, EntityTests.createComponentsDefinition());
+			EntityArray sourceEntityArray = EntityTests.CreateStandardEntityArray();
+			EntityArray destinationEntityArray = new EntityArray(3, EntityTests.CreateComponentsDefinition());
 			sourceEntityArray.CopyTo(destinationEntityArray);
-			EntityTests.assertStandardEntityArray(destinationEntityArray);
+			EntityTests.AssertStandardEntityArray(destinationEntityArray);
 		}
 
 		[Test]
 		public void EntityArray_CopyTo_Overwrite()
 		{
-			EntityArray sourceEntityArray = EntityTests.createStandardEntityArray();
-			EntityArray destinationEntityArray = new EntityArray(3, EntityTests.createComponentsDefinition());
+			EntityArray sourceEntityArray = EntityTests.CreateStandardEntityArray();
+			EntityArray destinationEntityArray = new EntityArray(3, EntityTests.CreateComponentsDefinition());
 			destinationEntityArray.BeginUpdate();
 			destinationEntityArray.TryCreateEntity(out Entity entity0);
 			destinationEntityArray.TryCreateEntity(out Entity entity1);
@@ -390,14 +390,14 @@ namespace Entmoot.UnitTests
 			destinationEntityArray.RemoveEntity(entity0);
 			destinationEntityArray.EndUpdate();
 			sourceEntityArray.CopyTo(destinationEntityArray);
-			EntityTests.assertStandardEntityArray(destinationEntityArray);
+			EntityTests.AssertStandardEntityArray(destinationEntityArray);
 		}
 
 		[Test]
 		public void EntityArray_Serialize_Empty()
 		{
-			EntityArray sourceEntityArray = EntityTests.createStandardEntityArray();
-			EntityArray destinationEntityArray = new EntityArray(3, EntityTests.createComponentsDefinition());
+			EntityArray sourceEntityArray = EntityTests.CreateStandardEntityArray();
+			EntityArray destinationEntityArray = new EntityArray(3, EntityTests.CreateComponentsDefinition());
 			byte[] serializedBytes;
 			using (MemoryStream memoryStream = new MemoryStream())
 			{
@@ -414,14 +414,14 @@ namespace Entmoot.UnitTests
 					destinationEntityArray.Deserialize(binaryReader);
 				}
 			}
-			EntityTests.assertStandardEntityArray(destinationEntityArray);
+			EntityTests.AssertStandardEntityArray(destinationEntityArray);
 		}
 
 		[Test]
 		public void EntityArray_Serialize_Overwrite()
 		{
-			EntityArray sourceEntityArray = EntityTests.createStandardEntityArray();
-			EntityArray destinationEntityArray = new EntityArray(3, EntityTests.createComponentsDefinition());
+			EntityArray sourceEntityArray = EntityTests.CreateStandardEntityArray();
+			EntityArray destinationEntityArray = new EntityArray(3, EntityTests.CreateComponentsDefinition());
 			destinationEntityArray.BeginUpdate();
 			destinationEntityArray.TryCreateEntity(out Entity entity0);
 			destinationEntityArray.TryCreateEntity(out Entity entity1);
@@ -457,7 +457,7 @@ namespace Entmoot.UnitTests
 					Assert.AreEqual(memoryStream.Length, memoryStream.Position);
 				}
 			}
-			EntityTests.assertStandardEntityArray(destinationEntityArray);
+			EntityTests.AssertStandardEntityArray(destinationEntityArray);
 		}
 
 		[Test]
@@ -555,7 +555,7 @@ namespace Entmoot.UnitTests
 
 		#region Helpers
 
-		private static ComponentsDefinition createComponentsDefinition()
+		public static ComponentsDefinition CreateComponentsDefinition()
 		{
 			ComponentsDefinition componentsDefinition = new ComponentsDefinition();
 			componentsDefinition.RegisterComponentType<PositionComponent2D>();
@@ -564,9 +564,9 @@ namespace Entmoot.UnitTests
 			return componentsDefinition;
 		}
 
-		private static EntityArray createStandardEntityArray()
+		public static EntityArray CreateStandardEntityArray()
 		{
-			EntityArray entityArray = new EntityArray(3, EntityTests.createComponentsDefinition());
+			EntityArray entityArray = new EntityArray(3, EntityTests.CreateComponentsDefinition());
 			entityArray.BeginUpdate();
 			entityArray.TryCreateEntity(out Entity entity0);
 			entityArray.TryCreateEntity(out Entity entity1);
@@ -585,11 +585,11 @@ namespace Entmoot.UnitTests
 			//entity2.AddComponent<StringComponent>().StringValue = "entity2";
 			entityArray.RemoveEntity(entity1);
 			entityArray.EndUpdate();
-			EntityTests.assertStandardEntityArray(entityArray);
+			EntityTests.AssertStandardEntityArray(entityArray);
 			return entityArray;
 		}
 
-		private static void assertStandardEntityArray(EntityArray entityArray)
+		public static void AssertStandardEntityArray(EntityArray entityArray)
 		{
 			Assert.IsTrue(entityArray.TryGetEntity(0, out Entity entity0));
 			Assert.IsFalse(entityArray.TryGetEntity(1, out Entity entity1));
