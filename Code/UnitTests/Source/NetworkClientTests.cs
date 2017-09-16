@@ -651,11 +651,11 @@ namespace Entmoot.UnitTests
 			Assert.AreEqual(clientFrameTick, engineClient.FrameTick, "Unexpected FrameTick at tick " + mockClient.NetworkTick);
 			Assert.AreEqual(recievedServerFrameTick, engineClient.LatestServerTickReceived, "Unexpected LatestServerTickAcknowledgedByClient at tick " + mockClient.NetworkTick);
 			Assert.AreEqual(hasInterpStarted, engineClient.HasInterpolationStarted, "Unexpected HasInterpolationStarted at tick " + mockClient.NetworkTick);
-			Assert.AreEqual(hasInterpStarted, engineClient.InterpolationStartSnapshot.ServerFrameTick != -1, "Unexpected InterpolationStartSnapshot at tick " + mockClient.NetworkTick);
-			Assert.AreEqual(hasInterpStarted, engineClient.InterpolationEndSnapshot.ServerFrameTick != -1, "Unexpected InterpolationEndSnapshot at tick " + mockClient.NetworkTick);
+			Assert.AreEqual(hasInterpStarted, engineClient.InterpolationStartSnapshot.HasData, "Unexpected InterpolationStartSnapshot at tick " + mockClient.NetworkTick);
+			Assert.AreEqual(hasInterpStarted, engineClient.InterpolationEndSnapshot.HasData, "Unexpected InterpolationEndSnapshot at tick " + mockClient.NetworkTick);
 			Assert.AreEqual(extrapolatedFrames, engineClient.NumberOfExtrapolatedFrames, "Unexpected NumberOfExtrapolatedFrames at tick " + mockClient.NetworkTick);
 			Assert.AreEqual(noInterpFrames, engineClient.NumberOfNoInterpolationFrames, "Unexpected NumberOfNoInterpolationFrames at tick " + mockClient.NetworkTick);
-			Assert.AreEqual(position.HasValue, engineClient.RenderedSnapshot.ServerFrameTick != -1, "Unexpected RenderedSnapshot at tick " + mockClient.NetworkTick);
+			Assert.AreEqual(position.HasValue, engineClient.RenderedSnapshot.HasData, "Unexpected RenderedSnapshot at tick " + mockClient.NetworkTick);
 			if (position.HasValue)
 			{
 				if (engineClient.ShouldInterpolate)

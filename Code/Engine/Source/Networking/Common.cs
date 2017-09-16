@@ -37,6 +37,11 @@ namespace Entmoot.Engine
 		/// </summary>
 		public EntityArray EntityArray { get; }
 
+		/// <summary>
+		/// Gets whether or not this entity snapshot has been loaded with data.
+		/// </summary>
+		public bool HasData { get { return (this.ServerFrameTick >= 0); } }
+
 		#endregion Properties
 
 		#region Methods

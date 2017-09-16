@@ -75,7 +75,7 @@ namespace Entmoot.Engine
 		public int CommandingEntity { get; private set; } = -1;
 
 		/// <summary>Gets whether or not the client has enough data from the server to start interpolation and that indeed interpolation has begun.</summary>
-		public bool HasInterpolationStarted { get { return (this.InterpolationStartSnapshot.ServerFrameTick != -1 && this.InterpolationEndSnapshot.ServerFrameTick != -1); } }
+		public bool HasInterpolationStarted { get { return (this.InterpolationStartSnapshot.HasData && this.InterpolationEndSnapshot.HasData); } }
 		/// <summary>Gets the number of total frames (over the course of the entire session) that had to be extrapolated (instead of interpolated) due to packet loss.</summary>
 		public int NumberOfExtrapolatedFrames { get; private set; }
 		/// <summary>Gets the number of total frames (over the course of the entire session) that had no interpolation or extrapolation due to severe packet loss and <see cref="MaxExtrapolationTicks"/>.</summary>
@@ -141,7 +141,7 @@ namespace Entmoot.Engine
 			this.setupRenderSnapshot();
 
 			// Client side prediction
-			if (this.ShouldPredictInput && this.RenderedSnapshot.ServerFrameTick != -1 && this.CommandingEntity != -1 && this.RenderedSnapshot.EntityArray.TryGetEntity(this.CommandingEntity, out Entity predictedEntity))
+			if (this.ShouldPredictInput && this.RenderedSnapshot.HasData && this.CommandingEntity != -1 && this.RenderedSnapshot.EntityArray.TryGetEntity(this.CommandingEntity, out Entity predictedEntity))
 			{
 				// Get the latest entity snapshot in the buffer we will start predicting from
 				EntitySnapshot latestHistoryEntitySnapshot = this.getLatestHistoryEntitySnapshot();

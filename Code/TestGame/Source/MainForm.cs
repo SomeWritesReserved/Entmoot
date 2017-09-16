@@ -163,7 +163,7 @@ namespace Entmoot.TestGame
 
 			e.Graphics.DrawString(now.ToString(), this.Font, Brushes.Black, 10, 10);
 			if (this.drawInterpolationCheckBox.Checked && clientServerContext == ClientServerContext.Client &&
-				this.client.InterpolationStartSnapshot.ServerFrameTick != -1 && this.client.InterpolationEndSnapshot.ServerFrameTick != -1)
+				this.client.InterpolationStartSnapshot.HasData && this.client.InterpolationEndSnapshot.HasData)
 			{
 				foreach (Entity entity in this.client.InterpolationStartSnapshot.EntityArray)
 				{
