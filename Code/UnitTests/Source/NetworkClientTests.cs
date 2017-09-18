@@ -650,6 +650,7 @@ namespace Entmoot.UnitTests
 			Client<MockCommandData> engineClient = mockClient.EngineClient;
 			Assert.AreEqual(clientFrameTick, engineClient.FrameTick, "Unexpected FrameTick at tick " + mockClient.NetworkTick);
 			Assert.AreEqual(recievedServerFrameTick, engineClient.LatestServerTickReceived, "Unexpected LatestServerTickAcknowledgedByClient at tick " + mockClient.NetworkTick);
+			Assert.AreEqual(hasInterpStarted, engineClient.HasRenderingStarted, "Unexpected HasRenderingStarted at tick " + mockClient.NetworkTick);
 			Assert.AreEqual(hasInterpStarted, engineClient.HasInterpolationStarted, "Unexpected HasInterpolationStarted at tick " + mockClient.NetworkTick);
 			Assert.AreEqual(hasInterpStarted, engineClient.InterpolationStartSnapshot.HasData, "Unexpected InterpolationStartSnapshot at tick " + mockClient.NetworkTick);
 			Assert.AreEqual(hasInterpStarted, engineClient.InterpolationEndSnapshot.HasData, "Unexpected InterpolationEndSnapshot at tick " + mockClient.NetworkTick);
@@ -938,7 +939,7 @@ namespace Entmoot.UnitTests
 				this.mockServerUpdates[networkTickToArriveOn].Enqueue(new MockServerUpdate()
 				{
 					LatestClientTickReceived = acknowledgedClientFrameTick,
-					CommandingEntity = 0,
+					CommandingEntityID = 0,
 					ServerFrameTick = serverFrameTick,
 					NewPosition = entityPosition,
 				});
@@ -952,7 +953,7 @@ namespace Entmoot.UnitTests
 				this.serverEntitySnapshot.EntityArray.TryGetEntity(0, out Entity entity);
 				entity.AddComponent<MockComponent>().Position = mockServerUpdate.NewPosition;
 				this.serverEntitySnapshot.UpdateFrom(mockServerUpdate.ServerFrameTick, this.serverEntitySnapshot.EntityArray);
-				return ServerUpdateSerializer.Serialize(this.serverEntitySnapshot, mockServerUpdate.LatestClientTickReceived, mockServerUpdate.CommandingEntity);
+				return ServerUpdateSerializer.Serialize(this.serverEntitySnapshot, mockServerUpdate.LatestClientTickReceived, mockServerUpdate.CommandingEntityID);
 			}
 
 			void INetworkConnection.SendPacket(byte[] packet)
@@ -967,7 +968,7 @@ namespace Entmoot.UnitTests
 			private class MockServerUpdate
 			{
 				public int LatestClientTickReceived;
-				public int CommandingEntity;
+				public int CommandingEntityID;
 				public int ServerFrameTick;
 				public float NewPosition;
 			}
@@ -985,12 +986,12 @@ namespace Entmoot.UnitTests
 
 			#region Methods
 
-			public void DeserializeData(BinaryReader binaryReader)
+			public void Deserialize(BinaryReader binaryReader)
 			{
 				this.CommandKeys = (MockCommandKeys)binaryReader.ReadByte();
 			}
 
-			public void SerializeData(BinaryWriter binaryWriter)
+			public void Serialize(BinaryWriter binaryWriter)
 			{
 				binaryWriter.Write((byte)this.CommandKeys);
 			}

@@ -521,12 +521,12 @@ namespace Entmoot.TestGame
 
 		#region Methods
 
-		public void DeserializeData(BinaryReader binaryReader)
+		public void Deserialize(BinaryReader binaryReader)
 		{
 			this.CommandKeys = (TestCommandKeys)binaryReader.ReadByte();
 		}
 
-		public void SerializeData(BinaryWriter binaryWriter)
+		public void Serialize(BinaryWriter binaryWriter)
 		{
 			binaryWriter.Write((byte)this.CommandKeys);
 		}

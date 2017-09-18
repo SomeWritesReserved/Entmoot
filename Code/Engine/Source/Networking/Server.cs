@@ -28,14 +28,14 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		public Server(int maxHistory, int entityCapacity, ComponentsDefinition componentsDefinition, IEnumerable<ISystem> systems)
+		public Server(int maxEntityHistory, int entityCapacity, ComponentsDefinition componentsDefinition, IEnumerable<ISystem> systems)
 		{
 			this.EntityArray = new EntityArray(entityCapacity, componentsDefinition);
 			this.SystemCollection = new SystemCollection(systems);
 
-			// Populate the whole history buffer with data that will be overwritten as needed
-			this.entitySnapshotHistory = new Queue<EntitySnapshot>(maxHistory);
-			for (int i = 0; i < maxHistory; i++)
+			// Populate the entire history buffer with data that will be overwritten as needed
+			this.entitySnapshotHistory = new Queue<EntitySnapshot>();
+			for (int i = 0; i < maxEntityHistory; i++)
 			{
 				this.entitySnapshotHistory.Enqueue(new EntitySnapshot(entityCapacity, componentsDefinition));
 			}
@@ -67,7 +67,7 @@ namespace Entmoot.Engine
 		{
 			this.clients.Add(new ClientConnection(this, clientNetworkConnection)
 			{
-				CommandingEntity = this.clients.Count,
+				CommandingEntityID = this.clients.Count,
 			});
 		}
 
@@ -85,7 +85,7 @@ namespace Entmoot.Engine
 
 			this.SystemCollection.Update(this.EntityArray);
 
-			// Take a snapshot of the latest entity state (recycle old snapshots) and add it to the snapshot history buffer
+			// Take a snapshot of the latest entity state and add it to the snapshot history buffer (overwriting an old snapshot)
 			EntitySnapshot newEntitySnapshot = this.entitySnapshotHistory.Dequeue();
 			newEntitySnapshot.UpdateFrom(this.FrameTick, this.EntityArray);
 			this.entitySnapshotHistory.Enqueue(newEntitySnapshot);
@@ -114,6 +114,8 @@ namespace Entmoot.Engine
 			private readonly Server<TCommandData> parentServer;
 			/// <summary>The network connection that communicates to the client.</summary>
 			private readonly INetworkConnection clientNetworkConnection;
+			/// <summary></summary>
+			private readonly ClientCommand<TCommandData>[] deserializedClientCommandHistory;
 
 			#endregion Fields
 
@@ -126,6 +128,13 @@ namespace Entmoot.Engine
 			{
 				this.parentServer = parentServer;
 				this.clientNetworkConnection = clientNetworkConnection;
+
+				// Populate the entire history buffer with data that will be overwritten as needed
+				this.deserializedClientCommandHistory = new ClientCommand<TCommandData>[ClientCommand<TCommandData>.MaxClientCommandsPerUpdate];
+				for (int i = 0; i < this.deserializedClientCommandHistory.Length; i++)
+				{
+					this.deserializedClientCommandHistory[i] = new ClientCommand<TCommandData>();
+				}
 			}
 
 			#endregion Constructors
@@ -137,7 +146,7 @@ namespace Entmoot.Engine
 			/// <summary>Gets the most recent frame tick we sent that we know was received by the client.</summary>
 			public int LatestFrameTickAcknowledgedByClient { get; private set; } = -1;
 			/// <summary>Gets or sets the entity that this client currently commands.</summary>
-			public int CommandingEntity { get; set; } = -1;
+			public int CommandingEntityID { get; set; } = -1;
 
 			#endregion Properties
 
@@ -148,7 +157,7 @@ namespace Entmoot.Engine
 			/// </summary>
 			public void SendClientUpdate(EntitySnapshot entitySnapshot)
 			{
-				ServerUpdateSerializer.Serialize(this.clientNetworkConnection, entitySnapshot, this.LatestClientTickReceived, this.CommandingEntity);
+				ServerUpdateSerializer.Send(this.clientNetworkConnection, entitySnapshot, this.LatestClientTickReceived, this.CommandingEntityID);
 			}
 
 			/// <summary>
@@ -160,14 +169,17 @@ namespace Entmoot.Engine
 				while ((packet = this.clientNetworkConnection.GetNextIncomingPacket()) != null)
 				{
 					// Todo: handle out of order packets here and make sure we only execute each command once (drop old packets)
-					ClientCommand<TCommandData>[] clientCommands = ClientCommand<TCommandData>.DeserializePacket(packet)
-						.Where((cmd) => cmd.ClientFrameTick > this.LatestClientTickReceived)
-						.ToArray();
+					int numberOfCommands = ClientUpdateSerializer<TCommandData>.Deserialize(packet, this.deserializedClientCommandHistory, out int newlatestFrameTickAcknowledgedByClient);
 
-					foreach (ClientCommand<TCommandData> clientCommand in clientCommands)
+					for (int i = 0; i < numberOfCommands; i++)
 					{
+						ClientCommand<TCommandData> clientCommand = this.deserializedClientCommandHistory[i];
+
+						// Make sure we don't process a command we've already receieved and processed in a previous tick
+						if (!clientCommand.HasData || clientCommand.ClientFrameTick <= this.LatestClientTickReceived) { continue; }
+
 						// Make sure we have an entity to command, that the client thinks its commanding the same entity, and that the entity exists
-						if (this.CommandingEntity != -1 && clientCommand.CommandingEntity == this.CommandingEntity && entityArray.TryGetEntity(this.CommandingEntity, out Entity entity))
+						if (this.CommandingEntityID != -1 && clientCommand.CommandingEntityID == this.CommandingEntityID && entityArray.TryGetEntity(this.CommandingEntityID, out Entity entity))
 						{
 							clientCommand.CommandData.ApplyToEntity(entity);
 						}

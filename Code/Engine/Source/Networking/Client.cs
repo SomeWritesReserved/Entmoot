@@ -32,7 +32,7 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		public Client(INetworkConnection serverNetworkConnection, int maxHistory, int entityCapacity, ComponentsDefinition componentsDefinition, IEnumerable<ISystem> systems)
+		public Client(INetworkConnection serverNetworkConnection, int maxEntityHistory, int entityCapacity, ComponentsDefinition componentsDefinition, IEnumerable<ISystem> systems)
 		{
 			this.serverNetworkConnection = serverNetworkConnection;
 			this.systemCollection = new SystemCollection(systems);
@@ -42,12 +42,15 @@ namespace Entmoot.Engine
 			this.InterpolationEndSnapshot = new EntitySnapshot(entityCapacity, componentsDefinition);
 			this.RenderedSnapshot = new EntitySnapshot(entityCapacity, componentsDefinition);
 
-			// Populate the whole history buffer with data that will be overwritten as needed
-			this.entitySnapshotHistory = new EntitySnapshot[maxHistory];
-			this.clientCommandHistory = new Queue<ClientCommand<TCommandData>>(maxHistory);
-			for (int i = 0; i < maxHistory; i++)
+			// Populate the entire history buffer with data that will be overwritten as needed
+			this.entitySnapshotHistory = new EntitySnapshot[maxEntityHistory];
+			for (int i = 0; i < this.entitySnapshotHistory.Length; i++)
 			{
 				this.entitySnapshotHistory[i] = new EntitySnapshot(entityCapacity, componentsDefinition);
+			}
+			this.clientCommandHistory = new Queue<ClientCommand<TCommandData>>();
+			for (int i = 0; i < ClientCommand<TCommandData>.MaxClientCommandsPerUpdate; i++)
+			{
 				this.clientCommandHistory.Enqueue(new ClientCommand<TCommandData>());
 			}
 		}
@@ -56,6 +59,8 @@ namespace Entmoot.Engine
 
 		#region Properties
 
+		/// <summary>Gets or sets the rate at which the client will send commands to the server (i.e. every Nth frame commands will be sent).</summary>
+		public int NetworkSendRate { get; set; } = 1;
 		/// <summary>Gets or sets whether the client should interpolate sent server state for a smoother rendered experience.</summary>
 		public bool ShouldInterpolate { get; set; } = true;
 		/// <summary>Gets or sets whether to perform client-side prediction on the user's input.</summary>
@@ -65,28 +70,30 @@ namespace Entmoot.Engine
 		/// <summary>Gets or sets the maximum number of ticks that the client can extrapolate for (in the event of packet loss).</summary>
 		public int MaxExtrapolationTicks { get; set; } = 10;
 
-		/// <summary>Gets the current frame tick of the client (which may or may not be ahead of the tick that is currently being rendered).</summary>
+		/// <summary>Gets the current frame tick of the client (which may be ahead of the tick that is currently being rendered in <see cref="RenderedSnapshot"/>).</summary>
 		public int FrameTick { get; private set; }
 		/// <summary>Gets the most recent server tick that we got from the server.</summary>
 		public int LatestServerTickReceived { get; private set; } = -1;
 		/// <summary>Gets the most recent frame tick we sent that we know was received by the server.</summary>
 		public int LatestFrameTickAcknowledgedByServer { get; private set; } = -1;
 		/// <summary>Gets the entity that is currently owned by this client (and might take part in client-side prediction).</summary>
-		public int CommandingEntity { get; private set; } = -1;
+		public int CommandingEntityID { get; private set; } = -1;
 
+		/// <summary>Gets whether or not the client has enough data from the server to start rendering and that indeed rendering has begun.</summary>
+		public bool HasRenderingStarted { get { return this.RenderedSnapshot.HasData; } }
 		/// <summary>Gets whether or not the client has enough data from the server to start interpolation and that indeed interpolation has begun.</summary>
-		public bool HasInterpolationStarted { get { return (this.InterpolationStartSnapshot.HasData && this.InterpolationEndSnapshot.HasData); } }
+		public bool HasInterpolationStarted { get { return this.InterpolationStartSnapshot.HasData && this.InterpolationEndSnapshot.HasData; } }
 		/// <summary>Gets the number of total frames (over the course of the entire session) that had to be extrapolated (instead of interpolated) due to packet loss.</summary>
 		public int NumberOfExtrapolatedFrames { get; private set; }
 		/// <summary>Gets the number of total frames (over the course of the entire session) that had no interpolation or extrapolation due to severe packet loss and <see cref="MaxExtrapolationTicks"/>.</summary>
 		public int NumberOfNoInterpolationFrames { get; private set; }
 
+		/// <summary>Gets the entity snapshot that is currently the actively rendered state.</summary>
+		public EntitySnapshot RenderedSnapshot { get; }
 		/// <summary>Gets the entity snapshot that is currently being used as the starting interpolation tick (where we are coming from).</summary>
 		public EntitySnapshot InterpolationStartSnapshot { get; }
 		/// <summary>Gets the entity snapshot that is currently being used as the ending interpolation tick (where we are going to).</summary>
 		public EntitySnapshot InterpolationEndSnapshot { get; }
-		/// <summary>Gets the entity snapshot that is currently the actively rendered state.</summary>
-		public EntitySnapshot RenderedSnapshot { get; }
 
 		#endregion Properties
 
@@ -96,7 +103,7 @@ namespace Entmoot.Engine
 		{
 			if (this.LatestServerTickReceived >= 0)
 			{
-				// Only tick the client if we started getting info from the server
+				// Only tick the client if we started getting data from the server
 				this.FrameTick++;
 			}
 
@@ -105,53 +112,54 @@ namespace Entmoot.Engine
 			{
 				// Get the oldest entity snapshot in the history that should be overwritten with the new incoming data, but only if the incoming data is actually newer
 				EntitySnapshot newEntitySnapshot = this.getOldestHistoryEntitySnapshot();
-				if (!ServerUpdateSerializer.DeserializeIfNewer(packet, newEntitySnapshot, out int newLatestClientTickAcknowledgedByServer, out int newCommandingEntity)) { continue; }
+				if (!ServerUpdateSerializer.DeserializeIfNewer(packet, newEntitySnapshot, out int newLatestClientTickAcknowledgedByServer, out int newCommandingEntityID)) { continue; }
 
 				if (this.LatestServerTickReceived < 0)
 				{
 					// This must be our first update from the server, so sync our ticks with the server's ticks once we start getting data flow from the server
 					this.FrameTick = newEntitySnapshot.ServerFrameTick;
 				}
-				
+
 				if (this.LatestServerTickReceived < newEntitySnapshot.ServerFrameTick)
 				{
 					// This snapshot is the most recent, up-to-date server update we've gotten so update our state accordingly
 					this.LatestServerTickReceived = newEntitySnapshot.ServerFrameTick;
 					this.LatestFrameTickAcknowledgedByServer = newLatestClientTickAcknowledgedByServer;
-					this.CommandingEntity = newCommandingEntity;
+					this.CommandingEntityID = newCommandingEntityID;
 				}
 			}
 
-			if (this.HasInterpolationStarted)
+			if (this.HasRenderingStarted)
 			{
-				this.clientCommandHistory.Dequeue();
-				this.clientCommandHistory.Enqueue(new ClientCommand<TCommandData>()
+				// Once we are rendering we can start taking user commands and sending them to the server
+				// Take the latest command and add it to the command history buffer (overwritting an old command)
+				ClientCommand<TCommandData> newClientCommand = this.clientCommandHistory.Dequeue();
+
+				// Todo: handle the frame ticks whenever we aren't interpolating
+				newClientCommand.UpdateFrom(this.FrameTick, this.RenderedSnapshot.ServerFrameTick, this.InterpolationStartSnapshot.ServerFrameTick, this.InterpolationEndSnapshot.ServerFrameTick, this.CommandingEntityID, commandData);
+				this.clientCommandHistory.Enqueue(newClientCommand);
+
+				if (this.FrameTick % this.NetworkSendRate == 0)
 				{
-					ClientFrameTick = this.FrameTick,
-					AcknowledgedServerTick = this.LatestServerTickReceived,
-					InterpolationStartTick = this.InterpolationStartSnapshot.ServerFrameTick,
-					InterpolationEndTick = this.InterpolationEndSnapshot.ServerFrameTick,
-					RenderedFrameTick = this.FrameTick - this.InterpolationRenderDelay,
-					CommandingEntity = this.CommandingEntity,
-					CommandData = commandData,
-				});
-				this.serverNetworkConnection.SendPacket(ClientCommand<TCommandData>.SerializeCommands(this.clientCommandHistory.Where((cmd) => cmd.ClientFrameTick > this.LatestFrameTickAcknowledgedByServer).ToArray()));
+					ClientUpdateSerializer<TCommandData>.Send(this.serverNetworkConnection, this.clientCommandHistory, this.LatestServerTickReceived);
+				}
 			}
 
 			this.setupRenderSnapshot();
 
 			// Client side prediction
-			if (this.ShouldPredictInput && this.RenderedSnapshot.HasData && this.CommandingEntity != -1 && this.RenderedSnapshot.EntityArray.TryGetEntity(this.CommandingEntity, out Entity predictedEntity))
+			if (this.ShouldPredictInput && this.HasRenderingStarted && this.CommandingEntityID != -1 && this.RenderedSnapshot.EntityArray.TryGetEntity(this.CommandingEntityID, out Entity predictedEntity))
 			{
 				// Get the latest entity snapshot in the buffer we will start predicting from
 				EntitySnapshot latestHistoryEntitySnapshot = this.getLatestHistoryEntitySnapshot();
-				if (latestHistoryEntitySnapshot.EntityArray.TryGetEntity(this.CommandingEntity, out Entity latestHistoryEntity))
+				if (latestHistoryEntitySnapshot.EntityArray.TryGetEntity(this.CommandingEntityID, out Entity latestHistoryEntity))
 				{
 					latestHistoryEntity.CopyTo(predictedEntity);
 					foreach (ClientCommand<TCommandData> clientCommand in this.clientCommandHistory)
 					{
-						// This command has either been processed by the server or was for a different commanded entity, either way don't use it for prediction
-						if (clientCommand.ClientFrameTick <= this.LatestFrameTickAcknowledgedByServer || clientCommand.CommandingEntity != this.CommandingEntity) { continue; }
+						// If the command was already received by the server then it doesn't need prediction (the results are in the update sent to us), if the command was for a different
+						// entity than what we are currently commanding then we can't predict at all
+						if (!clientCommand.HasData || clientCommand.ClientFrameTick <= this.LatestFrameTickAcknowledgedByServer || clientCommand.CommandingEntityID != this.CommandingEntityID) { continue; }
 
 						// Reapply all the commands we've sent that the server hasn't processed yet to get us back to where we predicted we should be, starting
 						// from where the server last gave us an authoritative response
