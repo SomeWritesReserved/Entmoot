@@ -70,11 +70,11 @@ namespace Entmoot.Engine
 		public bool TryCreateEntity(out Entity entity)
 		{
 			entity = Entity.NoEntity;
-			int nextEntityIndex = Array.IndexOf(this.entityStates, EntityState.NoEntity);
-			if (nextEntityIndex < 0) { return false; }
+			int nextEntityID = Array.IndexOf(this.entityStates, EntityState.NoEntity);
+			if (nextEntityID < 0) { return false; }
 
-			entity = new Entity(this, nextEntityIndex);
-			this.entityStates[nextEntityIndex] = EntityState.Creating;
+			entity = new Entity(this, nextEntityID);
+			this.entityStates[nextEntityID] = EntityState.Creating;
 			foreach (IComponentArray componentArray in this.componentArrays)
 			{
 				componentArray.RemoveComponent(entity);

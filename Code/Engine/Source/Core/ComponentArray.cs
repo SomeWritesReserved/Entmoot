@@ -209,9 +209,9 @@ namespace Entmoot.Engine
 		{
 			Array.Copy(otherA.components, this.components, this.Capacity);
 			otherA.componentStates.CopyTo(this.componentStates);
-			for (int componentIndex = 0; componentIndex < this.Capacity; componentIndex++)
+			for (int entityID = 0; entityID < this.Capacity; entityID++)
 			{
-				this.components[componentIndex].Interpolate(otherA.components[componentIndex], otherB.components[componentIndex], amount);
+				this.components[entityID].Interpolate(otherA.components[entityID], otherB.components[entityID], amount);
 			}
 		}
 
@@ -229,9 +229,9 @@ namespace Entmoot.Engine
 		public void Serialize(BinaryWriter binaryWriter)
 		{
 			this.componentStates.Serialize(binaryWriter);
-			for (int componentIndex = 0; componentIndex < this.Capacity; componentIndex++)
+			for (int entityID = 0; entityID < this.Capacity; entityID++)
 			{
-				this.components[componentIndex].Serialize(binaryWriter);
+				this.components[entityID].Serialize(binaryWriter);
 			}
 		}
 
@@ -241,9 +241,9 @@ namespace Entmoot.Engine
 		public void Deserialize(BinaryReader binaryReader)
 		{
 			this.componentStates.Deserialize(binaryReader);
-			for (int componentIndex = 0; componentIndex < this.Capacity; componentIndex++)
+			for (int entityID = 0; entityID < this.Capacity; entityID++)
 			{
-				this.components[componentIndex].Deserialize(binaryReader);
+				this.components[entityID].Deserialize(binaryReader);
 			}
 		}
 
