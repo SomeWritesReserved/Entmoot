@@ -108,16 +108,6 @@ namespace Entmoot.Engine
 		#endregion Methods
 	}
 
-	public interface INetworkConnection
-	{
-		#region Methods
-
-		byte[] GetNextIncomingPacket();
-		void SendPacket(byte[] packet);
-
-		#endregion Methods
-	}
-
 	/// <summary>
 	/// An interface that defines the actual data that a client command will send to the server.
 	/// </summary>
@@ -240,6 +230,16 @@ namespace Entmoot.Engine
 			this.CommandingEntityID = binaryReader.ReadInt32();
 			this.commandData.Deserialize(binaryReader);
 		}
+
+		#endregion Methods
+	}
+
+	public interface INetworkConnection
+	{
+		#region Methods
+
+		byte[] GetNextIncomingPacket();
+		void SendPacket(byte[] packet);
 
 		#endregion Methods
 	}
