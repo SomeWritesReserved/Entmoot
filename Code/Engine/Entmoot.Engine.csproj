@@ -46,6 +46,7 @@
     <Compile Include="Source\Core\ISystem.cs" />
     <Compile Include="Source\Core\EntityArray.cs" />
     <Compile Include="Source\Math\Vector3.cs" />
+    <Compile Include="Source\Networking\Serializers.cs" />
     <Compile Include="Source\StateArray.cs" />
     <Compile Include="Source\Networking\Client.cs" />
     <Compile Include="Source\Networking\Common.cs" />
