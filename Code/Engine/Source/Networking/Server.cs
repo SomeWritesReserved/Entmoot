@@ -171,6 +171,8 @@ namespace Entmoot.Engine
 					// Todo: handle out of order packets here and make sure we only execute each command once (drop old packets)
 					int numberOfCommands = ClientUpdateSerializer<TCommandData>.Deserialize(packet, this.deserializedClientCommandHistory, out int newlatestFrameTickAcknowledgedByClient);
 
+					if (this.LatestFrameTickAcknowledgedByClient < newlatestFrameTickAcknowledgedByClient) { this.LatestFrameTickAcknowledgedByClient = newlatestFrameTickAcknowledgedByClient; }
+
 					for (int i = 0; i < numberOfCommands; i++)
 					{
 						ClientCommand<TCommandData> clientCommand = this.deserializedClientCommandHistory[i];
