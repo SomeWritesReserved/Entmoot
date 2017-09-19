@@ -93,8 +93,20 @@ namespace Entmoot.Engine
 			{
 				foreach (ClientConnection client in this.clients)
 				{
-					client.SendClientUpdate(newEntitySnapshot);
+					client.SendServerUpdate(newEntitySnapshot);
 				}
+			}
+		}
+
+		/// <summary>
+		/// Executes a given client command on behalf of the given client.
+		/// </summary>
+		private void executeClientCommand(ClientConnection client, ClientCommand<TCommandData> clientCommand)
+		{
+			// Make sure we have an entity to command, that the client thinks its commanding that same entity, and that the entity actually exists
+			if (client.CommandingEntityID != -1 && clientCommand.CommandingEntityID == client.CommandingEntityID && this.EntityArray.TryGetEntity(client.CommandingEntityID, out Entity commandingEntity))
+			{
+				clientCommand.CommandData.ApplyToEntity(commandingEntity);
 			}
 		}
 
@@ -154,7 +166,7 @@ namespace Entmoot.Engine
 			/// <summary>
 			/// Sends the client an update of the given entity state and other information.
 			/// </summary>
-			public void SendClientUpdate(EntitySnapshot entitySnapshot)
+			public void SendServerUpdate(EntitySnapshot entitySnapshot)
 			{
 				ServerUpdateSerializer.Send(this.clientNetworkConnection, entitySnapshot, this.LatestClientTickReceived, this.CommandingEntityID);
 			}
@@ -178,11 +190,7 @@ namespace Entmoot.Engine
 						// Make sure we don't process a command we've already receieved and processed in a previous tick
 						if (!clientCommand.HasData || clientCommand.ClientFrameTick <= this.LatestClientTickReceived) { continue; }
 
-						// Make sure we have an entity to command, that the client thinks its commanding the same entity, and that the entity exists
-						if (this.CommandingEntityID != -1 && clientCommand.CommandingEntityID == this.CommandingEntityID && entityArray.TryGetEntity(this.CommandingEntityID, out Entity entity))
-						{
-							clientCommand.CommandData.ApplyToEntity(entity);
-						}
+						this.parentServer.executeClientCommand(this, clientCommand);
 
 						if (this.LatestClientTickReceived < clientCommand.ClientFrameTick) { this.LatestClientTickReceived = clientCommand.ClientFrameTick; }
 					}
