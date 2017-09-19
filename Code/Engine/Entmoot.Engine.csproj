@@ -39,12 +39,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Source\Core\ComponentArray.cs" />
-    <Compile Include="Source\Core\ComponentsDefinition.cs" />
-    <Compile Include="Source\Core\SystemCollection.cs" />
-    <Compile Include="Source\Core\Entity.cs" />
-    <Compile Include="Source\Core\ISystem.cs" />
-    <Compile Include="Source\Core\EntityArray.cs" />
+    <Compile Include="Source\Entity\ComponentArray.cs" />
+    <Compile Include="Source\Entity\ComponentsDefinition.cs" />
+    <Compile Include="Source\Entity\SystemCollection.cs" />
+    <Compile Include="Source\Entity\Entity.cs" />
+    <Compile Include="Source\Entity\ISystem.cs" />
+    <Compile Include="Source\Entity\EntityArray.cs" />
     <Compile Include="Source\Math\Vector3.cs" />
     <Compile Include="Source\Networking\Serializers.cs" />
     <Compile Include="Source\StateArray.cs" />
