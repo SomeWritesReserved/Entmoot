@@ -136,12 +136,11 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Copies the given entity and its component data to another entity in another entity array.
 		/// </summary>
-		public void CopyTo(int thisEntityID, EntityArray otherEntityArray, int otherEntityID)
+		public void CopyEntityTo(int thisEntityID, EntityArray otherEntityArray, int otherEntityID)
 		{
-			// I don't like this, clumsy API...
 			for (int componentTypeID = 0; componentTypeID < this.componentArrays.Count; componentTypeID++)
 			{
-				this.componentArrays[componentTypeID].CopyTo(thisEntityID, otherEntityArray.componentArrays[componentTypeID], otherEntityID);
+				this.componentArrays[componentTypeID].CopyEntityTo(thisEntityID, otherEntityArray.componentArrays[componentTypeID], otherEntityID);
 			}
 		}
 

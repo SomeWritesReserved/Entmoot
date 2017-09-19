@@ -91,8 +91,7 @@ namespace Entmoot.Engine
 		/// </summary>
 		public void CopyTo(Entity other)
 		{
-			// I don't like this, clumsy API...
-			this.parentEntityArray.CopyTo(this.ID, other.parentEntityArray, other.ID);
+			this.parentEntityArray.CopyEntityTo(this.ID, other.parentEntityArray, other.ID);
 		}
 
 		#endregion Methods

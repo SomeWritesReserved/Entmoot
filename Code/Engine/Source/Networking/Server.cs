@@ -87,7 +87,7 @@ namespace Entmoot.Engine
 
 			// Take a snapshot of the latest entity state and add it to the snapshot history buffer (overwriting an old snapshot)
 			EntitySnapshot newEntitySnapshot = this.entitySnapshotHistory.Dequeue();
-			newEntitySnapshot.UpdateFrom(this.FrameTick, this.EntityArray);
+			newEntitySnapshot.Update(this.FrameTick, this.EntityArray);
 			this.entitySnapshotHistory.Enqueue(newEntitySnapshot);
 
 			if (this.FrameTick % this.NetworkSendRate == 0)

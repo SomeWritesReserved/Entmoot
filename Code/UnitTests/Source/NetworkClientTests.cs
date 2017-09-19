@@ -952,7 +952,7 @@ namespace Entmoot.UnitTests
 				MockServerUpdate mockServerUpdate = this.mockServerUpdates[this.NetworkTick].Dequeue();
 				this.serverEntitySnapshot.EntityArray.TryGetEntity(0, out Entity entity);
 				entity.AddComponent<MockComponent>().Position = mockServerUpdate.NewPosition;
-				this.serverEntitySnapshot.UpdateFrom(mockServerUpdate.ServerFrameTick, this.serverEntitySnapshot.EntityArray);
+				this.serverEntitySnapshot.Update(mockServerUpdate.ServerFrameTick, this.serverEntitySnapshot.EntityArray);
 				return ServerUpdateSerializer.Serialize(this.serverEntitySnapshot, mockServerUpdate.LatestClientTickReceived, mockServerUpdate.CommandingEntityID);
 			}
 

@@ -20,7 +20,7 @@ namespace Entmoot.UnitTests
 			{
 				EntityArray entityArray = EntityTests.CreateStandardEntityArray();
 				EntitySnapshot entitySnapshot = new EntitySnapshot(3, EntityTests.CreateComponentsDefinition());
-				entitySnapshot.UpdateFrom(66, entityArray);
+				entitySnapshot.Update(66, entityArray);
 				packet = ServerUpdateSerializer.Serialize(entitySnapshot, 63, 13);
 			}
 			{
@@ -39,13 +39,13 @@ namespace Entmoot.UnitTests
 			byte[] packet;
 			{
 				EntitySnapshot entitySnapshot = new EntitySnapshot(3, EntityTests.CreateComponentsDefinition());
-				entitySnapshot.UpdateFrom(68, entitySnapshot.EntityArray);
+				entitySnapshot.Update(68, entitySnapshot.EntityArray);
 				packet = ServerUpdateSerializer.Serialize(entitySnapshot, 73, 17);
 			}
 			{
 				EntityArray entityArray = EntityTests.CreateStandardEntityArray();
 				EntitySnapshot entitySnapshot = new EntitySnapshot(3, EntityTests.CreateComponentsDefinition());
-				entitySnapshot.UpdateFrom(65, entityArray);
+				entitySnapshot.Update(65, entityArray);
 				ServerUpdateSerializer.Deserialize(packet, entitySnapshot, out int latestClientTickAcknowledgedByServer, out int clientCommandingEntityID);
 				Assert.AreEqual(73, latestClientTickAcknowledgedByServer);
 				Assert.AreEqual(17, clientCommandingEntityID);
@@ -62,13 +62,13 @@ namespace Entmoot.UnitTests
 			byte[] packet;
 			{
 				EntitySnapshot entitySnapshot = new EntitySnapshot(3, EntityTests.CreateComponentsDefinition());
-				entitySnapshot.UpdateFrom(55, entitySnapshot.EntityArray);
+				entitySnapshot.Update(55, entitySnapshot.EntityArray);
 				packet = ServerUpdateSerializer.Serialize(entitySnapshot, 73, 17);
 			}
 			{
 				EntityArray entityArray = EntityTests.CreateStandardEntityArray();
 				EntitySnapshot entitySnapshot = new EntitySnapshot(3, EntityTests.CreateComponentsDefinition());
-				entitySnapshot.UpdateFrom(65, entityArray);
+				entitySnapshot.Update(65, entityArray);
 				Assert.IsFalse(ServerUpdateSerializer.DeserializeIfNewer(packet, entitySnapshot, out int latestClientTickAcknowledgedByServer, out int clientCommandingEntityID));
 				Assert.AreEqual(73, latestClientTickAcknowledgedByServer);
 				Assert.AreEqual(17, clientCommandingEntityID);
@@ -83,13 +83,13 @@ namespace Entmoot.UnitTests
 			byte[] packet;
 			{
 				EntitySnapshot entitySnapshot = new EntitySnapshot(3, EntityTests.CreateComponentsDefinition());
-				entitySnapshot.UpdateFrom(68, entitySnapshot.EntityArray);
+				entitySnapshot.Update(68, entitySnapshot.EntityArray);
 				packet = ServerUpdateSerializer.Serialize(entitySnapshot, 73, 17);
 			}
 			{
 				EntityArray entityArray = EntityTests.CreateStandardEntityArray();
 				EntitySnapshot entitySnapshot = new EntitySnapshot(3, EntityTests.CreateComponentsDefinition());
-				entitySnapshot.UpdateFrom(65, entityArray);
+				entitySnapshot.Update(65, entityArray);
 				Assert.IsTrue(ServerUpdateSerializer.DeserializeIfNewer(packet, entitySnapshot, out int latestClientTickAcknowledgedByServer, out int clientCommandingEntityID));
 				Assert.AreEqual(73, latestClientTickAcknowledgedByServer);
 				Assert.AreEqual(17, clientCommandingEntityID);

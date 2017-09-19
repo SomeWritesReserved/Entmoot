@@ -136,7 +136,7 @@ namespace Entmoot.Engine
 				ClientCommand<TCommandData> newClientCommand = this.clientCommandHistory.Dequeue();
 
 				// Todo: handle the frame ticks whenever we aren't interpolating
-				newClientCommand.UpdateFrom(this.FrameTick, this.RenderedSnapshot.ServerFrameTick, this.InterpolationStartSnapshot.ServerFrameTick, this.InterpolationEndSnapshot.ServerFrameTick, this.CommandingEntityID, commandData);
+				newClientCommand.Update(this.FrameTick, this.RenderedSnapshot.ServerFrameTick, this.InterpolationStartSnapshot.ServerFrameTick, this.InterpolationEndSnapshot.ServerFrameTick, this.CommandingEntityID, commandData);
 				this.clientCommandHistory.Enqueue(newClientCommand);
 
 				if (this.FrameTick % this.NetworkSendRate == 0)
@@ -198,8 +198,8 @@ namespace Entmoot.Engine
 				}
 				if (newInterpolationStartSnapshot != null && newInterpolationEndSnapshot != null)
 				{
-					this.InterpolationStartSnapshot.CopyFrom(newInterpolationStartSnapshot);
-					this.InterpolationEndSnapshot.CopyFrom(newInterpolationEndSnapshot);
+					newInterpolationStartSnapshot.CopyTo(this.InterpolationStartSnapshot);
+					newInterpolationEndSnapshot.CopyTo(this.InterpolationEndSnapshot);
 				}
 			}
 
@@ -221,8 +221,8 @@ namespace Entmoot.Engine
 
 				if (newInterpolationEndSnapshot != null)
 				{
-					this.InterpolationStartSnapshot.CopyFrom(this.RenderedSnapshot);
-					this.InterpolationEndSnapshot.CopyFrom(newInterpolationEndSnapshot);
+					this.RenderedSnapshot.CopyTo(this.InterpolationStartSnapshot);
+					newInterpolationEndSnapshot.CopyTo(this.InterpolationEndSnapshot);
 				}
 			}
 
@@ -240,7 +240,7 @@ namespace Entmoot.Engine
 			{
 				// Even though we aren't interpolating, we still want to use whatever the user picked as the render delay so
 				// use the end interpolation state and just snap to it
-				this.RenderedSnapshot.CopyFrom(this.InterpolationEndSnapshot);
+				this.InterpolationEndSnapshot.CopyTo(this.RenderedSnapshot);
 			}
 		}
 
