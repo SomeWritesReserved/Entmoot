@@ -88,7 +88,7 @@ namespace Entmoot.Engine
 	}
 
 	/// <summary>
-	/// Represents an array of identically typed components that define which entities have a <see cref="TComponent"/>.
+	/// Represents an array of identically typed components that define which entities have a <typeparamref name="TComponent"/>.
 	/// </summary>
 	public sealed class ComponentArray<TComponent> : IComponentArray
 		where TComponent : struct, IComponent<TComponent>
@@ -169,7 +169,7 @@ namespace Entmoot.Engine
 		}
 
 		/// <summary>
-		/// Copies all <see cref="TComponent"/> data to another component array.
+		/// Copies all <typeparamref name="TComponent"/> data to another component array.
 		/// </summary>
 		public void CopyTo(ComponentArray<TComponent> other)
 		{
@@ -186,7 +186,7 @@ namespace Entmoot.Engine
 		}
 
 		/// <summary>
-		/// Copies a single entity's <see cref="TComponent"/> data to another entity's components in another component array.
+		/// Copies a single entity's <typeparamref name="TComponent"/> data to another entity's components in another component array.
 		/// </summary>
 		public void CopyEntityTo(int thisEntityID, ComponentArray<TComponent> otherComponentArray, int otherEntityID)
 		{
@@ -203,7 +203,7 @@ namespace Entmoot.Engine
 		}
 
 		/// <summary>
-		/// Updates all <see cref="TComponent"/> data to interpolated values between two other components.
+		/// Updates all <typeparamref name="TComponent"/> data to interpolated values between two other components.
 		/// </summary>
 		public void Interpolate(ComponentArray<TComponent> otherA, ComponentArray<TComponent> otherB, float amount)
 		{
