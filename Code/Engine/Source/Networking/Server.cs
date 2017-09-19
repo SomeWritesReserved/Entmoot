@@ -50,7 +50,6 @@ namespace Entmoot.Engine
 
 		/// <summary>Gets the current frame tick of the server.</summary>
 		public int FrameTick { get; private set; }
-
 		/// <summary>Gets the array of entities that are controlled and simulated by this server.</summary>
 		public EntityArray EntityArray { get; }
 		/// <summary>Gets the collection of systems that will update entities.</summary>
@@ -72,7 +71,7 @@ namespace Entmoot.Engine
 		}
 
 		/// <summary>
-		/// Updates the server state byprocessing client input, updating entities, and sending state to clients.
+		/// Updates the server state by processing client input, updating entities, and sending state to clients.
 		/// </summary>
 		public void Update()
 		{
