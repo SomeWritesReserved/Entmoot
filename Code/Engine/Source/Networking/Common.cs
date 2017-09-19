@@ -195,12 +195,12 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Updates this entity snapshot to be a new snapshot at a new point in time, given the new server frame tick and new entities.
 		/// </summary>
-		public void Update(int clientFrameTick, int renderedTick, int interpolationStartTick, int interpolationEndTick, int commandingEntityID, TCommandData commandData)
+		public void Update(int clientFrameTick, int renderedTick, int interpolationStartTick, int interpolationEndTick, bool isInterpolating, int commandingEntityID, TCommandData commandData)
 		{
 			this.ClientFrameTick = clientFrameTick;
 			this.RenderedTick = renderedTick;
-			this.InterpolationStartTick = interpolationStartTick;
-			this.InterpolationEndTick = interpolationEndTick;
+			this.InterpolationStartTick = isInterpolating ? interpolationStartTick : -1;
+			this.InterpolationEndTick = isInterpolating ? interpolationEndTick : -1;
 			this.CommandingEntityID = commandingEntityID;
 			this.commandData = commandData;
 		}

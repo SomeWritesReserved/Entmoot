@@ -665,7 +665,6 @@ namespace Entmoot.UnitTests
 				}
 				else
 				{
-					// Todo: should the client's render frame always be frametick-interpolationRenderDelay? Seems fragile to have the rendered frame tick report the same number for several frames (even though its accurate)
 					Assert.AreEqual(engineClient.InterpolationEndSnapshot.ServerFrameTick, engineClient.RenderedSnapshot.ServerFrameTick, "Unexpected RenderedFrameTick at tick " + mockClient.NetworkTick);
 				}
 				Assert.IsTrue(engineClient.RenderedSnapshot.EntityArray.TryGetEntity(0, out Entity entity), "Expected RenderedState to have entity");

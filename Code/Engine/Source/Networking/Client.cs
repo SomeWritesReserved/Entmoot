@@ -134,9 +134,7 @@ namespace Entmoot.Engine
 				// Once we are rendering we can start taking user commands and sending them to the server
 				// Take the latest command and add it to the command history buffer (overwritting an old command)
 				ClientCommand<TCommandData> newClientCommand = this.clientCommandHistory.Dequeue();
-
-				// Todo: handle the frame ticks whenever we aren't interpolating
-				newClientCommand.Update(this.FrameTick, this.RenderedSnapshot.ServerFrameTick, this.InterpolationStartSnapshot.ServerFrameTick, this.InterpolationEndSnapshot.ServerFrameTick, this.CommandingEntityID, commandData);
+				newClientCommand.Update(this.FrameTick, this.RenderedSnapshot.ServerFrameTick, this.InterpolationStartSnapshot.ServerFrameTick, this.InterpolationEndSnapshot.ServerFrameTick, this.ShouldInterpolate, this.CommandingEntityID, commandData);
 				this.clientCommandHistory.Enqueue(newClientCommand);
 
 				if (this.FrameTick % this.NetworkSendRate == 0)

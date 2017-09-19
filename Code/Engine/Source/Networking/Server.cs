@@ -168,7 +168,6 @@ namespace Entmoot.Engine
 				byte[] packet;
 				while ((packet = this.clientNetworkConnection.GetNextIncomingPacket()) != null)
 				{
-					// Todo: handle out of order packets here and make sure we only execute each command once (drop old packets)
 					int numberOfCommands = ClientUpdateSerializer<TCommandData>.Deserialize(packet, this.deserializedClientCommandHistory, out int newlatestFrameTickAcknowledgedByClient);
 
 					if (this.LatestFrameTickAcknowledgedByClient < newlatestFrameTickAcknowledgedByClient) { this.LatestFrameTickAcknowledgedByClient = newlatestFrameTickAcknowledgedByClient; }
