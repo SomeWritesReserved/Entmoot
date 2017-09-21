@@ -11,7 +11,7 @@ namespace Entmoot.Engine
 	/// A dumb client that connects to a server host which dictates the state of the simulation.
 	/// </summary>
 	/// <typeparam name="TCommandData">The type of data that will be sent to the server as a command.</typeparam>
-	public class Client<TCommandData>
+	public class GameClient<TCommandData>
 		where TCommandData : struct, ICommandData
 	{
 		#region Fields
@@ -30,7 +30,7 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		public Client(INetworkConnection serverNetworkConnection, int maxEntityHistory, int entityCapacity, ComponentsDefinition componentsDefinition, IEnumerable<ISystem> systems)
+		public GameClient(INetworkConnection serverNetworkConnection, int maxEntityHistory, int entityCapacity, ComponentsDefinition componentsDefinition, IEnumerable<ISystem> systems)
 		{
 			this.serverNetworkConnection = serverNetworkConnection;
 			this.SystemCollection = new SystemCollection(systems);

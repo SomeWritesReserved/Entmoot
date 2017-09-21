@@ -11,7 +11,7 @@ namespace Entmoot.Engine
 	/// An authoritative server that will host clients in a simulation of entities.
 	/// </summary>
 	/// <typeparam name="TCommandData">The type of data expected from clients as a command.</typeparam>
-	public class Server<TCommandData>
+	public class GameServer<TCommandData>
 		where TCommandData : struct, ICommandData
 	{
 		#region Fields
@@ -28,7 +28,7 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		public Server(int maxEntityHistory, int entityCapacity, ComponentsDefinition componentsDefinition, IEnumerable<ISystem> systems)
+		public GameServer(int maxEntityHistory, int entityCapacity, ComponentsDefinition componentsDefinition, IEnumerable<ISystem> systems)
 		{
 			this.EntityArray = new EntityArray(entityCapacity, componentsDefinition);
 			this.SystemCollection = new SystemCollection(systems);
@@ -122,7 +122,7 @@ namespace Entmoot.Engine
 			#region Fields
 
 			/// <summary>The parent server that owns this client connection.</summary>
-			private readonly Server<TCommandData> parentServer;
+			private readonly GameServer<TCommandData> parentServer;
 			/// <summary>The network connection that communicates to the client.</summary>
 			private readonly INetworkConnection clientNetworkConnection;
 			/// <summary></summary>
@@ -135,7 +135,7 @@ namespace Entmoot.Engine
 			/// <summary>
 			/// Constructor.
 			/// </summary>
-			public ClientConnection(Server<TCommandData> parentServer, INetworkConnection clientNetworkConnection)
+			public ClientConnection(GameServer<TCommandData> parentServer, INetworkConnection clientNetworkConnection)
 			{
 				this.parentServer = parentServer;
 				this.clientNetworkConnection = clientNetworkConnection;

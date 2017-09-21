@@ -18,8 +18,8 @@ namespace Entmoot.UnitTests
 		public void FirstConnect()
 		{
 			MockClient client = NetworkClientTests.createTestCase0();
-			client.EngineClient.ShouldInterpolate = true;
-			client.EngineClient.InterpolationRenderDelay = 5;
+			client.GameClient.ShouldInterpolate = true;
+			client.GameClient.InterpolationRenderDelay = 5;
 			NetworkClientTests.updateClientAndAssertState(client, 0, -1, false, null);
 			NetworkClientTests.updateClientAndAssertState(client, 0, -1, false, null);
 			NetworkClientTests.updateClientAndAssertState(client, 0, -1, false, null);
@@ -54,8 +54,8 @@ namespace Entmoot.UnitTests
 		public void TestCase1_Interpolation()
 		{
 			MockClient client = NetworkClientTests.createTestCase1();
-			client.EngineClient.ShouldInterpolate = true;
-			client.EngineClient.InterpolationRenderDelay = 8;
+			client.GameClient.ShouldInterpolate = true;
+			client.GameClient.InterpolationRenderDelay = 8;
 			NetworkClientTests.updateClientAndAssertState(client, 1, 1, false, null);
 			NetworkClientTests.updateClientAndAssertState(client, 2, 1, false, null);
 			NetworkClientTests.updateClientAndAssertState(client, 3, 1, false, null);
@@ -92,8 +92,8 @@ namespace Entmoot.UnitTests
 		public void TestCase1_NoInterpolation()
 		{
 			MockClient client = NetworkClientTests.createTestCase1();
-			client.EngineClient.ShouldInterpolate = false;
-			client.EngineClient.InterpolationRenderDelay = 8;
+			client.GameClient.ShouldInterpolate = false;
+			client.GameClient.InterpolationRenderDelay = 8;
 			NetworkClientTests.updateClientAndAssertState(client, 1, 1, false, null);
 			NetworkClientTests.updateClientAndAssertState(client, 2, 1, false, null);
 			NetworkClientTests.updateClientAndAssertState(client, 3, 1, false, null);
@@ -130,8 +130,8 @@ namespace Entmoot.UnitTests
 		public void TestCase2_Interpolation()
 		{
 			MockClient client = NetworkClientTests.createTestCase2();
-			client.EngineClient.ShouldInterpolate = true;
-			client.EngineClient.InterpolationRenderDelay = 8;
+			client.GameClient.ShouldInterpolate = true;
+			client.GameClient.InterpolationRenderDelay = 8;
 			NetworkClientTests.updateClientAndAssertState(client, 1, 1, false, null);
 			NetworkClientTests.updateClientAndAssertState(client, 2, 1, false, null);
 			NetworkClientTests.updateClientAndAssertState(client, 3, 1, false, null);
@@ -173,9 +173,9 @@ namespace Entmoot.UnitTests
 		public void TestCase2_Prediction()
 		{
 			MockClient client = NetworkClientTests.createTestCase2();
-			client.EngineClient.ShouldInterpolate = true;
-			client.EngineClient.InterpolationRenderDelay = 8;
-			client.EngineClient.ShouldPredictInput = true;
+			client.GameClient.ShouldInterpolate = true;
+			client.GameClient.InterpolationRenderDelay = 8;
+			client.GameClient.ShouldPredictInput = true;
 			NetworkClientTests.updateClientAndAssertState(client, 1, 1, false, null);
 			NetworkClientTests.updateClientAndAssertState(client, 2, 1, false, null);
 			NetworkClientTests.updateClientAndAssertState(client, 3, 1, false, null);
@@ -217,9 +217,9 @@ namespace Entmoot.UnitTests
 		public void TestCase2B_Mispredict_Prediction()
 		{
 			MockClient client = NetworkClientTests.createTestCase2B();
-			client.EngineClient.ShouldInterpolate = true;
-			client.EngineClient.InterpolationRenderDelay = 8;
-			client.EngineClient.ShouldPredictInput = true;
+			client.GameClient.ShouldInterpolate = true;
+			client.GameClient.InterpolationRenderDelay = 8;
+			client.GameClient.ShouldPredictInput = true;
 			NetworkClientTests.updateClientAndAssertState(client, 1, 1, false, null);
 			NetworkClientTests.updateClientAndAssertState(client, 2, 1, false, null);
 			NetworkClientTests.updateClientAndAssertState(client, 3, 1, false, null);
@@ -261,8 +261,8 @@ namespace Entmoot.UnitTests
 		public void TestCase2C_Jitter_Interpolation()
 		{
 			MockClient client = NetworkClientTests.createTestCase2C();
-			client.EngineClient.ShouldInterpolate = true;
-			client.EngineClient.InterpolationRenderDelay = 8;
+			client.GameClient.ShouldInterpolate = true;
+			client.GameClient.InterpolationRenderDelay = 8;
 			NetworkClientTests.updateClientAndAssertState(client, 1, 1, false, null);
 			NetworkClientTests.updateClientAndAssertState(client, 2, 1, false, null);
 			NetworkClientTests.updateClientAndAssertState(client, 3, 1, false, null);
@@ -304,9 +304,9 @@ namespace Entmoot.UnitTests
 		public void TestCase2C_Jitter_Prediction()
 		{
 			MockClient client = NetworkClientTests.createTestCase2C();
-			client.EngineClient.ShouldInterpolate = true;
-			client.EngineClient.InterpolationRenderDelay = 8;
-			client.EngineClient.ShouldPredictInput = true;
+			client.GameClient.ShouldInterpolate = true;
+			client.GameClient.InterpolationRenderDelay = 8;
+			client.GameClient.ShouldPredictInput = true;
 			NetworkClientTests.updateClientAndAssertState(client, 1, 1, false, null);
 			NetworkClientTests.updateClientAndAssertState(client, 2, 1, false, null);
 			NetworkClientTests.updateClientAndAssertState(client, 3, 1, false, null);
@@ -348,8 +348,8 @@ namespace Entmoot.UnitTests
 		public void TestCase2D_OutOfOrder1_Interpolation()
 		{
 			MockClient client = NetworkClientTests.createTestCase2D();
-			client.EngineClient.ShouldInterpolate = true;
-			client.EngineClient.InterpolationRenderDelay = 8;
+			client.GameClient.ShouldInterpolate = true;
+			client.GameClient.InterpolationRenderDelay = 8;
 			NetworkClientTests.updateClientAndAssertState(client, 1, 1, false, null);
 			NetworkClientTests.updateClientAndAssertState(client, 2, 1, false, null);
 			NetworkClientTests.updateClientAndAssertState(client, 3, 1, false, null);
@@ -391,9 +391,9 @@ namespace Entmoot.UnitTests
 		public void TestCase2D_OutOfOrder1_Prediction()
 		{
 			MockClient client = NetworkClientTests.createTestCase2D();
-			client.EngineClient.ShouldInterpolate = true;
-			client.EngineClient.InterpolationRenderDelay = 8;
-			client.EngineClient.ShouldPredictInput = true;
+			client.GameClient.ShouldInterpolate = true;
+			client.GameClient.InterpolationRenderDelay = 8;
+			client.GameClient.ShouldPredictInput = true;
 			NetworkClientTests.updateClientAndAssertState(client, 1, 1, false, null);
 			NetworkClientTests.updateClientAndAssertState(client, 2, 1, false, null);
 			NetworkClientTests.updateClientAndAssertState(client, 3, 1, false, null);
@@ -435,8 +435,8 @@ namespace Entmoot.UnitTests
 		public void TestCase2E_OutOfOrder2_Interpolation()
 		{
 			MockClient client = NetworkClientTests.createTestCase2E();
-			client.EngineClient.ShouldInterpolate = true;
-			client.EngineClient.InterpolationRenderDelay = 8;
+			client.GameClient.ShouldInterpolate = true;
+			client.GameClient.InterpolationRenderDelay = 8;
 			NetworkClientTests.updateClientAndAssertState(client, 1, 1, false, null);
 			NetworkClientTests.updateClientAndAssertState(client, 2, 1, false, null);
 			NetworkClientTests.updateClientAndAssertState(client, 3, 1, false, null);
@@ -478,9 +478,9 @@ namespace Entmoot.UnitTests
 		public void TestCase2E_OutOfOrder2_Prediction()
 		{
 			MockClient client = NetworkClientTests.createTestCase2E();
-			client.EngineClient.ShouldInterpolate = true;
-			client.EngineClient.InterpolationRenderDelay = 8;
-			client.EngineClient.ShouldPredictInput = true;
+			client.GameClient.ShouldInterpolate = true;
+			client.GameClient.InterpolationRenderDelay = 8;
+			client.GameClient.ShouldPredictInput = true;
 			NetworkClientTests.updateClientAndAssertState(client, 1, 1, false, null);
 			NetworkClientTests.updateClientAndAssertState(client, 2, 1, false, null);
 			NetworkClientTests.updateClientAndAssertState(client, 3, 1, false, null);
@@ -522,8 +522,8 @@ namespace Entmoot.UnitTests
 		public void TestCase3_4DroppedPackets_Interpolation()
 		{
 			MockClient client = NetworkClientTests.createTestCase3();
-			client.EngineClient.ShouldInterpolate = true;
-			client.EngineClient.InterpolationRenderDelay = 8;
+			client.GameClient.ShouldInterpolate = true;
+			client.GameClient.InterpolationRenderDelay = 8;
 			NetworkClientTests.updateClientAndAssertState(client, 1, 1, false, null);
 			NetworkClientTests.updateClientAndAssertState(client, 2, 1, false, null);
 			NetworkClientTests.updateClientAndAssertState(client, 3, 1, false, null);
@@ -580,9 +580,9 @@ namespace Entmoot.UnitTests
 		public void TestCase3_4DroppedPackets_Prediction()
 		{
 			MockClient client = NetworkClientTests.createTestCase3();
-			client.EngineClient.ShouldInterpolate = true;
-			client.EngineClient.InterpolationRenderDelay = 8;
-			client.EngineClient.ShouldPredictInput = true;
+			client.GameClient.ShouldInterpolate = true;
+			client.GameClient.InterpolationRenderDelay = 8;
+			client.GameClient.ShouldPredictInput = true;
 			NetworkClientTests.updateClientAndAssertState(client, 1, 1, false, null);
 			NetworkClientTests.updateClientAndAssertState(client, 2, 1, false, null);
 			NetworkClientTests.updateClientAndAssertState(client, 3, 1, false, null);
@@ -647,27 +647,27 @@ namespace Entmoot.UnitTests
 		private static void updateClientAndAssertState(MockClient mockClient, MockCommandKeys keys, int clientFrameTick, int recievedServerFrameTick, bool hasInterpStarted, float? position, int extrapolatedFrames = 0, int noInterpFrames = 0)
 		{
 			mockClient.Update(keys);
-			Client<MockCommandData> engineClient = mockClient.EngineClient;
-			Assert.AreEqual(clientFrameTick, engineClient.FrameTick, "Unexpected FrameTick at tick " + mockClient.NetworkTick);
-			Assert.AreEqual(recievedServerFrameTick, engineClient.LatestServerTickReceived, "Unexpected LatestServerTickAcknowledgedByClient at tick " + mockClient.NetworkTick);
-			Assert.AreEqual(hasInterpStarted, engineClient.HasRenderingStarted, "Unexpected HasRenderingStarted at tick " + mockClient.NetworkTick);
-			Assert.AreEqual(hasInterpStarted, engineClient.HasInterpolationStarted, "Unexpected HasInterpolationStarted at tick " + mockClient.NetworkTick);
-			Assert.AreEqual(hasInterpStarted, engineClient.InterpolationStartSnapshot.HasData, "Unexpected InterpolationStartSnapshot at tick " + mockClient.NetworkTick);
-			Assert.AreEqual(hasInterpStarted, engineClient.InterpolationEndSnapshot.HasData, "Unexpected InterpolationEndSnapshot at tick " + mockClient.NetworkTick);
-			Assert.AreEqual(extrapolatedFrames, engineClient.NumberOfExtrapolatedFrames, "Unexpected NumberOfExtrapolatedFrames at tick " + mockClient.NetworkTick);
-			Assert.AreEqual(noInterpFrames, engineClient.NumberOfNoInterpolationFrames, "Unexpected NumberOfNoInterpolationFrames at tick " + mockClient.NetworkTick);
-			Assert.AreEqual(position.HasValue, engineClient.RenderedSnapshot.HasData, "Unexpected RenderedSnapshot at tick " + mockClient.NetworkTick);
+			GameClient<MockCommandData> gameClient = mockClient.GameClient;
+			Assert.AreEqual(clientFrameTick, gameClient.FrameTick, "Unexpected FrameTick at tick " + mockClient.NetworkTick);
+			Assert.AreEqual(recievedServerFrameTick, gameClient.LatestServerTickReceived, "Unexpected LatestServerTickAcknowledgedByClient at tick " + mockClient.NetworkTick);
+			Assert.AreEqual(hasInterpStarted, gameClient.HasRenderingStarted, "Unexpected HasRenderingStarted at tick " + mockClient.NetworkTick);
+			Assert.AreEqual(hasInterpStarted, gameClient.HasInterpolationStarted, "Unexpected HasInterpolationStarted at tick " + mockClient.NetworkTick);
+			Assert.AreEqual(hasInterpStarted, gameClient.InterpolationStartSnapshot.HasData, "Unexpected InterpolationStartSnapshot at tick " + mockClient.NetworkTick);
+			Assert.AreEqual(hasInterpStarted, gameClient.InterpolationEndSnapshot.HasData, "Unexpected InterpolationEndSnapshot at tick " + mockClient.NetworkTick);
+			Assert.AreEqual(extrapolatedFrames, gameClient.NumberOfExtrapolatedFrames, "Unexpected NumberOfExtrapolatedFrames at tick " + mockClient.NetworkTick);
+			Assert.AreEqual(noInterpFrames, gameClient.NumberOfNoInterpolationFrames, "Unexpected NumberOfNoInterpolationFrames at tick " + mockClient.NetworkTick);
+			Assert.AreEqual(position.HasValue, gameClient.RenderedSnapshot.HasData, "Unexpected RenderedSnapshot at tick " + mockClient.NetworkTick);
 			if (position.HasValue)
 			{
-				if (engineClient.ShouldInterpolate)
+				if (gameClient.ShouldInterpolate)
 				{
-					Assert.AreEqual(engineClient.FrameTick - engineClient.InterpolationRenderDelay, engineClient.RenderedSnapshot.ServerFrameTick, "Unexpected RenderedSnapshot at tick " + mockClient.NetworkTick);
+					Assert.AreEqual(gameClient.FrameTick - gameClient.InterpolationRenderDelay, gameClient.RenderedSnapshot.ServerFrameTick, "Unexpected RenderedSnapshot at tick " + mockClient.NetworkTick);
 				}
 				else
 				{
-					Assert.AreEqual(engineClient.InterpolationEndSnapshot.ServerFrameTick, engineClient.RenderedSnapshot.ServerFrameTick, "Unexpected RenderedFrameTick at tick " + mockClient.NetworkTick);
+					Assert.AreEqual(gameClient.InterpolationEndSnapshot.ServerFrameTick, gameClient.RenderedSnapshot.ServerFrameTick, "Unexpected RenderedFrameTick at tick " + mockClient.NetworkTick);
 				}
-				Assert.IsTrue(engineClient.RenderedSnapshot.EntityArray.TryGetEntity(0, out Entity entity), "Expected RenderedState to have entity");
+				Assert.IsTrue(gameClient.RenderedSnapshot.EntityArray.TryGetEntity(0, out Entity entity), "Expected RenderedState to have entity");
 				Assert.IsTrue(entity.HasComponent<MockComponent>(), "Expected RenderedState to have component");
 				Assert.AreEqual(position.Value, entity.GetComponent<MockComponent>().Position, 0.001f, "Unexpected RenderedState at tick " + mockClient.NetworkTick);
 			}
@@ -680,8 +680,8 @@ namespace Entmoot.UnitTests
 		private static MockClient createTestCase0()
 		{
 			MockClient client = MockClient.CreateMockClient();
-			client.EngineClient.MaxExtrapolationTicks = 5;
-			client.EngineClient.ShouldPredictInput = false;
+			client.GameClient.MaxExtrapolationTicks = 5;
+			client.GameClient.ShouldPredictInput = false;
 			client.QueueIncomingStateUpdate(4, 64, 10.0f);
 			client.QueueIncomingStateUpdate(7, 67, 20.0f);
 			client.QueueIncomingStateUpdate(10, 70, 30.0f);
@@ -697,9 +697,9 @@ namespace Entmoot.UnitTests
 		private static MockClient createTestCase1()
 		{
 			MockClient client = MockClient.CreateMockClient();
-			client.EngineClient.InterpolationRenderDelay = 8;
-			client.EngineClient.MaxExtrapolationTicks = 3;
-			client.EngineClient.ShouldPredictInput = false;
+			client.GameClient.InterpolationRenderDelay = 8;
+			client.GameClient.MaxExtrapolationTicks = 3;
+			client.GameClient.ShouldPredictInput = false;
 			client.QueueIncomingStateUpdate(1, 1, 10.0f);
 			client.QueueIncomingStateUpdate(4, 4, 10.0f);
 			client.QueueIncomingStateUpdate(7, 7, 10.0f);
@@ -716,9 +716,9 @@ namespace Entmoot.UnitTests
 		private static MockClient createTestCase2()
 		{
 			MockClient client = MockClient.CreateMockClient();
-			client.EngineClient.InterpolationRenderDelay = 8;
-			client.EngineClient.MaxExtrapolationTicks = 3;
-			client.EngineClient.ShouldPredictInput = false;
+			client.GameClient.InterpolationRenderDelay = 8;
+			client.GameClient.MaxExtrapolationTicks = 3;
+			client.GameClient.ShouldPredictInput = false;
 			client.QueueIncomingStateUpdate(1, 1, -1, 10.0f);
 			client.QueueIncomingStateUpdate(4, 4, -1, 10.0f);
 			client.QueueIncomingStateUpdate(7, 7, 3, 10.0f);
@@ -738,9 +738,9 @@ namespace Entmoot.UnitTests
 		private static MockClient createTestCase2B()
 		{
 			MockClient client = MockClient.CreateMockClient();
-			client.EngineClient.InterpolationRenderDelay = 8;
-			client.EngineClient.MaxExtrapolationTicks = 3;
-			client.EngineClient.ShouldPredictInput = false;
+			client.GameClient.InterpolationRenderDelay = 8;
+			client.GameClient.MaxExtrapolationTicks = 3;
+			client.GameClient.ShouldPredictInput = false;
 			client.QueueIncomingStateUpdate(1, 1, -1, 10.0f);
 			client.QueueIncomingStateUpdate(4, 4, -1, 10.0f);
 			client.QueueIncomingStateUpdate(7, 7, 3, 10.0f);
@@ -759,9 +759,9 @@ namespace Entmoot.UnitTests
 		private static MockClient createTestCase2C()
 		{
 			MockClient client = MockClient.CreateMockClient();
-			client.EngineClient.InterpolationRenderDelay = 8;
-			client.EngineClient.MaxExtrapolationTicks = 3;
-			client.EngineClient.ShouldPredictInput = false;
+			client.GameClient.InterpolationRenderDelay = 8;
+			client.GameClient.MaxExtrapolationTicks = 3;
+			client.GameClient.ShouldPredictInput = false;
 			client.QueueIncomingStateUpdate(1, 1, -1, 10.0f);
 			client.QueueIncomingStateUpdate(5, 4, -1, 10.0f);
 			client.QueueIncomingStateUpdate(7, 7, 3, 10.0f);
@@ -781,9 +781,9 @@ namespace Entmoot.UnitTests
 		private static MockClient createTestCase2D()
 		{
 			MockClient client = MockClient.CreateMockClient();
-			client.EngineClient.InterpolationRenderDelay = 8;
-			client.EngineClient.MaxExtrapolationTicks = 3;
-			client.EngineClient.ShouldPredictInput = false;
+			client.GameClient.InterpolationRenderDelay = 8;
+			client.GameClient.MaxExtrapolationTicks = 3;
+			client.GameClient.ShouldPredictInput = false;
 			client.QueueIncomingStateUpdate(1, 1, -1, 10.0f);
 			client.QueueIncomingStateUpdate(4, 4, -1, 10.0f);
 			client.QueueIncomingStateUpdate(8, 10, 6, 10.0f);
@@ -803,9 +803,9 @@ namespace Entmoot.UnitTests
 		private static MockClient createTestCase2E()
 		{
 			MockClient client = MockClient.CreateMockClient();
-			client.EngineClient.InterpolationRenderDelay = 8;
-			client.EngineClient.MaxExtrapolationTicks = 3;
-			client.EngineClient.ShouldPredictInput = false;
+			client.GameClient.InterpolationRenderDelay = 8;
+			client.GameClient.MaxExtrapolationTicks = 3;
+			client.GameClient.ShouldPredictInput = false;
 			client.QueueIncomingStateUpdate(1, 1, -1, 10.0f);
 			client.QueueIncomingStateUpdate(4, 4, -1, 10.0f);
 			client.QueueIncomingStateUpdate(8, 10, 6, 10.0f);
@@ -825,9 +825,9 @@ namespace Entmoot.UnitTests
 		private static MockClient createTestCase3()
 		{
 			MockClient client = MockClient.CreateMockClient();
-			client.EngineClient.InterpolationRenderDelay = 8;
-			client.EngineClient.MaxExtrapolationTicks = 3;
-			client.EngineClient.ShouldPredictInput = false;
+			client.GameClient.InterpolationRenderDelay = 8;
+			client.GameClient.MaxExtrapolationTicks = 3;
+			client.GameClient.ShouldPredictInput = false;
 			client.QueueIncomingStateUpdate(1, 1, -1, 10.0f);
 			client.QueueIncomingStateUpdate(4, 4, -1, 10.0f);
 			client.QueueIncomingStateUpdate(7, 7, 3, 10.0f);
@@ -850,16 +850,16 @@ namespace Entmoot.UnitTests
 
 		/// <summary>
 		/// Represents a mock client that is "connected" to a server (data incoming from the server is mocked, outgoing data is not mocked).
-		/// Use this instead of using a <see cref="Client"/> object directly (since this offers deterministic simulated packet arrival).
+		/// Use this instead of using a <see cref="GameClient"/> object directly (since this offers deterministic simulated packet arrival).
 		/// Add mocked packets by calling <see cref="QueueIncomingStateUpdate"/> and they will "arrive" on the pre-determined tick you specify.
 		/// </summary>
 		/// <remarks>
-		/// This wraps a <see cref="Client"/> object and you should call <see cref="Update"/> on this object rather than on the wrapped
-		/// up <see cref="Client"/> object. This is because this class keeps track of its own ticks in order to simulate packet arrivals
-		/// in a sane way (which isn't possible if we based off of <see cref="Client"/>'s ticks since it changes its tick as needed
+		/// This wraps a <see cref="GameClient"/> object and you should call <see cref="Update"/> on this object rather than on the wrapped
+		/// up <see cref="GameClient"/> object. This is because this class keeps track of its own ticks in order to simulate packet arrivals
+		/// in a sane way (which isn't possible if we based off of <see cref="GameClient"/>'s ticks since it changes its tick as needed
 		/// to sync with the server). With this class, the tick is always monotonically increasing by one every call to <see cref="Update"/>.
-		/// This class also happens to be the <see cref="INetworkConnection"/> for the wrapped <see cref="Client"/> which makes a weird
-		/// circular reference but this is the easiest way to control exactly when the packets come up independent of the <see cref="Client"/>'s
+		/// This class also happens to be the <see cref="INetworkConnection"/> for the wrapped <see cref="GameClient"/> which makes a weird
+		/// circular reference but this is the easiest way to control exactly when the packets come up independent of the <see cref="GameClient"/>'s
 		/// tick. So even though this is a <see cref="INetworkConnection"/> it should be treated as a client (hence the name <see cref="MockClient"/>
 		/// rather than something like MockedClientNetworkConnection).
 		/// </remarks>
@@ -874,18 +874,18 @@ namespace Entmoot.UnitTests
 
 			#region Properties
 
-			/// <summary>Gets the current tick of the network, independent of the underlying <see cref="Client"/>.</summary>
+			/// <summary>Gets the current tick of the network, independent of the underlying <see cref="GameClient"/>.</summary>
 			public int NetworkTick { get; private set; }
 
-			/// <summary>Gets the underlying <see cref="Client"/> object.</summary>
-			public Client<MockCommandData> EngineClient { get; private set; }
+			/// <summary>Gets the underlying GameClient object.</summary>
+			public GameClient<MockCommandData> GameClient { get; private set; }
 
 			#endregion Properties
 
 			#region Methods
 
 			/// <summary>
-			/// Returns a newly created <see cref="MockClient"/> object along with an underlying <see cref="Client"/>, all ready to go.
+			/// Returns a newly created <see cref="MockClient"/> object along with an underlying <see cref="GameClient"/>, all ready to go.
 			/// </summary>
 			public static MockClient CreateMockClient()
 			{
@@ -897,26 +897,26 @@ namespace Entmoot.UnitTests
 				};
 				Assert.IsTrue(mockClient.serverEntitySnapshot.EntityArray.TryCreateEntity(out _));
 				mockClient.serverEntitySnapshot.EntityArray.EndUpdate();
-				Client<MockCommandData> engineClient = new Client<MockCommandData>(mockClient, 10, mockClient.serverEntitySnapshot.EntityArray.Capacity, componentsDefinition, new ISystem[0]);
-				mockClient.EngineClient = engineClient;
+				GameClient<MockCommandData> gameClient = new GameClient<MockCommandData>(mockClient, 10, mockClient.serverEntitySnapshot.EntityArray.Capacity, componentsDefinition, new ISystem[0]);
+				mockClient.GameClient = gameClient;
 				return mockClient;
 			}
 
 			/// <summary>
-			/// Updates the state of the network and will also update the underlying <see cref="Client"/> object. It is important
-			/// to call this <see cref="Update"/> rather than <see cref="Client.Update"/> otherwise the underlying <see cref="Client"/>
+			/// Updates the state of the network and will also update the underlying <see cref="GameClient"/> object. It is important
+			/// to call this <see cref="Update"/> rather than <see cref="GameClient.Update"/> otherwise the underlying <see cref="GameClient"/>
 			/// will never get new packets (since the network never gets updated).
 			/// </summary>
 			public void Update(MockCommandKeys commandKeys)
 			{
 				this.NetworkTick++;
-				this.EngineClient.Update(new MockCommandData() { CommandKeys = commandKeys });
+				this.GameClient.Update(new MockCommandData() { CommandKeys = commandKeys });
 			}
 
 			/// <summary>
 			/// Creates and adds a new <see cref="EntitySnapshot"/> to the network that will "arrive" for the client at a specified network tick
 			/// (i.e. after that many calls to <see cref="Update"/> the given <see cref="EntitySnapshot"/> packet will "arrive" for the underlying
-			/// <see cref="Client"/>).
+			/// <see cref="GameClient"/>).
 			/// </summary>
 			public void QueueIncomingStateUpdate(int networkTickToArriveOn, int serverFrameTick, float entityPosition)
 			{
@@ -927,7 +927,7 @@ namespace Entmoot.UnitTests
 			/// <summary>
 			/// Creates and adds a new <see cref="EntitySnapshot"/> to the network that will "arrive" for the client at a specified network tick
 			/// (i.e. after that many calls to <see cref="Update"/> the given <see cref="EntitySnapshot"/> packet will "arrive" for the underlying
-			/// <see cref="Client"/>).
+			/// <see cref="GameClient"/>).
 			/// </summary>
 			public void QueueIncomingStateUpdate(int networkTickToArriveOn, int serverFrameTick, int acknowledgedClientFrameTick, float entityPosition)
 			{

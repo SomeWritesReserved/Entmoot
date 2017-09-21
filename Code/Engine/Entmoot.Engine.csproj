@@ -52,9 +52,9 @@
     <Compile Include="Source\Networking\NetworkConnection.cs" />
     <Compile Include="Source\Networking\Serializers.cs" />
     <Compile Include="Source\Collections\StateArray.cs" />
-    <Compile Include="Source\Networking\Client.cs" />
+    <Compile Include="Source\Networking\GameClient.cs" />
     <Compile Include="Source\Networking\ClientCommand.cs" />
-    <Compile Include="Source\Networking\Server.cs" />
+    <Compile Include="Source\Networking\GameServer.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

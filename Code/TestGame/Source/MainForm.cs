@@ -18,8 +18,8 @@ namespace Entmoot.TestGame
 	{
 		#region Fields
 
-		private Client<TestCommandData> client;
-		private Server<TestCommandData> server;
+		private GameClient<TestCommandData> gameClient;
+		private GameServer<TestCommandData> gameServer;
 		private TestNetworkConnection clientServerNetworkConnection;
 
 		private int serverStepsRemaining = 0;
@@ -43,22 +43,22 @@ namespace Entmoot.TestGame
 			ComponentsDefinition componentsDefinition = new ComponentsDefinition();
 			componentsDefinition.RegisterComponentType<PositionComponent>();
 
-			this.client = new Client<TestCommandData>(this.clientServerNetworkConnection, 10, 5, componentsDefinition, new ISystem[0]);
-			this.server = new Server<TestCommandData>(10, 5, componentsDefinition, new ISystem[] { new TestSystem(1) });
+			this.gameClient = new GameClient<TestCommandData>(this.clientServerNetworkConnection, 10, 5, componentsDefinition, new ISystem[0]);
+			this.gameServer = new GameServer<TestCommandData>(10, 5, componentsDefinition, new ISystem[] { new TestSystem(1) });
 			{
-				this.server.EntityArray.TryCreateEntity(out Entity entity1);
+				this.gameServer.EntityArray.TryCreateEntity(out Entity entity1);
 				entity1.AddComponent<PositionComponent>().Position = new Vector3(100, 50, 0);
-				this.server.EntityArray.TryCreateEntity(out Entity entity2);
+				this.gameServer.EntityArray.TryCreateEntity(out Entity entity2);
 				entity2.AddComponent<PositionComponent>().Position = new Vector3(0, 0, 0);
-				this.server.EntityArray.TryCreateEntity(out Entity entity3);
-				this.server.EntityArray.RemoveEntity(entity3);
-				this.server.EntityArray.TryCreateEntity(out Entity entity4);
+				this.gameServer.EntityArray.TryCreateEntity(out Entity entity3);
+				this.gameServer.EntityArray.RemoveEntity(entity3);
+				this.gameServer.EntityArray.TryCreateEntity(out Entity entity4);
 				entity4.AddComponent<PositionComponent>().Position = new Vector3(200, 350, 0);
 			}
-			this.server.AddConnectedClient(this.clientServerNetworkConnection);
+			this.gameServer.AddConnectedClient(this.clientServerNetworkConnection);
 
-			this.clientServerNetworkConnection.Client = this.client;
-			this.clientServerNetworkConnection.Server = this.server;
+			this.clientServerNetworkConnection.GameClient = this.gameClient;
+			this.clientServerNetworkConnection.GameServer = this.gameServer;
 
 			this.clientGroupBox.Tag = ClientServerContext.Client;
 			this.serverGroupBox.Tag = ClientServerContext.Server;
@@ -158,21 +158,21 @@ namespace Entmoot.TestGame
 		private void gameGroupBox_Paint(object sender, PaintEventArgs e)
 		{
 			ClientServerContext clientServerContext = (ClientServerContext)((Control)sender).Tag;
-			int now = (clientServerContext == ClientServerContext.Client) ? this.client.FrameTick : this.server.FrameTick;
-			EntityArray entityArray = (clientServerContext == ClientServerContext.Client) ? this.client.RenderedSnapshot.EntityArray : this.server.EntityArray;
+			int now = (clientServerContext == ClientServerContext.Client) ? this.gameClient.FrameTick : this.gameServer.FrameTick;
+			EntityArray entityArray = (clientServerContext == ClientServerContext.Client) ? this.gameClient.RenderedSnapshot.EntityArray : this.gameServer.EntityArray;
 
 			e.Graphics.DrawString(now.ToString(), this.Font, Brushes.Black, 10, 10);
 			if (this.drawInterpolationCheckBox.Checked && clientServerContext == ClientServerContext.Client &&
-				this.client.InterpolationStartSnapshot.HasData && this.client.InterpolationEndSnapshot.HasData)
+				this.gameClient.InterpolationStartSnapshot.HasData && this.gameClient.InterpolationEndSnapshot.HasData)
 			{
-				foreach (Entity entity in this.client.InterpolationStartSnapshot.EntityArray)
+				foreach (Entity entity in this.gameClient.InterpolationStartSnapshot.EntityArray)
 				{
 					if (!entity.HasComponent<PositionComponent>()) { continue; }
 
 					ref PositionComponent component = ref entity.GetComponent<PositionComponent>();
 					e.Graphics.FillRectangle(Brushes.Gainsboro, component.Position.X, component.Position.Y, 3, 3);
 				}
-				foreach (Entity entity in this.client.InterpolationEndSnapshot.EntityArray)
+				foreach (Entity entity in this.gameClient.InterpolationEndSnapshot.EntityArray)
 				{
 					ref PositionComponent component = ref entity.GetComponent<PositionComponent>();
 					e.Graphics.FillRectangle(Brushes.Gainsboro, component.Position.X, component.Position.Y, 3, 3);
@@ -226,9 +226,9 @@ namespace Entmoot.TestGame
 
 		#region Properties
 
-		public Client<TestCommandData> Client { get; set; }
+		public GameClient<TestCommandData> GameClient { get; set; }
 
-		public Server<TestCommandData> Server { get; set; }
+		public GameServer<TestCommandData> GameServer { get; set; }
 
 		public ClientServerContext CurrentContext { get; set; }
 
@@ -257,13 +257,13 @@ namespace Entmoot.TestGame
 		public void UpdateServer()
 		{
 			this.NetworkServerTick++;
-			this.Server.Update();
+			this.GameServer.Update();
 		}
 
 		public void UpdateClient(TestCommandKeys commandKeys)
 		{
 			this.NetworkClientTick++;
-			this.Client.Update(new TestCommandData() { CommandKeys = commandKeys });
+			this.GameClient.Update(new TestCommandData() { CommandKeys = commandKeys });
 		}
 
 		public byte[] GetNextIncomingPacket()
