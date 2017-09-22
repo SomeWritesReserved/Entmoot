@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Source\Core\Serialization.cs" />
     <Compile Include="Source\Entity\ComponentArray.cs" />
     <Compile Include="Source\Entity\ComponentsDefinition.cs" />
     <Compile Include="Source\Entity\SystemCollection.cs" />
@@ -52,7 +53,7 @@
     <Compile Include="Source\Networking\Messages.cs" />
     <Compile Include="Source\Networking\NetworkConnection.cs" />
     <Compile Include="Source\Networking\Serializers.cs" />
-    <Compile Include="Source\Collections\StateArray.cs" />
+    <Compile Include="Source\Core\StateArray.cs" />
     <Compile Include="Source\Game\GameClient.cs" />
     <Compile Include="Source\Game\ClientCommand.cs" />
     <Compile Include="Source\Game\GameServer.cs" />

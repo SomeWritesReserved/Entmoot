@@ -10,7 +10,7 @@ namespace Entmoot.Engine
 	/// <summary>
 	/// Represents a message that can be read from which has come in from another endpoint.
 	/// </summary>
-	public class IncomingMessage
+	public class IncomingMessage : IReader
 	{
 		#region Fields
 
@@ -115,7 +115,7 @@ namespace Entmoot.Engine
 	/// <summary>
 	/// Represents a message which can be written to that will go out to other endpoints
 	/// </summary>
-	public class OutgoingMessage
+	public class OutgoingMessage : IWriter
 	{
 		#region Fields
 
