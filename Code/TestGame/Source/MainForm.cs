@@ -266,6 +266,13 @@ namespace Entmoot.TestGame
 			this.GameClient.Update(new TestCommandData() { CommandKeys = commandKeys });
 		}
 
+		public IncomingMessage GetNextIncomingMessage()
+		{
+			byte[] data = this.GetNextIncomingPacket();
+			if (data == null) { return null; }
+			return new IncomingMessage(data);
+		}
+
 		public byte[] GetNextIncomingPacket()
 		{
 			return (this.CurrentContext == ClientServerContext.Client) ? this.getArrivedPacket(this.IncomingPacketsForClient, this.OldPacketsForClient) : this.getArrivedPacket(this.IncomingPacketsForServer, this.OldPacketsForServer);
@@ -471,11 +478,11 @@ namespace Entmoot.TestGame
 			writer.Write(this.Position.Z);
 		}
 
-		public void Deserialize(BinaryReader binaryReader)
+		public void Deserialize(IReader reader)
 		{
-			this.Position.X = binaryReader.ReadSingle();
-			this.Position.Y = binaryReader.ReadSingle();
-			this.Position.Z = binaryReader.ReadSingle();
+			this.Position.X = reader.ReadSingle();
+			this.Position.Y = reader.ReadSingle();
+			this.Position.Z = reader.ReadSingle();
 		}
 
 		#endregion Methods
@@ -526,9 +533,9 @@ namespace Entmoot.TestGame
 
 		#region Methods
 
-		public void Deserialize(BinaryReader binaryReader)
+		public void Deserialize(IReader reader)
 		{
-			this.CommandKeys = (TestCommandKeys)binaryReader.ReadByte();
+			this.CommandKeys = (TestCommandKeys)reader.ReadByte();
 		}
 
 		public void Serialize(IWriter writer)

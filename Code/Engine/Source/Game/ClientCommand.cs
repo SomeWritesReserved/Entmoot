@@ -22,7 +22,7 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Reads and overwrites the current state of this command data from a binary source.
 		/// </summary>
-		void Deserialize(BinaryReader binaryReader);
+		void Deserialize(IReader reader);
 
 		/// <summary>
 		/// Applies this command data to a given entity (whatever that may mean for the type of command).
@@ -120,14 +120,14 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Reads and overwrites the current state of this command from a binary source.
 		/// </summary>
-		public void Deserialize(BinaryReader binaryReader)
+		public void Deserialize(IReader reader)
 		{
-			this.ClientFrameTick = binaryReader.ReadInt32();
-			this.RenderedTick = binaryReader.ReadInt32();
-			this.InterpolationStartTick = binaryReader.ReadInt32();
-			this.InterpolationEndTick = binaryReader.ReadInt32();
-			this.CommandingEntityID = binaryReader.ReadInt32();
-			this.commandData.Deserialize(binaryReader);
+			this.ClientFrameTick = reader.ReadInt32();
+			this.RenderedTick = reader.ReadInt32();
+			this.InterpolationStartTick = reader.ReadInt32();
+			this.InterpolationEndTick = reader.ReadInt32();
+			this.CommandingEntityID = reader.ReadInt32();
+			this.commandData.Deserialize(reader);
 		}
 
 		#endregion Methods

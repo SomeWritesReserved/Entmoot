@@ -176,10 +176,10 @@ namespace Entmoot.Engine
 			/// </summary>
 			public void ProcessClientCommands(EntityArray entityArray)
 			{
-				byte[] packet;
-				while ((packet = this.clientNetworkConnection.GetNextIncomingPacket()) != null)
+				IncomingMessage incomingMessage;
+				while ((incomingMessage = this.clientNetworkConnection.GetNextIncomingMessage()) != null)
 				{
-					int numberOfCommands = ClientUpdateSerializer<TCommandData>.Deserialize(packet, this.deserializedClientCommandHistory, out int newlatestFrameTickAcknowledgedByClient);
+					int numberOfCommands = ClientUpdateSerializer<TCommandData>.Deserialize(incomingMessage, this.deserializedClientCommandHistory, out int newlatestFrameTickAcknowledgedByClient);
 
 					if (this.LatestFrameTickAcknowledgedByClient < newlatestFrameTickAcknowledgedByClient) { this.LatestFrameTickAcknowledgedByClient = newlatestFrameTickAcknowledgedByClient; }
 

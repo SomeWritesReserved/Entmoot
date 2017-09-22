@@ -97,11 +97,11 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Reads and overwrites all boolean states from a binary source.
 		/// </summary>
-		public void Deserialize(BinaryReader binaryReader)
+		public void Deserialize(IReader reader)
 		{
 			for (int i = 0; i < this.storageArray.Length; i++)
 			{
-				this.storageArray[i] = binaryReader.ReadInt32();
+				this.storageArray[i] = reader.ReadInt32();
 			}
 		}
 

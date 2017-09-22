@@ -28,7 +28,7 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Reads and overwrites the current state of this specific component from a binary source.
 		/// </summary>
-		void Deserialize(BinaryReader binaryReader);
+		void Deserialize(IReader reader);
 
 		#endregion Methods
 	}
@@ -82,7 +82,7 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Reads and overwrites the current state of all component data from a binary source.
 		/// </summary>
-		void Deserialize(BinaryReader binaryReader);
+		void Deserialize(IReader reader);
 
 		#endregion Methods
 	}
@@ -238,12 +238,12 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Reads and overwrites the current state of all component data from a binary source.
 		/// </summary>
-		public void Deserialize(BinaryReader binaryReader)
+		public void Deserialize(IReader reader)
 		{
-			this.componentStates.Deserialize(binaryReader);
+			this.componentStates.Deserialize(reader);
 			for (int entityID = 0; entityID < this.Capacity; entityID++)
 			{
-				this.components[entityID].Deserialize(binaryReader);
+				this.components[entityID].Deserialize(reader);
 			}
 		}
 

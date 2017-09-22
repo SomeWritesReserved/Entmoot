@@ -402,13 +402,11 @@ namespace Entmoot.UnitTests
 			{
 				OutgoingMessage outgoingMessage = new OutgoingMessage(serializedBytes);
 				sourceEntityArray.Serialize(outgoingMessage);
+				serializedBytes = outgoingMessage.ToArray();
 			}
-			using (MemoryStream memoryStream = new MemoryStream(serializedBytes))
 			{
-				using (BinaryReader binaryReader = new BinaryReader(memoryStream))
-				{
-					destinationEntityArray.Deserialize(binaryReader);
-				}
+				IncomingMessage incomingMessage = new IncomingMessage(serializedBytes);
+				destinationEntityArray.Deserialize(incomingMessage);
 			}
 			EntityTests.AssertStandardEntityArray(destinationEntityArray);
 		}
@@ -440,14 +438,11 @@ namespace Entmoot.UnitTests
 			{
 				OutgoingMessage outgoingMessage = new OutgoingMessage(serializedBytes);
 				sourceEntityArray.Serialize(outgoingMessage);
+				serializedBytes = outgoingMessage.ToArray();
 			}
-			using (MemoryStream memoryStream = new MemoryStream(serializedBytes))
 			{
-				using (BinaryReader binaryReader = new BinaryReader(memoryStream))
-				{
-					destinationEntityArray.Deserialize(binaryReader);
-					Assert.AreEqual(memoryStream.Length, memoryStream.Position);
-				}
+				IncomingMessage incomingMessage = new IncomingMessage(serializedBytes);
+				destinationEntityArray.Deserialize(incomingMessage);
 			}
 			EntityTests.AssertStandardEntityArray(destinationEntityArray);
 		}
@@ -627,10 +622,10 @@ namespace Entmoot.UnitTests
 				writer.Write(this.PositionY);
 			}
 
-			public void Deserialize(BinaryReader binaryReader)
+			public void Deserialize(IReader reader)
 			{
-				this.PositionX = binaryReader.ReadSingle();
-				this.PositionY = binaryReader.ReadSingle();
+				this.PositionX = reader.ReadSingle();
+				this.PositionY = reader.ReadSingle();
 			}
 
 			#endregion Methods
@@ -656,9 +651,9 @@ namespace Entmoot.UnitTests
 				writer.Write(this.HealthAmount);
 			}
 
-			public void Deserialize(BinaryReader binaryReader)
+			public void Deserialize(IReader reader)
 			{
-				this.HealthAmount = binaryReader.ReadInt32();
+				this.HealthAmount = reader.ReadInt32();
 			}
 
 			#endregion Methods
@@ -684,9 +679,9 @@ namespace Entmoot.UnitTests
 				writer.Write(this.StringValue ?? "");
 			}
 
-			public void Deserialize(BinaryReader binaryReader)
+			public void Deserialize(IReader reader)
 			{
-				this.StringValue = binaryReader.ReadString();
+				this.StringValue = reader.ReadString();
 			}
 
 			#endregion Methods

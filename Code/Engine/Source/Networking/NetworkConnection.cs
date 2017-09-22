@@ -14,9 +14,9 @@ namespace Entmoot.Engine
 		#region Methods
 
 		/// <summary>
-		/// Returns the next packet that is coming in over the network. Returns null if no packet is ready.
+		/// Returns the next message that is coming in over the network. Returns null if no message is ready.
 		/// </summary>
-		byte[] GetNextIncomingPacket();
+		IncomingMessage GetNextIncomingMessage();
 
 		/// <summary>
 		/// Returns an <see cref="OutgoingMessage"/> that can be sent.

@@ -158,14 +158,12 @@ namespace Entmoot.UnitTests
 			{
 				OutgoingMessage outgoingMessage = new OutgoingMessage(serializedBytes);
 				sourceStateArray.Serialize(outgoingMessage);
+				serializedBytes = outgoingMessage.ToArray();
 			}
 			StateArray destinationStateArray = new StateArray(64);
-			using (MemoryStream memoryStream = new MemoryStream(serializedBytes))
 			{
-				using (BinaryReader binaryReader = new BinaryReader(memoryStream))
-				{
-					destinationStateArray.Deserialize(binaryReader);
-				}
+				IncomingMessage incomingMessage = new IncomingMessage(serializedBytes);
+				destinationStateArray.Deserialize(incomingMessage);
 			}
 			for (int i = 0; i < 64; i++)
 			{
@@ -192,13 +190,9 @@ namespace Entmoot.UnitTests
 					sourceStateArray.Serialize(outgoingMessage);
 				}
 				StateArray destinationStateArray = new StateArray(64);
-				using (MemoryStream memoryStream = new MemoryStream(serializedBytes))
 				{
-					using (BinaryReader binaryReader = new BinaryReader(memoryStream))
-					{
-						destinationStateArray.Deserialize(binaryReader);
-						Assert.AreEqual(memoryStream.Length, memoryStream.Position);
-					}
+					IncomingMessage incomingMessage = new IncomingMessage(serializedBytes);
+					destinationStateArray.Deserialize(incomingMessage);
 				}
 				for (int k = 0; k < 160; k++)
 				{

@@ -944,7 +944,7 @@ namespace Entmoot.UnitTests
 				});
 			}
 
-			byte[] INetworkConnection.GetNextIncomingPacket()
+			IncomingMessage INetworkConnection.GetNextIncomingMessage()
 			{
 				if (!this.mockServerUpdates.ContainsKey(this.NetworkTick) || !this.mockServerUpdates[this.NetworkTick].Any()) { return null; }
 
@@ -953,10 +953,9 @@ namespace Entmoot.UnitTests
 				entity.AddComponent<MockComponent>().Position = mockServerUpdate.NewPosition;
 				this.serverEntitySnapshot.Update(mockServerUpdate.ServerFrameTick, this.serverEntitySnapshot.EntityArray);
 				
-				byte[] data = new byte[1024];
-				OutgoingMessage outgoingMessage = new OutgoingMessage(data);
+				OutgoingMessage outgoingMessage = new OutgoingMessage(new byte[1024]);
 				ServerUpdateSerializer.Serialize(outgoingMessage, this.serverEntitySnapshot, mockServerUpdate.LatestClientTickReceived, mockServerUpdate.CommandingEntityID);
-				return data;
+				return new IncomingMessage(outgoingMessage.ToArray());
 			}
 
 			OutgoingMessage INetworkConnection.GetOutgoingMessageToSend()
@@ -999,9 +998,9 @@ namespace Entmoot.UnitTests
 				writer.Write((byte)this.CommandKeys);
 			}
 
-			public void Deserialize(BinaryReader binaryReader)
+			public void Deserialize(IReader reader)
 			{
-				this.CommandKeys = (MockCommandKeys)binaryReader.ReadByte();
+				this.CommandKeys = (MockCommandKeys)reader.ReadByte();
 			}
 
 			public void ApplyToEntity(Entity entity)
@@ -1038,9 +1037,9 @@ namespace Entmoot.UnitTests
 				writer.Write(this.Position);
 			}
 
-			public void Deserialize(BinaryReader binaryReader)
+			public void Deserialize(IReader reader)
 			{
-				this.Position = binaryReader.ReadSingle();
+				this.Position = reader.ReadSingle();
 			}
 
 			#endregion Methods

@@ -137,12 +137,12 @@ namespace Entmoot.Engine
 		/// </summary>
 		private void processServerUpdates()
 		{
-			byte[] packet;
-			while ((packet = this.serverNetworkConnection.GetNextIncomingPacket()) != null)
+			IncomingMessage incomingMessage;
+			while ((incomingMessage = this.serverNetworkConnection.GetNextIncomingMessage()) != null)
 			{
 				// Get the oldest entity snapshot in the history that should be overwritten with the new incoming data, but only overwrite if the incoming data is actually newer
 				EntitySnapshot newEntitySnapshot = this.getOldestHistoryEntitySnapshot();
-				if (!ServerUpdateSerializer.DeserializeIfNewer(packet, newEntitySnapshot, out int newLatestClientTickAcknowledgedByServer, out int newCommandingEntityID)) { continue; }
+				if (!ServerUpdateSerializer.DeserializeIfNewer(incomingMessage, newEntitySnapshot, out int newLatestClientTickAcknowledgedByServer, out int newCommandingEntityID)) { continue; }
 
 				if (this.LatestServerTickReceived < 0)
 				{

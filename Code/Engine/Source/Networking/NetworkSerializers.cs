@@ -35,36 +35,24 @@ namespace Entmoot.Engine
 		}
 
 		/// <summary>
-		/// Deserializes a server update (entity snapshot and client-specific data) based on the given byte array.
+		/// Deserializes a server update (entity snapshot and client-specific data) based on the given reader.
 		/// </summary>
-		public static void Deserialize(byte[] packet, EntitySnapshot entitySnapshot, out int latestClientTickAcknowledgedByServer, out int clientCommandingEntityID)
+		public static void Deserialize(IReader reader, EntitySnapshot entitySnapshot, out int latestClientTickAcknowledgedByServer, out int clientCommandingEntityID)
 		{
-			using (MemoryStream memoryStream = new MemoryStream(packet))
-			{
-				using (BinaryReader binaryReader = new BinaryReader(memoryStream))
-				{
-					latestClientTickAcknowledgedByServer = binaryReader.ReadInt32();
-					clientCommandingEntityID = binaryReader.ReadInt32();
-					entitySnapshot.Deserialize(binaryReader);
-				}
-			}
+			latestClientTickAcknowledgedByServer = reader.ReadInt32();
+			clientCommandingEntityID = reader.ReadInt32();
+			entitySnapshot.Deserialize(reader);
 		}
 
 		/// <summary>
-		/// Deserializes a server update (entity snapshot and client-specific data) based on the given byte array, but only if the byte array represents a newer server update.
-		/// Returns true if the entity snapshot was actually updated from the byte array.
+		/// Deserializes a server update (entity snapshot and client-specific data) based on the given reader, but only if the reader contains a newer server update.
+		/// Returns true if the entity snapshot was actually updated from the reader.
 		/// </summary>
-		public static bool DeserializeIfNewer(byte[] packet, EntitySnapshot entitySnapshot, out int latestClientTickAcknowledgedByServer, out int clientCommandingEntityID)
+		public static bool DeserializeIfNewer(IReader reader, EntitySnapshot entitySnapshot, out int latestClientTickAcknowledgedByServer, out int clientCommandingEntityID)
 		{
-			using (MemoryStream memoryStream = new MemoryStream(packet))
-			{
-				using (BinaryReader binaryReader = new BinaryReader(memoryStream))
-				{
-					latestClientTickAcknowledgedByServer = binaryReader.ReadInt32();
-					clientCommandingEntityID = binaryReader.ReadInt32();
-					return entitySnapshot.DeserializeIfNewer(binaryReader);
-				}
-			}
+			latestClientTickAcknowledgedByServer = reader.ReadInt32();
+			clientCommandingEntityID = reader.ReadInt32();
+			return entitySnapshot.DeserializeIfNewer(reader);
 		}
 
 		#endregion Methods
@@ -104,24 +92,18 @@ namespace Entmoot.Engine
 		}
 
 		/// <summary>
-		/// Deserializes a client update (client commands) based on the given byte array, overwriting the given array of commands with what was
-		/// receieved. Returns the number of commands received (which may be less than given array's length).
+		/// Deserializes a client update (client commands) based on the given reader, overwriting the given array of commands with what was
+		/// read. Returns the number of commands received (which may be less than the given array's length).
 		/// </summary>
-		public static int Deserialize(byte[] packet, ClientCommand<TCommandData>[] clientCommands, out int latestFrameTickAcknowledgedByClient)
+		public static int Deserialize(IReader reader, ClientCommand<TCommandData>[] clientCommands, out int latestFrameTickAcknowledgedByClient)
 		{
-			using (MemoryStream memoryStream = new MemoryStream(packet))
+			latestFrameTickAcknowledgedByClient = reader.ReadInt32();
+			byte numberOfCommands = reader.ReadByte();
+			for (int i = 0; i < numberOfCommands; i++)
 			{
-				using (BinaryReader binaryReader = new BinaryReader(memoryStream))
-				{
-					latestFrameTickAcknowledgedByClient = binaryReader.ReadInt32();
-					byte numberOfCommands = binaryReader.ReadByte();
-					for (int i = 0; i < numberOfCommands; i++)
-					{
-						clientCommands[i].Deserialize(binaryReader);
-					}
-					return numberOfCommands;
-				}
+				clientCommands[i].Deserialize(reader);
 			}
+			return numberOfCommands;
 		}
 
 		#endregion Methods
