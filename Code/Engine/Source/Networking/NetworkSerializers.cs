@@ -19,24 +19,19 @@ namespace Entmoot.Engine
 		/// </summary>
 		public static void Send(INetworkConnection clientNetworkConnection, EntitySnapshot entitySnapshot, int latestClientTickReceived, int clientCommandingEntityID)
 		{
-			clientNetworkConnection.SendPacket(ServerUpdateSerializer.Serialize(entitySnapshot, latestClientTickReceived, clientCommandingEntityID));
+			OutgoingMessage outgoingMessage = clientNetworkConnection.GetOutgoingMessageToSend();
+			ServerUpdateSerializer.Serialize(outgoingMessage, entitySnapshot, latestClientTickReceived, clientCommandingEntityID);
+			clientNetworkConnection.SendMessage(outgoingMessage);
 		}
 
 		/// <summary>
-		/// Returns a serialized byte array for the given server update (entity snapshot and client-specific data).
+		/// Serializes the given server update (entity snapshot and client-specific data) to the given writer.
 		/// </summary>
-		public static byte[] Serialize(EntitySnapshot entitySnapshot, int latestClientTickReceived, int clientCommandingEntityID)
+		public static void Serialize(IWriter writer, EntitySnapshot entitySnapshot, int latestClientTickReceived, int clientCommandingEntityID)
 		{
-			using (MemoryStream memoryStream = new MemoryStream())
-			{
-				using (BinaryWriter binaryWriter = new BinaryWriter(memoryStream))
-				{
-					binaryWriter.Write(latestClientTickReceived);
-					binaryWriter.Write(clientCommandingEntityID);
-					entitySnapshot.Serialize(binaryWriter);
-					return memoryStream.ToArray();
-				}
-			}
+			writer.Write(latestClientTickReceived);
+			writer.Write(clientCommandingEntityID);
+			entitySnapshot.Serialize(writer);
 		}
 
 		/// <summary>
@@ -89,27 +84,22 @@ namespace Entmoot.Engine
 		/// </summary>
 		public static void Send(INetworkConnection serverNetworkConnection, IEnumerable<ClientCommand<TCommandData>> clientCommands, int latestServerTickReceived)
 		{
-			serverNetworkConnection.SendPacket(ClientUpdateSerializer<TCommandData>.Serialize(clientCommands, latestServerTickReceived));
+			OutgoingMessage outgoingMessage = serverNetworkConnection.GetOutgoingMessageToSend();
+			ClientUpdateSerializer<TCommandData>.Serialize(outgoingMessage, clientCommands, latestServerTickReceived);
+			serverNetworkConnection.SendMessage(outgoingMessage);
 		}
 
 		/// <summary>
-		/// Returns a serialized byte array for the given client update (client commands).
+		/// Serializes the given client update (client commands) to the given writer.
 		/// </summary>
-		public static byte[] Serialize(IEnumerable<ClientCommand<TCommandData>> clientCommands, int latestServerTickReceived)
+		public static void Serialize(IWriter writer, IEnumerable<ClientCommand<TCommandData>> clientCommands, int latestServerTickReceived)
 		{
 			// Todo: only write the commands that have data and are newer than what the server already acknowledged (LatestFrameTickAcknowledgedByServer)
-			using (MemoryStream memoryStream = new MemoryStream())
+			writer.Write(latestServerTickReceived);
+			writer.Write((byte)clientCommands.Count());
+			foreach (ClientCommand<TCommandData> clientCommand in clientCommands)
 			{
-				using (BinaryWriter binaryWriter = new BinaryWriter(memoryStream))
-				{
-					binaryWriter.Write(latestServerTickReceived);
-					binaryWriter.Write((byte)clientCommands.Count());
-					foreach (ClientCommand<TCommandData> clientCommand in clientCommands)
-					{
-						clientCommand.Serialize(binaryWriter);
-					}
-					return memoryStream.ToArray();
-				}
+				clientCommand.Serialize(writer);
 			}
 		}
 

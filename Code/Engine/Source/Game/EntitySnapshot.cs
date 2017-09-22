@@ -76,10 +76,10 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Writes this entity snapshot's data to a binary source.
 		/// </summary>
-		public void Serialize(BinaryWriter binaryWriter)
+		public void Serialize(IWriter writer)
 		{
-			binaryWriter.Write(this.ServerFrameTick);
-			this.EntityArray.Serialize(binaryWriter);
+			writer.Write(this.ServerFrameTick);
+			this.EntityArray.Serialize(writer);
 		}
 
 		/// <summary>

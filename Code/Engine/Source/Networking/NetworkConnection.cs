@@ -19,9 +19,14 @@ namespace Entmoot.Engine
 		byte[] GetNextIncomingPacket();
 
 		/// <summary>
-		/// Sends the given packet over the network to the other endpoint.
+		/// Returns an <see cref="OutgoingMessage"/> that can be sent.
 		/// </summary>
-		void SendPacket(byte[] packet);
+		OutgoingMessage GetOutgoingMessageToSend();
+
+		/// <summary>
+		/// Sends the given message over the network to the other endpoint.
+		/// </summary>
+		void SendMessage(OutgoingMessage outgoingMessage);
 
 		#endregion Methods
 	}

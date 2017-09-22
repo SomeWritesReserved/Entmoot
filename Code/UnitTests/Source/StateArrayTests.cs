@@ -154,14 +154,10 @@ namespace Entmoot.UnitTests
 			sourceStateArray[33] = true;
 			sourceStateArray[62] = true;
 			sourceStateArray[63] = true;
-			byte[] serializedBytes;
-			using (MemoryStream memoryStream = new MemoryStream(8))
+			byte[] serializedBytes = new byte[8];
 			{
-				using (BinaryWriter binaryWriter = new BinaryWriter(memoryStream))
-				{
-					sourceStateArray.Serialize(binaryWriter);
-					serializedBytes = memoryStream.ToArray();
-				}
+				OutgoingMessage outgoingMessage = new OutgoingMessage(serializedBytes);
+				sourceStateArray.Serialize(outgoingMessage);
 			}
 			StateArray destinationStateArray = new StateArray(64);
 			using (MemoryStream memoryStream = new MemoryStream(serializedBytes))
@@ -190,14 +186,10 @@ namespace Entmoot.UnitTests
 			{
 				StateArray sourceStateArray = new StateArray(64);
 				sourceStateArray[i] = true;
-				byte[] serializedBytes;
-				using (MemoryStream memoryStream = new MemoryStream(8))
+				byte[] serializedBytes = new byte[8];
 				{
-					using (BinaryWriter binaryWriter = new BinaryWriter(memoryStream))
-					{
-						sourceStateArray.Serialize(binaryWriter);
-						serializedBytes = memoryStream.ToArray();
-					}
+					OutgoingMessage outgoingMessage = new OutgoingMessage(serializedBytes);
+					sourceStateArray.Serialize(outgoingMessage);
 				}
 				StateArray destinationStateArray = new StateArray(64);
 				using (MemoryStream memoryStream = new MemoryStream(serializedBytes))

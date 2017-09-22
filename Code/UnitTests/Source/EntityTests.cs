@@ -398,14 +398,10 @@ namespace Entmoot.UnitTests
 		{
 			EntityArray sourceEntityArray = EntityTests.CreateStandardEntityArray();
 			EntityArray destinationEntityArray = new EntityArray(3, EntityTests.CreateComponentsDefinition());
-			byte[] serializedBytes;
-			using (MemoryStream memoryStream = new MemoryStream())
+			byte[] serializedBytes = new byte[512];
 			{
-				using (BinaryWriter binaryWriter = new BinaryWriter(memoryStream))
-				{
-					sourceEntityArray.Serialize(binaryWriter);
-					serializedBytes = memoryStream.ToArray();
-				}
+				OutgoingMessage outgoingMessage = new OutgoingMessage(serializedBytes);
+				sourceEntityArray.Serialize(outgoingMessage);
 			}
 			using (MemoryStream memoryStream = new MemoryStream(serializedBytes))
 			{
@@ -440,14 +436,10 @@ namespace Entmoot.UnitTests
 			entity2.AddComponent<StringComponent>().StringValue = "z2";
 			destinationEntityArray.RemoveEntity(entity0);
 			destinationEntityArray.EndUpdate();
-			byte[] serializedBytes;
-			using (MemoryStream memoryStream = new MemoryStream())
+			byte[] serializedBytes = new byte[512];
 			{
-				using (BinaryWriter binaryWriter = new BinaryWriter(memoryStream))
-				{
-					sourceEntityArray.Serialize(binaryWriter);
-					serializedBytes = memoryStream.ToArray();
-				}
+				OutgoingMessage outgoingMessage = new OutgoingMessage(serializedBytes);
+				sourceEntityArray.Serialize(outgoingMessage);
 			}
 			using (MemoryStream memoryStream = new MemoryStream(serializedBytes))
 			{
@@ -629,10 +621,10 @@ namespace Entmoot.UnitTests
 				this.PositionY = otherA.PositionY + (otherB.PositionY - otherA.PositionY) * amount;
 			}
 
-			public void Serialize(BinaryWriter binaryWriter)
+			public void Serialize(IWriter writer)
 			{
-				binaryWriter.Write(this.PositionX);
-				binaryWriter.Write(this.PositionY);
+				writer.Write(this.PositionX);
+				writer.Write(this.PositionY);
 			}
 
 			public void Deserialize(BinaryReader binaryReader)
@@ -659,9 +651,9 @@ namespace Entmoot.UnitTests
 				this.HealthAmount = otherA.HealthAmount;
 			}
 
-			public void Serialize(BinaryWriter binaryWriter)
+			public void Serialize(IWriter writer)
 			{
-				binaryWriter.Write(this.HealthAmount);
+				writer.Write(this.HealthAmount);
 			}
 
 			public void Deserialize(BinaryReader binaryReader)
@@ -687,9 +679,9 @@ namespace Entmoot.UnitTests
 				this.StringValue = otherA.StringValue;
 			}
 
-			public void Serialize(BinaryWriter binaryWriter)
+			public void Serialize(IWriter writer)
 			{
-				binaryWriter.Write(this.StringValue ?? "");
+				writer.Write(this.StringValue ?? "");
 			}
 
 			public void Deserialize(BinaryReader binaryReader)

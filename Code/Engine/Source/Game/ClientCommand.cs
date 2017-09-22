@@ -17,7 +17,7 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Writes the state of this command data to a binary source.
 		/// </summary>
-		void Serialize(BinaryWriter binaryWriter);
+		void Serialize(IWriter writer);
 
 		/// <summary>
 		/// Reads and overwrites the current state of this command data from a binary source.
@@ -107,14 +107,14 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Writes the state of this command to a binary source.
 		/// </summary>
-		public void Serialize(BinaryWriter binaryWriter)
+		public void Serialize(IWriter writer)
 		{
-			binaryWriter.Write(this.ClientFrameTick);
-			binaryWriter.Write(this.RenderedTick);
-			binaryWriter.Write(this.InterpolationStartTick);
-			binaryWriter.Write(this.InterpolationEndTick);
-			binaryWriter.Write(this.CommandingEntityID);
-			this.commandData.Serialize(binaryWriter);
+			writer.Write(this.ClientFrameTick);
+			writer.Write(this.RenderedTick);
+			writer.Write(this.InterpolationStartTick);
+			writer.Write(this.InterpolationEndTick);
+			writer.Write(this.CommandingEntityID);
+			this.commandData.Serialize(writer);
 		}
 
 		/// <summary>

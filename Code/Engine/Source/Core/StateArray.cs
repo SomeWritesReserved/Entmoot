@@ -86,11 +86,11 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Writes all boolean states to a binary source.
 		/// </summary>
-		public void Serialize(BinaryWriter binaryWriter)
+		public void Serialize(IWriter writer)
 		{
 			for (int i = 0; i < this.storageArray.Length; i++)
 			{
-				binaryWriter.Write(this.storageArray[i]);
+				writer.Write(this.storageArray[i]);
 			}
 		}
 

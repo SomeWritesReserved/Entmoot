@@ -952,10 +952,19 @@ namespace Entmoot.UnitTests
 				this.serverEntitySnapshot.EntityArray.TryGetEntity(0, out Entity entity);
 				entity.AddComponent<MockComponent>().Position = mockServerUpdate.NewPosition;
 				this.serverEntitySnapshot.Update(mockServerUpdate.ServerFrameTick, this.serverEntitySnapshot.EntityArray);
-				return ServerUpdateSerializer.Serialize(this.serverEntitySnapshot, mockServerUpdate.LatestClientTickReceived, mockServerUpdate.CommandingEntityID);
+				
+				byte[] data = new byte[1024];
+				OutgoingMessage outgoingMessage = new OutgoingMessage(data);
+				ServerUpdateSerializer.Serialize(outgoingMessage, this.serverEntitySnapshot, mockServerUpdate.LatestClientTickReceived, mockServerUpdate.CommandingEntityID);
+				return data;
 			}
 
-			void INetworkConnection.SendPacket(byte[] packet)
+			OutgoingMessage INetworkConnection.GetOutgoingMessageToSend()
+			{
+				return new OutgoingMessage(new byte[1024]);
+			}
+
+			void INetworkConnection.SendMessage(OutgoingMessage outgoingMessage)
 			{
 				// Do nothing, the other endpoint doesn't exist so it won't respond to anything anyway
 			}
@@ -985,14 +994,14 @@ namespace Entmoot.UnitTests
 
 			#region Methods
 
+			public void Serialize(IWriter writer)
+			{
+				writer.Write((byte)this.CommandKeys);
+			}
+
 			public void Deserialize(BinaryReader binaryReader)
 			{
 				this.CommandKeys = (MockCommandKeys)binaryReader.ReadByte();
-			}
-
-			public void Serialize(BinaryWriter binaryWriter)
-			{
-				binaryWriter.Write((byte)this.CommandKeys);
 			}
 
 			public void ApplyToEntity(Entity entity)
@@ -1024,9 +1033,9 @@ namespace Entmoot.UnitTests
 				this.Position = otherA.Position + (otherB.Position - otherA.Position) * amount;
 			}
 
-			public void Serialize(BinaryWriter binaryWriter)
+			public void Serialize(IWriter writer)
 			{
-				binaryWriter.Write(this.Position);
+				writer.Write(this.Position);
 			}
 
 			public void Deserialize(BinaryReader binaryReader)

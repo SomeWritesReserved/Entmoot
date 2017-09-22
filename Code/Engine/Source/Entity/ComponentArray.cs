@@ -23,7 +23,7 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Writes the state of this specific component to a binary source.
 		/// </summary>
-		void Serialize(BinaryWriter binaryWriter);
+		void Serialize(IWriter writer);
 
 		/// <summary>
 		/// Reads and overwrites the current state of this specific component from a binary source.
@@ -77,7 +77,7 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Writes the state of all component data to a binary source.
 		/// </summary>
-		void Serialize(BinaryWriter binaryWriter);
+		void Serialize(IWriter writer);
 
 		/// <summary>
 		/// Reads and overwrites the current state of all component data from a binary source.
@@ -226,12 +226,12 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Writes the state of all component data to a binary source.
 		/// </summary>
-		public void Serialize(BinaryWriter binaryWriter)
+		public void Serialize(IWriter writer)
 		{
-			this.componentStates.Serialize(binaryWriter);
+			this.componentStates.Serialize(writer);
 			for (int entityID = 0; entityID < this.Capacity; entityID++)
 			{
-				this.components[entityID].Serialize(binaryWriter);
+				this.components[entityID].Serialize(writer);
 			}
 		}
 

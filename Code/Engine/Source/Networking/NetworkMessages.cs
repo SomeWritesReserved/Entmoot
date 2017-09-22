@@ -153,6 +153,16 @@ namespace Entmoot.Engine
 		#region Methods
 
 		/// <summary>
+		/// Returns a new byte array that has the data that this message wrote.
+		/// </summary>
+		public byte[] ToArray()
+		{
+			byte[] newData = new byte[this.dataIndex];
+			Array.Copy(this.messageData, newData, newData.Length);
+			return newData;
+		}
+
+		/// <summary>
 		/// Writes an unsigned byte to the message.
 		/// </summary>
 		public void Write(byte value)

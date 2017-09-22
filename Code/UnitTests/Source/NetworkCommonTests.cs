@@ -16,12 +16,13 @@ namespace Entmoot.UnitTests
 		[Test]
 		public void ServerUpdateSerializer_Serialization_Empty()
 		{
-			byte[] packet;
+			byte[] packet = new byte[1024];
 			{
 				EntityArray entityArray = EntityTests.CreateStandardEntityArray();
 				EntitySnapshot entitySnapshot = new EntitySnapshot(3, EntityTests.CreateComponentsDefinition());
 				entitySnapshot.Update(66, entityArray);
-				packet = ServerUpdateSerializer.Serialize(entitySnapshot, 63, 13);
+				OutgoingMessage outgoingMessage = new OutgoingMessage(packet);
+				ServerUpdateSerializer.Serialize(outgoingMessage, entitySnapshot, 63, 13);
 			}
 			{
 				EntitySnapshot entitySnapshot = new EntitySnapshot(3, EntityTests.CreateComponentsDefinition());
@@ -36,11 +37,12 @@ namespace Entmoot.UnitTests
 		[Test]
 		public void ServerUpdateSerializer_Serialization_Overwrite()
 		{
-			byte[] packet;
+			byte[] packet = new byte[1024];
 			{
 				EntitySnapshot entitySnapshot = new EntitySnapshot(3, EntityTests.CreateComponentsDefinition());
 				entitySnapshot.Update(68, entitySnapshot.EntityArray);
-				packet = ServerUpdateSerializer.Serialize(entitySnapshot, 73, 17);
+				OutgoingMessage outgoingMessage = new OutgoingMessage(packet);
+				ServerUpdateSerializer.Serialize(outgoingMessage, entitySnapshot, 73, 17);
 			}
 			{
 				EntityArray entityArray = EntityTests.CreateStandardEntityArray();
@@ -59,11 +61,12 @@ namespace Entmoot.UnitTests
 		[Test]
 		public void ServerUpdateSerializer_DeserializeIfNewer_NotNewer()
 		{
-			byte[] packet;
+			byte[] packet = new byte[1024];
 			{
 				EntitySnapshot entitySnapshot = new EntitySnapshot(3, EntityTests.CreateComponentsDefinition());
 				entitySnapshot.Update(55, entitySnapshot.EntityArray);
-				packet = ServerUpdateSerializer.Serialize(entitySnapshot, 73, 17);
+				OutgoingMessage outgoingMessage = new OutgoingMessage(packet);
+				ServerUpdateSerializer.Serialize(outgoingMessage, entitySnapshot, 73, 17);
 			}
 			{
 				EntityArray entityArray = EntityTests.CreateStandardEntityArray();
@@ -80,11 +83,12 @@ namespace Entmoot.UnitTests
 		[Test]
 		public void ServerUpdateSerializer_DeserializeIfNewer_IsNewer()
 		{
-			byte[] packet;
+			byte[] packet = new byte[1024];
 			{
 				EntitySnapshot entitySnapshot = new EntitySnapshot(3, EntityTests.CreateComponentsDefinition());
 				entitySnapshot.Update(68, entitySnapshot.EntityArray);
-				packet = ServerUpdateSerializer.Serialize(entitySnapshot, 73, 17);
+				OutgoingMessage outgoingMessage = new OutgoingMessage(packet);
+				ServerUpdateSerializer.Serialize(outgoingMessage, entitySnapshot, 73, 17);
 			}
 			{
 				EntityArray entityArray = EntityTests.CreateStandardEntityArray();

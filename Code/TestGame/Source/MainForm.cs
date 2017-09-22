@@ -271,20 +271,25 @@ namespace Entmoot.TestGame
 			return (this.CurrentContext == ClientServerContext.Client) ? this.getArrivedPacket(this.IncomingPacketsForClient, this.OldPacketsForClient) : this.getArrivedPacket(this.IncomingPacketsForServer, this.OldPacketsForServer);
 		}
 
-		public void SendPacket(byte[] packet)
+		public OutgoingMessage GetOutgoingMessageToSend()
+		{
+			return new OutgoingMessage(new byte[1024]);
+		}
+
+		public void SendMessage(OutgoingMessage outgoingMessage)
 		{
 			if (random.NextDouble() < this.SimulatedPacketLoss || this.DropAllPackets) { return; }
 
 			if (this.CurrentContext == ClientServerContext.Client)
 			{
 				int arrivalNetworkTick = (int)(this.NetworkServerTick + this.SimulatedLatency + (this.random.NextDouble() - this.random.NextDouble()) * this.SimulatedJitter);
-				SentPacket sentPacket = new SentPacket() { ArrivalNetworkTick = arrivalNetworkTick, Data = packet };
+				SentPacket sentPacket = new SentPacket() { ArrivalNetworkTick = arrivalNetworkTick, Data = outgoingMessage.ToArray() };
 				this.IncomingPacketsForServer.Add(sentPacket);
 			}
 			else
 			{
 				int arrivalNetworkTick = (int)(this.NetworkClientTick + this.SimulatedLatency + (this.random.NextDouble() - this.random.NextDouble()) * this.SimulatedJitter);
-				SentPacket sentPacket = new SentPacket() { ArrivalNetworkTick = arrivalNetworkTick, Data = packet };
+				SentPacket sentPacket = new SentPacket() { ArrivalNetworkTick = arrivalNetworkTick, Data = outgoingMessage.ToArray() };
 				this.IncomingPacketsForClient.Add(sentPacket);
 			}
 		}
@@ -459,11 +464,11 @@ namespace Entmoot.TestGame
 			this.Position = Vector3.Interpolate(otherA.Position, otherB.Position, amount);
 		}
 
-		public void Serialize(BinaryWriter binaryWriter)
+		public void Serialize(IWriter writer)
 		{
-			binaryWriter.Write(this.Position.X);
-			binaryWriter.Write(this.Position.Y);
-			binaryWriter.Write(this.Position.Z);
+			writer.Write(this.Position.X);
+			writer.Write(this.Position.Y);
+			writer.Write(this.Position.Z);
 		}
 
 		public void Deserialize(BinaryReader binaryReader)
@@ -526,9 +531,9 @@ namespace Entmoot.TestGame
 			this.CommandKeys = (TestCommandKeys)binaryReader.ReadByte();
 		}
 
-		public void Serialize(BinaryWriter binaryWriter)
+		public void Serialize(IWriter writer)
 		{
-			binaryWriter.Write((byte)this.CommandKeys);
+			writer.Write((byte)this.CommandKeys);
 		}
 
 		public void ApplyToEntity(Entity entity)
