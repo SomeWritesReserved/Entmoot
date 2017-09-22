@@ -9,7 +9,7 @@ using NUnit.Framework;
 namespace Entmoot.UnitTests
 {
 	[TestFixture]
-	public class NetMessageTests
+	public class NetworkMessageTests
 	{
 		#region Tests
 
