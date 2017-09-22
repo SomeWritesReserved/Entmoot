@@ -49,6 +49,7 @@
     <Compile Include="Source\Entity\EntityArray.cs" />
     <Compile Include="Source\Math\Vector3.cs" />
     <Compile Include="Source\Game\EntitySnapshot.cs" />
+    <Compile Include="Source\Networking\Messages.cs" />
     <Compile Include="Source\Networking\NetworkConnection.cs" />
     <Compile Include="Source\Networking\Serializers.cs" />
     <Compile Include="Source\Collections\StateArray.cs" />
