@@ -48,13 +48,13 @@
     <Compile Include="Source\Entity\ISystem.cs" />
     <Compile Include="Source\Entity\EntityArray.cs" />
     <Compile Include="Source\Math\Vector3.cs" />
-    <Compile Include="Source\Networking\EntitySnapshot.cs" />
+    <Compile Include="Source\Game\EntitySnapshot.cs" />
     <Compile Include="Source\Networking\NetworkConnection.cs" />
     <Compile Include="Source\Networking\Serializers.cs" />
     <Compile Include="Source\Collections\StateArray.cs" />
-    <Compile Include="Source\Networking\GameClient.cs" />
-    <Compile Include="Source\Networking\ClientCommand.cs" />
-    <Compile Include="Source\Networking\GameServer.cs" />
+    <Compile Include="Source\Game\GameClient.cs" />
+    <Compile Include="Source\Game\ClientCommand.cs" />
+    <Compile Include="Source\Game\GameServer.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
