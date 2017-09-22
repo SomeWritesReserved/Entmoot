@@ -147,6 +147,22 @@ namespace Entmoot.UnitTests
 			}
 		}
 
+		[Test]
+		public void OutgoingAndIncoming_String()
+		{
+			byte[] data = new byte[512];
+			OutgoingMessage outgoingMessage = new OutgoingMessage(data);
+			outgoingMessage.Write(string.Empty);
+			outgoingMessage.Write("");
+			outgoingMessage.Write("yyyyyyyyyes");
+			outgoingMessage.Write("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~!@#$%^&*()-_=+[{]}\\|;:'\"/?.>,<\r\n\t");
+			IncomingMessage incomingMessage = new IncomingMessage(data);
+			Assert.AreEqual(string.Empty, incomingMessage.ReadString());
+			Assert.AreEqual("", incomingMessage.ReadString());
+			Assert.AreEqual("yyyyyyyyyes", incomingMessage.ReadString());
+			Assert.AreEqual("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~!@#$%^&*()-_=+[{]}\\|;:'\"/?.>,<\r\n\t", incomingMessage.ReadString());
+		}
+
 		#endregion Tests
 	}
 }

@@ -109,6 +109,20 @@ namespace Entmoot.Engine
 			return (this.ReadByte() == 1);
 		}
 
+		/// <summary>
+		/// Reads a string from the message.
+		/// </summary>
+		public string ReadString()
+		{
+			int length = this.ReadInt32();
+			StringBuilder stringBuilder = new StringBuilder(length);
+			for (int i = 0; i < length; i++)
+			{
+				stringBuilder.Append((char)this.ReadByte());
+			}
+			return stringBuilder.ToString();
+		}
+
 		#endregion Methods
 	}
 
@@ -209,6 +223,18 @@ namespace Entmoot.Engine
 		public void Write(bool value)
 		{
 			this.Write(value ? (byte)1 : (byte)0);
+		}
+
+		/// <summary>
+		/// Writes a string to the message.
+		/// </summary>
+		public void Write(string value)
+		{
+			this.Write(value.Length);
+			for (int i = 0; i < value.Length; i++)
+			{
+				this.Write((byte)value[i]);
+			}
 		}
 
 		#endregion Methods

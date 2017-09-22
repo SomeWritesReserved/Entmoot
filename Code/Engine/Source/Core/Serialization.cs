@@ -48,6 +48,11 @@ namespace Entmoot.Engine
 		/// </summary>
 		bool ReadBoolean();
 
+		/// <summary>
+		/// Reads a string.
+		/// </summary>
+		string ReadString();
+
 		#endregion Methods
 	}
 
@@ -92,6 +97,11 @@ namespace Entmoot.Engine
 		/// Writes a boolean value.
 		/// </summary>
 		void Write(bool value);
+
+		/// <summary>
+		/// Writes a string value.
+		/// </summary>
+		void Write(string value);
 
 		#endregion Methods
 	}
