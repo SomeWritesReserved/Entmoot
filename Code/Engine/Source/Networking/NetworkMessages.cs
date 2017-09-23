@@ -14,7 +14,7 @@ namespace Entmoot.Engine
 	{
 		#region Fields
 
-		private readonly byte[] messageData;
+		/// <summary>The current location to write data to.</summary>
 		private int dataIndex = 0;
 
 		#endregion Fields
@@ -26,19 +26,36 @@ namespace Entmoot.Engine
 		/// </summary>
 		public IncomingMessage(byte[] messageData)
 		{
-			this.messageData = messageData;
+			this.MessageData = messageData;
 		}
 
 		#endregion Constructors
 
+		#region Properties
+
+		/// <summary>
+		/// Gets that raw underlying byte array that is the message data.
+		/// </summary>
+		public byte[] MessageData { get; }
+
+		#endregion Properties
+
 		#region Methods
+
+		/// <summary>
+		/// Resets this message so begins reading from the beginning.
+		/// </summary>
+		public void Reset()
+		{
+			this.dataIndex = 0;
+		}
 
 		/// <summary>
 		/// Reads an unsigned byte from the message.
 		/// </summary>
 		public byte ReadByte()
 		{
-			byte value = this.messageData[this.dataIndex];
+			byte value = this.MessageData[this.dataIndex];
 			this.dataIndex += sizeof(byte);
 			return value;
 		}
@@ -48,8 +65,8 @@ namespace Entmoot.Engine
 		/// </summary>
 		public short ReadInt16()
 		{
-			short value = (short)((this.messageData[this.dataIndex + 0] << 8) |
-				this.messageData[this.dataIndex + 1]);
+			short value = (short)((this.MessageData[this.dataIndex + 0] << 8) |
+				this.MessageData[this.dataIndex + 1]);
 			this.dataIndex += sizeof(short);
 			return value;
 		}
@@ -59,8 +76,8 @@ namespace Entmoot.Engine
 		/// </summary>
 		public ushort ReadUInt16()
 		{
-			ushort value = (ushort)((this.messageData[this.dataIndex + 0] << 8) |
-				this.messageData[this.dataIndex + 1]);
+			ushort value = (ushort)((this.MessageData[this.dataIndex + 0] << 8) |
+				this.MessageData[this.dataIndex + 1]);
 			this.dataIndex += sizeof(ushort);
 			return value;
 		}
@@ -70,10 +87,10 @@ namespace Entmoot.Engine
 		/// </summary>
 		public int ReadInt32()
 		{
-			int value = (int)((this.messageData[this.dataIndex + 0] << 24) |
-				(this.messageData[this.dataIndex + 1] << 16) |
-				(this.messageData[this.dataIndex + 2] << 8) |
-				this.messageData[this.dataIndex + 3]);
+			int value = (int)((this.MessageData[this.dataIndex + 0] << 24) |
+				(this.MessageData[this.dataIndex + 1] << 16) |
+				(this.MessageData[this.dataIndex + 2] << 8) |
+				this.MessageData[this.dataIndex + 3]);
 			this.dataIndex += sizeof(int);
 			return value;
 		}
@@ -83,10 +100,10 @@ namespace Entmoot.Engine
 		/// </summary>
 		public uint ReadUInt32()
 		{
-			uint value = (uint)((this.messageData[this.dataIndex + 0] << 24) |
-				(this.messageData[this.dataIndex + 1] << 16) |
-				(this.messageData[this.dataIndex + 2] << 8) |
-				this.messageData[this.dataIndex + 3]);
+			uint value = (uint)((this.MessageData[this.dataIndex + 0] << 24) |
+				(this.MessageData[this.dataIndex + 1] << 16) |
+				(this.MessageData[this.dataIndex + 2] << 8) |
+				this.MessageData[this.dataIndex + 3]);
 			this.dataIndex += sizeof(uint);
 			return value;
 		}
@@ -133,7 +150,7 @@ namespace Entmoot.Engine
 	{
 		#region Fields
 
-		private readonly byte[] messageData;
+		/// <summary>The current location to write data to.</summary>
 		private int dataIndex = 0;
 
 		#endregion Fields
@@ -145,12 +162,37 @@ namespace Entmoot.Engine
 		/// </summary>
 		public OutgoingMessage(byte[] messageData)
 		{
-			this.messageData = messageData;
+			this.MessageData = messageData;
 		}
 
 		#endregion Constructors
 
+		#region Properties
+
+		/// <summary>
+		/// Gets that raw underlying byte array that is the message data.
+		/// </summary>
+		public byte[] MessageData { get; }
+
+		#endregion Properties
+
 		#region Methods
+
+		/// <summary>
+		/// Resets this message so begins writing at the beginning.
+		/// </summary>
+		public void Reset()
+		{
+			this.dataIndex = 0;
+		}
+
+		/// <summary>
+		/// Copies this message's data to another message.
+		/// </summary>
+		public void CopyTo(IncomingMessage incomingMessage)
+		{
+			Array.Copy(this.MessageData, incomingMessage.MessageData, Math.Min(this.MessageData.Length, incomingMessage.MessageData.Length));
+		}
 
 		/// <summary>
 		/// Returns a new byte array that has the data that this message wrote.
@@ -158,7 +200,7 @@ namespace Entmoot.Engine
 		public byte[] ToArray()
 		{
 			byte[] newData = new byte[this.dataIndex];
-			Array.Copy(this.messageData, newData, newData.Length);
+			Array.Copy(this.MessageData, newData, newData.Length);
 			return newData;
 		}
 
@@ -167,7 +209,7 @@ namespace Entmoot.Engine
 		/// </summary>
 		public void Write(byte value)
 		{
-			this.messageData[this.dataIndex] = value;
+			this.MessageData[this.dataIndex] = value;
 			this.dataIndex += sizeof(byte);
 		}
 
@@ -176,8 +218,8 @@ namespace Entmoot.Engine
 		/// </summary>
 		public void Write(short value)
 		{
-			this.messageData[this.dataIndex + 0] = (byte)(value >> 8);
-			this.messageData[this.dataIndex + 1] = (byte)value;
+			this.MessageData[this.dataIndex + 0] = (byte)(value >> 8);
+			this.MessageData[this.dataIndex + 1] = (byte)value;
 			this.dataIndex += sizeof(short);
 		}
 
@@ -186,8 +228,8 @@ namespace Entmoot.Engine
 		/// </summary>
 		public void Write(ushort value)
 		{
-			this.messageData[this.dataIndex + 0] = (byte)(value >> 8);
-			this.messageData[this.dataIndex + 1] = (byte)value;
+			this.MessageData[this.dataIndex + 0] = (byte)(value >> 8);
+			this.MessageData[this.dataIndex + 1] = (byte)value;
 			this.dataIndex += sizeof(ushort);
 		}
 
@@ -196,10 +238,10 @@ namespace Entmoot.Engine
 		/// </summary>
 		public void Write(int value)
 		{
-			this.messageData[this.dataIndex + 0] = (byte)(value >> 24);
-			this.messageData[this.dataIndex + 1] = (byte)(value >> 16);
-			this.messageData[this.dataIndex + 2] = (byte)(value >> 8);
-			this.messageData[this.dataIndex + 3] = (byte)value;
+			this.MessageData[this.dataIndex + 0] = (byte)(value >> 24);
+			this.MessageData[this.dataIndex + 1] = (byte)(value >> 16);
+			this.MessageData[this.dataIndex + 2] = (byte)(value >> 8);
+			this.MessageData[this.dataIndex + 3] = (byte)value;
 			this.dataIndex += sizeof(int);
 		}
 
@@ -208,10 +250,10 @@ namespace Entmoot.Engine
 		/// </summary>
 		public void Write(uint value)
 		{
-			this.messageData[this.dataIndex + 0] = (byte)(value >> 24);
-			this.messageData[this.dataIndex + 1] = (byte)(value >> 16);
-			this.messageData[this.dataIndex + 2] = (byte)(value >> 8);
-			this.messageData[this.dataIndex + 3] = (byte)value;
+			this.MessageData[this.dataIndex + 0] = (byte)(value >> 24);
+			this.MessageData[this.dataIndex + 1] = (byte)(value >> 16);
+			this.MessageData[this.dataIndex + 2] = (byte)(value >> 8);
+			this.MessageData[this.dataIndex + 3] = (byte)value;
 			this.dataIndex += sizeof(uint);
 		}
 
