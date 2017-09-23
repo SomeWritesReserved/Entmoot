@@ -50,6 +50,7 @@
     <Compile Include="Source\Entity\EntityArray.cs" />
     <Compile Include="Source\Math\Vector3.cs" />
     <Compile Include="Source\Game\EntitySnapshot.cs" />
+    <Compile Include="Source\Networking\ListenServer.cs" />
     <Compile Include="Source\Networking\NetworkMessages.cs" />
     <Compile Include="Source\Networking\NetworkConnection.cs" />
     <Compile Include="Source\Networking\NetworkSerializers.cs" />
