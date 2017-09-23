@@ -34,7 +34,8 @@ namespace Entmoot.Engine
 	/// <summary>
 	/// Represents a connection between two local endpoints that communicate directly through memory.
 	/// </summary>
-	/// <remarks>This is not thread safe, it should only be used in a synchronous and sequential manner.</remarks>
+	/// <remarks>This is not thread safe, it should only be used in a synchronous and sequential manner.
+	/// This is designed to not generate garbage between either endpoint connections.</remarks>
 	public class LocalNetworkConnection : INetworkConnection
 	{
 		#region Fields
@@ -42,11 +43,11 @@ namespace Entmoot.Engine
 		/// <summary>The initial size for all the queues.</summary>
 		private const int initialMessageCapacity = 10;
 
-		/// <summary>The outgoing message to use for serialization and sending (there is only one since the use case is to request one, use it, then return it).</summary>
+		/// <summary>The outgoing message to use for serialization and sending (there is only one since the use case is to request exactly one, use it, then return it).</summary>
 		private readonly OutgoingMessage outgoingMessage;
 		/// <summary>The queue of messages that will be arriving next.</summary>
 		private readonly Queue<IncomingMessage> nextIncomingMessages;
-		/// <summary>The unused queue of messages that will be used to as a pool for next incoming messages.</summary>
+		/// <summary>The unused queue of messages that will be used as a pool for incoming messages that would arrive next.</summary>
 		private readonly Queue<IncomingMessage> unusedIncomingMessages;
 		/// <summary>The corresponding network connection that represents the opposite endpoint.</summary>
 		private LocalNetworkConnection pairedNetworkConnection;
@@ -108,6 +109,7 @@ namespace Entmoot.Engine
 		/// </summary>
 		public OutgoingMessage GetOutgoingMessageToSend()
 		{
+			this.outgoingMessage.Reset();
 			return this.outgoingMessage;
 		}
 
@@ -116,6 +118,7 @@ namespace Entmoot.Engine
 		/// </summary>
 		public void SendMessage(OutgoingMessage outgoingMessage)
 		{
+			if (this.pairedNetworkConnection == null) { return; }
 			IncomingMessage nextIncomingMessage = this.pairedNetworkConnection.unusedIncomingMessages.Dequeue();
 			nextIncomingMessage.Reset();
 			outgoingMessage.CopyTo(nextIncomingMessage);
