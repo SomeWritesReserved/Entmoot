@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Entmoot.Engine
 {
 	/// <summary>
-	/// A dumb client that connects to a server host which dictates the state of the simulation.
+	/// A dumb client that is connected to a server host which dictates the state of the game.
 	/// </summary>
 	/// <typeparam name="TCommandData">The type of data that will be sent to the server as a command.</typeparam>
 	public class GameClient<TCommandData>

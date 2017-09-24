@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Entmoot.Engine
 {
 	/// <summary>
-	/// An authoritative server that will host clients in a simulation of entities.
+	/// An authoritative game server that will host clients, taking input from them and updating them on the state of entities.
 	/// </summary>
 	/// <typeparam name="TCommandData">The type of data expected from clients as a command.</typeparam>
 	public class GameServer<TCommandData>
@@ -50,7 +50,7 @@ namespace Entmoot.Engine
 
 		/// <summary>Gets the current frame tick of the server.</summary>
 		public int FrameTick { get; private set; }
-		/// <summary>Gets the array of entities that are controlled and simulated by this server.</summary>
+		/// <summary>Gets the array of entities that are controlled and updated by this server.</summary>
 		public EntityArray EntityArray { get; }
 		/// <summary>Gets the collection of systems that will update entities.</summary>
 		public SystemCollection SystemCollection { get; }
