@@ -55,7 +55,7 @@ namespace Entmoot.TestGame
 				this.gameServer.EntityArray.TryCreateEntity(out Entity entity4);
 				entity4.AddComponent<PositionComponent>().Position = new Vector3(200, 350, 0);
 			}
-			this.gameServer.AddConnectedClient(this.clientServerNetworkConnection);
+			this.gameServer.AddClient(this.clientServerNetworkConnection);
 
 			this.clientServerNetworkConnection.GameClient = this.gameClient;
 			this.clientServerNetworkConnection.GameServer = this.gameServer;

@@ -19,7 +19,7 @@ namespace Entmoot.Engine
 		/// <summary>The ordered history of entity state snapshots taken over the past N frame ticks.</summary>
 		private readonly Queue<EntitySnapshot> entitySnapshotHistory;
 		/// <summary>The list of clients currently connected to this server.</summary>
-		private readonly List<ClientConnection> clients = new List<ClientConnection>(16);
+		private readonly List<ClientProxy> clients = new List<ClientProxy>(16);
 
 		#endregion Fields
 
@@ -60,11 +60,11 @@ namespace Entmoot.Engine
 		#region Methods
 
 		/// <summary>
-		/// Adds the given connection as a client to this server.
+		/// Adds the given network connection as a client to this server.
 		/// </summary>
-		public void AddConnectedClient(INetworkConnection clientNetworkConnection)
+		public void AddClient(INetworkConnection clientNetworkConnection)
 		{
-			this.clients.Add(new ClientConnection(this, clientNetworkConnection)
+			this.clients.Add(new ClientProxy(this, clientNetworkConnection)
 			{
 				CommandingEntityID = this.clients.Count,
 			});
@@ -77,7 +77,7 @@ namespace Entmoot.Engine
 		{
 			this.FrameTick++;
 
-			foreach (ClientConnection client in this.clients)
+			foreach (ClientProxy client in this.clients)
 			{
 				client.ProcessClientCommands(this.EntityArray);
 			}
@@ -91,7 +91,7 @@ namespace Entmoot.Engine
 
 			if (this.FrameTick % this.NetworkSendRate == 0)
 			{
-				foreach (ClientConnection client in this.clients)
+				foreach (ClientProxy client in this.clients)
 				{
 					client.SendServerUpdate(newEntitySnapshot);
 				}
@@ -101,7 +101,7 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Executes a given client command on behalf of the given client.
 		/// </summary>
-		private void executeClientCommand(ClientConnection client, ClientCommand<TCommandData> clientCommand)
+		private void executeClientCommand(ClientProxy client, ClientCommand<TCommandData> clientCommand)
 		{
 			// Make sure we have an entity to command, that the client thinks its commanding that same entity, and that the entity actually exists
 			if (client.CommandingEntityID != -1 && clientCommand.CommandingEntityID == client.CommandingEntityID && this.EntityArray.TryGetEntity(client.CommandingEntityID, out Entity commandingEntity))
@@ -115,17 +115,17 @@ namespace Entmoot.Engine
 		#region Nested Types
 
 		/// <summary>
-		/// Represents a connection to a single client of a server.
+		/// Represents a proxy of a single client of a server.
 		/// </summary>
-		public class ClientConnection
+		public class ClientProxy
 		{
 			#region Fields
 
-			/// <summary>The parent server that owns this client connection.</summary>
+			/// <summary>The parent server that owns this client proxy.</summary>
 			private readonly GameServer<TCommandData> parentServer;
 			/// <summary>The network connection that communicates to the client.</summary>
 			private readonly INetworkConnection clientNetworkConnection;
-			/// <summary></summary>
+			/// <summary>The history buffer used to temporarily store incoming client command data from a single message.</summary>
 			private readonly ClientCommand<TCommandData>[] deserializedClientCommandHistory;
 
 			#endregion Fields
@@ -135,7 +135,7 @@ namespace Entmoot.Engine
 			/// <summary>
 			/// Constructor.
 			/// </summary>
-			public ClientConnection(GameServer<TCommandData> parentServer, INetworkConnection clientNetworkConnection)
+			public ClientProxy(GameServer<TCommandData> parentServer, INetworkConnection clientNetworkConnection)
 			{
 				this.parentServer = parentServer;
 				this.clientNetworkConnection = clientNetworkConnection;
