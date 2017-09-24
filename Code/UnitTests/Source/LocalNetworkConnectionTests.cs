@@ -14,7 +14,7 @@ namespace Entmoot.UnitTests
 		#region Tests
 
 		[Test]
-		public void ListenServerTest_OneMessage()
+		public void LocalNetworkConnection_OneMessage()
 		{
 			LocalNetworkConnection localNetworkConnectionA = new LocalNetworkConnection(1300);
 			LocalNetworkConnection localNetworkConnectionB = localNetworkConnectionA.GetPairedNetworkConnection();
@@ -38,7 +38,7 @@ namespace Entmoot.UnitTests
 		}
 
 		[Test]
-		public void ListenServerTest_TwoMessages()
+		public void LocalNetworkConnection_TwoMessages()
 		{
 			LocalNetworkConnection localNetworkConnectionA = new LocalNetworkConnection(1300);
 			LocalNetworkConnection localNetworkConnectionB = localNetworkConnectionA.GetPairedNetworkConnection();

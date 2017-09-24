@@ -15,15 +15,13 @@ namespace Entmoot.Engine
 	{
 		#region Fields
 
-		/// <summary>The initial size for all the queues.</summary>
-		private const int initialMessageCapacity = 10;
+		/// <summary>The default initial size for the incoming message queue.</summary>
+		private const int initialMessageQueueCapacity = 10;
 
 		/// <summary>The outgoing message to use for serialization and sending (there is only one since the use case is to request exactly one, use it, then return it).</summary>
 		private readonly OutgoingMessage outgoingMessage;
-		/// <summary>The queue of messages that will be arriving next.</summary>
-		private readonly Queue<IncomingMessage> nextIncomingMessages;
-		/// <summary>The unused queue of messages that will be used as a pool for incoming messages that would arrive next.</summary>
-		private readonly Queue<IncomingMessage> unusedIncomingMessages;
+		/// <summary>The queue of messages that have arrived at this end point.</summary>
+		private readonly IncomingMessageQueue incomingMessageQueue;
 		/// <summary>The corresponding network connection that represents the opposite endpoint.</summary>
 		private LocalNetworkConnection pairedNetworkConnection;
 
@@ -39,12 +37,7 @@ namespace Entmoot.Engine
 			this.MaxMessageSize = maxMessageSize;
 
 			this.outgoingMessage = new OutgoingMessage(new byte[this.MaxMessageSize]);
-			this.nextIncomingMessages = new Queue<IncomingMessage>(LocalNetworkConnection.initialMessageCapacity);
-			this.unusedIncomingMessages = new Queue<IncomingMessage>(LocalNetworkConnection.initialMessageCapacity);
-			for (int i = 0; i < LocalNetworkConnection.initialMessageCapacity; i++)
-			{
-				this.unusedIncomingMessages.Enqueue(new IncomingMessage(new byte[this.MaxMessageSize]));
-			}
+			this.incomingMessageQueue = new IncomingMessageQueue(this.MaxMessageSize, LocalNetworkConnection.initialMessageQueueCapacity);
 		}
 
 		/// <summary>
@@ -73,10 +66,7 @@ namespace Entmoot.Engine
 		/// </summary>
 		public IncomingMessage GetNextIncomingMessage()
 		{
-			if (this.nextIncomingMessages.Count == 0) { return null; }
-			IncomingMessage nextIncomingMessage = this.nextIncomingMessages.Dequeue();
-			this.unusedIncomingMessages.Enqueue(nextIncomingMessage);
-			return nextIncomingMessage;
+			return this.incomingMessageQueue.GetNextIncomingMessage();
 		}
 
 		/// <summary>
@@ -94,10 +84,8 @@ namespace Entmoot.Engine
 		public void SendMessage(OutgoingMessage outgoingMessage)
 		{
 			if (this.pairedNetworkConnection == null) { return; }
-			IncomingMessage nextIncomingMessage = this.pairedNetworkConnection.unusedIncomingMessages.Dequeue();
-			nextIncomingMessage.Reset();
+			IncomingMessage nextIncomingMessage = this.pairedNetworkConnection.incomingMessageQueue.GetMessageToAddToQueue();
 			outgoingMessage.CopyTo(nextIncomingMessage);
-			this.pairedNetworkConnection.nextIncomingMessages.Enqueue(nextIncomingMessage);
 		}
 
 		/// <summary>
