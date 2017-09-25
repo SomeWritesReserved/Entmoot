@@ -38,6 +38,16 @@ namespace Entmoot.Engine
 		/// </summary>
 		public byte[] MessageData { get; }
 
+		/// <summary>
+		/// Gets the length of this message (the amount of data that has been written to it).
+		/// </summary>
+		public int Length { get; private set; }
+
+		/// <summary>
+		/// Gets the current position of the read head (showing which data will be read next).
+		/// </summary>
+		public int Position { get { return this.dataIndex; } }
+
 		#endregion Properties
 
 		#region Methods
@@ -48,6 +58,27 @@ namespace Entmoot.Engine
 		public void Reset()
 		{
 			this.dataIndex = 0;
+			this.Length = 0;
+		}
+
+		/// <summary>
+		/// Copies data from an outgoing message to this message (simulating its data arriving as an incoming message).
+		/// </summary>
+		public void CopyFrom(OutgoingMessage outgoingMessage)
+		{
+			this.Reset();
+			this.Length = outgoingMessage.Length;
+			Array.Copy(outgoingMessage.MessageData, this.MessageData, this.Length);
+		}
+
+		/// <summary>
+		/// Copies data from a binary source to this message.
+		/// </summary>
+		public void CopyFrom(byte[] data, int numberOfBytes)
+		{
+			this.Reset();
+			this.Length = numberOfBytes;
+			Array.Copy(data, this.MessageData, this.Length);
 		}
 
 		/// <summary>
@@ -189,14 +220,6 @@ namespace Entmoot.Engine
 		public void Reset()
 		{
 			this.dataIndex = 0;
-		}
-
-		/// <summary>
-		/// Copies this message's data to another message.
-		/// </summary>
-		public void CopyTo(IncomingMessage incomingMessage)
-		{
-			Array.Copy(this.MessageData, incomingMessage.MessageData, Math.Min(this.MessageData.Length, incomingMessage.MessageData.Length));
 		}
 
 		/// <summary>

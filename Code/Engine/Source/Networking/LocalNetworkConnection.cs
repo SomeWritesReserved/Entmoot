@@ -85,7 +85,7 @@ namespace Entmoot.Engine
 		{
 			if (this.pairedNetworkConnection == null) { return; }
 			IncomingMessage nextIncomingMessage = this.pairedNetworkConnection.incomingMessageQueue.GetMessageToAddToQueue();
-			outgoingMessage.CopyTo(nextIncomingMessage);
+			nextIncomingMessage.CopyFrom(outgoingMessage);
 		}
 
 		/// <summary>
