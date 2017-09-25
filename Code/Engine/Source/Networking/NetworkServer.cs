@@ -237,6 +237,11 @@ namespace Entmoot.Engine
 			/// </summary>
 			public ClientState ClientState { get; private set; }
 
+			/// <summary>
+			/// Gets whether or not this client connection is actually connected to another endpoint.
+			/// </summary>
+			public bool IsConnected { get { return this.ClientState != ClientState.Disconnected; } }
+
 			#endregion Properties
 
 			#region Methods
@@ -249,6 +254,7 @@ namespace Entmoot.Engine
 				this.ClientState = ClientState.Disconnected;
 				this.clientEndPoint.Address = IPAddress.None;
 				this.clientEndPoint.Port = 0;
+				this.messageBuffer.Clear();
 			}
 
 			/// <summary>

@@ -97,6 +97,19 @@ namespace Entmoot.Engine
 			return this.outgoingMessage;
 		}
 
+		/// <summary>
+		/// Clears this buffer to start from scratch (clears all incoming messages).
+		/// </summary>
+		public void Clear()
+		{
+			while (this.nextIncomingMessages.Count > 0)
+			{
+				IncomingMessage incomingMessage = this.nextIncomingMessages.Dequeue();
+				incomingMessage.Clear();
+				this.pooledIncomingMessages.Enqueue(incomingMessage);
+			}
+		}
+
 		#endregion Methods
 	}
 }
