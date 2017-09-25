@@ -60,6 +60,7 @@
     <Compile Include="Source\Game\GameClient.cs" />
     <Compile Include="Source\Game\ClientCommand.cs" />
     <Compile Include="Source\Game\GameServer.cs" />
+    <Compile Include="Source\Networking\NetworkServer.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

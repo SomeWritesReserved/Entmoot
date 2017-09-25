@@ -10,6 +10,7 @@ namespace Entmoot.Engine
 	/// <summary>
 	/// An authoritative game server that will host clients, taking input from them and updating them on the state of entities.
 	/// </summary>
+	/// <remarks>This class does not manage the actual network connections, it only handles updating connected clients.</remarks>
 	/// <typeparam name="TCommandData">The type of data expected from clients as a command.</typeparam>
 	public class GameServer<TCommandData>
 		where TCommandData : struct, ICommandData

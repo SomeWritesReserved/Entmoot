@@ -85,13 +85,13 @@ namespace Entmoot.Engine
 		}
 
 		/// <summary>
-		/// Copies data from a binary source to this message.
+		/// Copies data from another incoming message (only copying the unread data that is left in the other message).
 		/// </summary>
-		public void CopyFrom(byte[] data, int numberOfBytes)
+		public void CopyFrom(IncomingMessage other)
 		{
 			this.Clear();
-			this.Length = numberOfBytes;
-			Array.Copy(data, this.MessageData, this.Length);
+			this.Length = other.BytesLeft;
+			Array.Copy(other.MessageData, other.Position, this.MessageData, 0, this.Length);
 		}
 
 		/// <summary>
