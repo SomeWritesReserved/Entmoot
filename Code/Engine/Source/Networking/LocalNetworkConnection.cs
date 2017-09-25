@@ -16,12 +16,10 @@ namespace Entmoot.Engine
 		#region Fields
 
 		/// <summary>The default initial size for the incoming message queue.</summary>
-		private const int initialMessageQueueCapacity = 10;
+		private const int initialMessageQueueCapacity = 2;
 
-		/// <summary>The outgoing message to use for serialization and sending (there is only one since the use case is to request exactly one, use it, then return it).</summary>
-		private readonly OutgoingMessage outgoingMessage;
-		/// <summary>The queue of messages that have arrived at this end point.</summary>
-		private readonly IncomingMessageQueue incomingMessageQueue;
+		/// <summary>The message buffer for creating outgoing messages and queueing/reading incoming messages.</summary>
+		private readonly MessageBuffer messageBuffer;
 		/// <summary>The corresponding network connection that represents the opposite endpoint.</summary>
 		private LocalNetworkConnection pairedNetworkConnection;
 
@@ -35,9 +33,7 @@ namespace Entmoot.Engine
 		public LocalNetworkConnection(int maxMessageSize)
 		{
 			this.MaxMessageSize = maxMessageSize;
-
-			this.outgoingMessage = new OutgoingMessage(new byte[this.MaxMessageSize]);
-			this.incomingMessageQueue = new IncomingMessageQueue(this.MaxMessageSize, LocalNetworkConnection.initialMessageQueueCapacity);
+			this.messageBuffer = new MessageBuffer(this.MaxMessageSize, LocalNetworkConnection.initialMessageQueueCapacity);
 		}
 
 		/// <summary>
@@ -66,7 +62,7 @@ namespace Entmoot.Engine
 		/// </summary>
 		public IncomingMessage GetNextIncomingMessage()
 		{
-			return this.incomingMessageQueue.GetNextIncomingMessage();
+			return this.messageBuffer.GetNextIncomingMessage();
 		}
 
 		/// <summary>
@@ -74,8 +70,7 @@ namespace Entmoot.Engine
 		/// </summary>
 		public OutgoingMessage GetOutgoingMessageToSend()
 		{
-			this.outgoingMessage.Reset();
-			return this.outgoingMessage;
+			return this.messageBuffer.CreateOutgoingMessage();
 		}
 
 		/// <summary>
@@ -84,7 +79,7 @@ namespace Entmoot.Engine
 		public void SendMessage(OutgoingMessage outgoingMessage)
 		{
 			if (this.pairedNetworkConnection == null) { return; }
-			IncomingMessage nextIncomingMessage = this.pairedNetworkConnection.incomingMessageQueue.GetMessageToAddToQueue();
+			IncomingMessage nextIncomingMessage = this.pairedNetworkConnection.messageBuffer.GetMessageToAddToIncomingQueue();
 			nextIncomingMessage.CopyFrom(outgoingMessage);
 		}
 

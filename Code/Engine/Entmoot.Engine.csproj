@@ -51,7 +51,7 @@
     <Compile Include="Source\Math\Vector3.cs" />
     <Compile Include="Source\Game\EntitySnapshot.cs" />
     <Compile Include="Source\Game\INetworkConnection.cs" />
-    <Compile Include="Source\Networking\IncomingMessageQueue.cs" />
+    <Compile Include="Source\Networking\MessageBuffer.cs" />
     <Compile Include="Source\Networking\ListenServer.cs" />
     <Compile Include="Source\Networking\NetworkMessages.cs" />
     <Compile Include="Source\Networking\LocalNetworkConnection.cs" />
