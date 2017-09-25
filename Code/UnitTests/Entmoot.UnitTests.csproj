@@ -44,12 +44,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Source\EntityTests.cs" />
-    <Compile Include="Source\LocalNetworkConnectionTests.cs" />
-    <Compile Include="Source\NetworkMessageTests.cs" />
-    <Compile Include="Source\NetworkClientTests.cs" />
-    <Compile Include="Source\NetworkCommonTests.cs" />
-    <Compile Include="Source\StateArrayTests.cs" />
+    <Compile Include="Source\Entity\EntityTests.cs" />
+    <Compile Include="Source\Networking\LocalNetworkConnectionTests.cs" />
+    <Compile Include="Source\Networking\MessageTests.cs" />
+    <Compile Include="Source\Game\GameClientTests.cs" />
+    <Compile Include="Source\Game\UpdateSerializersTests.cs" />
+    <Compile Include="Source\Core\StateArrayTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Engine\Entmoot.Engine.csproj">
