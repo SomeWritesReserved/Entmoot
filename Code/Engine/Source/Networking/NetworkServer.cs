@@ -141,8 +141,6 @@ namespace Entmoot.Engine
 		/// </summary>
 		private void processClientConnectRequest(IncomingMessage incomingMessage, IPEndPoint endPoint)
 		{
-			// Client is already connected or not enough incoming data, ignore
-			if (this.endPointToClientID.ContainsKey(endPoint)) { return; }
 			if (incomingMessage.BytesLeft < 9) { return; }
 
 			int clientAppIDHash = incomingMessage.ReadInt32();
@@ -273,6 +271,9 @@ namespace Entmoot.Engine
 				this.clientEndPoint.Port = endPoint.Port;
 			}
 
+			/// <summary>
+			/// Copies the given incoming message into this client's next incoming message queue.
+			/// </summary>
 			public void EnqueueIncomingMessage(IncomingMessage incomingMessage)
 			{
 				IncomingMessage clientIncomingMessage = this.messageBuffer.GetMessageToAddToIncomingQueue();

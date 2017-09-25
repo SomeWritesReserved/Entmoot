@@ -22,8 +22,7 @@ namespace Entmoot.Engine
 		{
 			LocalNetworkConnection clientNetworkConnection = new LocalNetworkConnection(maxMessageSize);
 			LocalNetworkConnection serverNetworkConnection = clientNetworkConnection.GetPairedNetworkConnection();
-			this.GameServer = new GameServer<TCommandData>(maxEntityHistory, entityCapacity, componentsDefinition, serverSystems);
-			this.GameServer.AddClient(clientNetworkConnection);
+			this.GameServer = new GameServer<TCommandData>(new[] { clientNetworkConnection }, maxEntityHistory, entityCapacity, componentsDefinition, serverSystems);
 			this.GameClient = new GameClient<TCommandData>(serverNetworkConnection, maxEntityHistory, entityCapacity, componentsDefinition, clientSystems);
 		}
 

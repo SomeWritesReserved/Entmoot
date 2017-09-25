@@ -44,7 +44,7 @@ namespace Entmoot.TestGame
 			componentsDefinition.RegisterComponentType<PositionComponent>();
 
 			this.gameClient = new GameClient<TestCommandData>(this.clientServerNetworkConnection, 10, 5, componentsDefinition, new ISystem[0]);
-			this.gameServer = new GameServer<TestCommandData>(10, 5, componentsDefinition, new ISystem[] { new TestSystem(1) });
+			this.gameServer = new GameServer<TestCommandData>(new[] { this.clientServerNetworkConnection }, 10, 5, componentsDefinition, new ISystem[] { new TestSystem(1) });
 			{
 				this.gameServer.EntityArray.TryCreateEntity(out Entity entity1);
 				entity1.AddComponent<PositionComponent>().Position = new Vector3(100, 50, 0);
@@ -55,7 +55,6 @@ namespace Entmoot.TestGame
 				this.gameServer.EntityArray.TryCreateEntity(out Entity entity4);
 				entity4.AddComponent<PositionComponent>().Position = new Vector3(200, 350, 0);
 			}
-			this.gameServer.AddClient(this.clientServerNetworkConnection);
 
 			this.clientServerNetworkConnection.GameClient = this.gameClient;
 			this.clientServerNetworkConnection.GameServer = this.gameServer;

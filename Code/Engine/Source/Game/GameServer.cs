@@ -19,8 +19,8 @@ namespace Entmoot.Engine
 
 		/// <summary>The ordered history of entity state snapshots taken over the past N frame ticks.</summary>
 		private readonly Queue<EntitySnapshot> entitySnapshotHistory;
-		/// <summary>The list of clients currently connected to this server.</summary>
-		private readonly List<ClientProxy> clients = new List<ClientProxy>(16);
+		/// <summary>The collection of client proxies (all client proxies exist all the time even if no client is connected for that client ID).</summary>
+		private readonly ClientProxy[] clients;
 
 		#endregion Fields
 
@@ -29,7 +29,7 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		public GameServer(int maxEntityHistory, int entityCapacity, ComponentsDefinition componentsDefinition, IEnumerable<ISystem> systems)
+		public GameServer(IList<INetworkConnection> clientNetworkConnections, int maxEntityHistory, int entityCapacity, ComponentsDefinition componentsDefinition, IEnumerable<ISystem> systems)
 		{
 			this.EntityArray = new EntityArray(entityCapacity, componentsDefinition);
 			this.SystemCollection = new SystemCollection(systems);
@@ -39,6 +39,13 @@ namespace Entmoot.Engine
 			for (int i = 0; i < maxEntityHistory; i++)
 			{
 				this.entitySnapshotHistory.Enqueue(new EntitySnapshot(entityCapacity, componentsDefinition));
+			}
+
+			// Create all the client proxies now, bound directly to the client network connections
+			this.clients = new ClientProxy[clientNetworkConnections.Count];
+			for (int clientID = 0; clientID < clientNetworkConnections.Count; clientID++)
+			{
+				this.clients[clientID] = new ClientProxy(this, clientNetworkConnections[clientID]);
 			}
 		}
 
@@ -59,17 +66,6 @@ namespace Entmoot.Engine
 		#endregion Properties
 
 		#region Methods
-
-		/// <summary>
-		/// Adds the given network connection as a client to this server.
-		/// </summary>
-		public void AddClient(INetworkConnection clientNetworkConnection)
-		{
-			this.clients.Add(new ClientProxy(this, clientNetworkConnection)
-			{
-				CommandingEntityID = this.clients.Count,
-			});
-		}
 
 		/// <summary>
 		/// Updates the server state by processing client input, updating entities, and sending state to clients.
@@ -165,14 +161,6 @@ namespace Entmoot.Engine
 			#region Methods
 
 			/// <summary>
-			/// Sends the client an update of the given entity state and other information.
-			/// </summary>
-			public void SendServerUpdate(EntitySnapshot entitySnapshot)
-			{
-				ServerUpdateSerializer.Send(this.clientNetworkConnection, entitySnapshot, this.LatestClientTickReceived, this.CommandingEntityID);
-			}
-
-			/// <summary>
 			/// Checks for and processes any new commands coming in from the client.
 			/// </summary>
 			public void ProcessClientCommands(EntityArray entityArray)
@@ -196,6 +184,14 @@ namespace Entmoot.Engine
 						if (this.LatestClientTickReceived < clientCommand.ClientFrameTick) { this.LatestClientTickReceived = clientCommand.ClientFrameTick; }
 					}
 				}
+			}
+
+			/// <summary>
+			/// Sends the client an update of the given entity state and other information.
+			/// </summary>
+			public void SendServerUpdate(EntitySnapshot entitySnapshot)
+			{
+				ServerUpdateSerializer.Send(this.clientNetworkConnection, entitySnapshot, this.LatestClientTickReceived, this.CommandingEntityID);
 			}
 
 			#endregion Methods
