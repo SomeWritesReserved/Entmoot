@@ -84,7 +84,7 @@ namespace Entmoot.Engine
 				pooledIncomingMessage = this.pooledIncomingMessages.Dequeue();
 			}
 			this.nextIncomingMessages.Enqueue(pooledIncomingMessage);
-			pooledIncomingMessage.Reset();
+			pooledIncomingMessage.Clear();
 			return pooledIncomingMessage;
 		}
 

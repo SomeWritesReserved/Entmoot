@@ -58,9 +58,17 @@ namespace Entmoot.Engine
 		#region Methods
 
 		/// <summary>
-		/// Resets this message so begins reading from the beginning.
+		/// Resets this message so it begins reading from the beginning.
 		/// </summary>
 		public void Reset()
+		{
+			this.dataIndex = 0;
+		}
+
+		/// <summary>
+		/// Clears this message so it represents an empty message.
+		/// </summary>
+		public void Clear()
 		{
 			this.dataIndex = 0;
 			this.Length = 0;
@@ -71,7 +79,7 @@ namespace Entmoot.Engine
 		/// </summary>
 		public void CopyFrom(OutgoingMessage outgoingMessage)
 		{
-			this.Reset();
+			this.Clear();
 			this.Length = outgoingMessage.Length;
 			Array.Copy(outgoingMessage.MessageData, this.MessageData, this.Length);
 		}
@@ -81,7 +89,7 @@ namespace Entmoot.Engine
 		/// </summary>
 		public void CopyFrom(byte[] data, int numberOfBytes)
 		{
-			this.Reset();
+			this.Clear();
 			this.Length = numberOfBytes;
 			Array.Copy(data, this.MessageData, this.Length);
 		}
@@ -232,7 +240,7 @@ namespace Entmoot.Engine
 		#region Methods
 
 		/// <summary>
-		/// Resets this message so begins writing at the beginning.
+		/// Resets this message so it begins writing at the beginning.
 		/// </summary>
 		public void Reset()
 		{
