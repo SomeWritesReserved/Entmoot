@@ -41,12 +41,17 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Gets the length of this message (the amount of data that has been written to it).
 		/// </summary>
-		public int Length { get; private set; }
+		public int Length { get; set; }
 
 		/// <summary>
 		/// Gets the current position of the read head (showing which data will be read next).
 		/// </summary>
 		public int Position { get { return this.dataIndex; } }
+
+		/// <summary>
+		/// Gets the number of bytes left in the message that can still be read.
+		/// </summary>
+		public int BytesLeft { get { return this.Length - this.Position; } }
 
 		#endregion Properties
 
@@ -158,17 +163,29 @@ namespace Entmoot.Engine
 		}
 
 		/// <summary>
-		/// Reads a string from the message.
+		/// Reads a string from the message (maximum of 256 characters).
 		/// </summary>
 		public string ReadString()
 		{
-			int length = this.ReadInt32();
+			int length = this.ReadByte();
 			StringBuilder stringBuilder = new StringBuilder(length);
 			for (int i = 0; i < length; i++)
 			{
 				stringBuilder.Append((char)this.ReadByte());
 			}
 			return stringBuilder.ToString();
+		}
+
+		/// <summary>
+		/// Reads a string from the message and appends it to the string builder (maximum of 256 characters).
+		/// </summary>
+		public void ReadString(StringBuilder stringBuilder)
+		{
+			int length = this.ReadByte();
+			for (int i = 0; i < length; i++)
+			{
+				stringBuilder.Append((char)this.ReadByte());
+			}
 		}
 
 		#endregion Methods
@@ -306,11 +323,23 @@ namespace Entmoot.Engine
 		}
 
 		/// <summary>
-		/// Writes a string to the message.
+		/// Writes a string to the message (maximum of 256 characters).
 		/// </summary>
 		public void Write(string value)
 		{
-			this.Write(value.Length);
+			this.Write((byte)value.Length);
+			for (int i = 0; i < value.Length; i++)
+			{
+				this.Write((byte)value[i]);
+			}
+		}
+
+		/// <summary>
+		/// Writes a string to the message (maximum of 256 characters).
+		/// </summary>
+		public void Write(StringBuilder value)
+		{
+			this.Write((byte)value.Length);
 			for (int i = 0; i < value.Length; i++)
 			{
 				this.Write((byte)value[i]);

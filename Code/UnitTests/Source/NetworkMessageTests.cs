@@ -183,12 +183,129 @@ namespace Entmoot.UnitTests
 			outgoingMessage.Write("");
 			outgoingMessage.Write("yyyyyyyyyes");
 			outgoingMessage.Write("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~!@#$%^&*()-_=+[{]}\\|;:'\"/?.>,<\r\n\t");
-			Assert.AreEqual(124, outgoingMessage.Length);
+			Assert.AreEqual(112, outgoingMessage.Length);
 			IncomingMessage incomingMessage = new IncomingMessage(data);
 			Assert.AreEqual(string.Empty, incomingMessage.ReadString());
 			Assert.AreEqual("", incomingMessage.ReadString());
 			Assert.AreEqual("yyyyyyyyyes", incomingMessage.ReadString());
 			Assert.AreEqual("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~!@#$%^&*()-_=+[{]}\\|;:'\"/?.>,<\r\n\t", incomingMessage.ReadString());
+		}
+
+		[Test]
+		public void OutgoingAndIncoming_StringBuilder()
+		{
+			byte[] data = new byte[512];
+			OutgoingMessage outgoingMessage = new OutgoingMessage(data);
+			Assert.AreEqual(0, outgoingMessage.Length);
+			outgoingMessage.Write(new StringBuilder());
+			outgoingMessage.Write(new StringBuilder(""));
+			outgoingMessage.Write(new StringBuilder("yyyyyyyyyes"));
+			outgoingMessage.Write(new StringBuilder("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~!@#$%^&*()-_=+[{]}\\|;:'\"/?.>,<\r\n\t"));
+			Assert.AreEqual(112, outgoingMessage.Length);
+			IncomingMessage incomingMessage = new IncomingMessage(data);
+			{
+				StringBuilder stringBuilder = new StringBuilder(16);
+				incomingMessage.ReadString(stringBuilder);
+				Assert.AreEqual(string.Empty, stringBuilder.ToString());
+			}
+			{
+				StringBuilder stringBuilder = new StringBuilder(16);
+				incomingMessage.ReadString(stringBuilder);
+				Assert.AreEqual("", stringBuilder.ToString());
+			}
+			{
+				StringBuilder stringBuilder = new StringBuilder(16);
+				incomingMessage.ReadString(stringBuilder);
+				Assert.AreEqual("yyyyyyyyyes", stringBuilder.ToString());
+			}
+			{
+				StringBuilder stringBuilder = new StringBuilder(16);
+				incomingMessage.ReadString(stringBuilder);
+				Assert.AreEqual("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~!@#$%^&*()-_=+[{]}\\|;:'\"/?.>,<\r\n\t", stringBuilder.ToString());
+			}
+		}
+
+		[Test]
+		public void OutgoingAndIncoming_StringBuilderAppend()
+		{
+			byte[] data = new byte[512];
+			OutgoingMessage outgoingMessage = new OutgoingMessage(data);
+			Assert.AreEqual(0, outgoingMessage.Length);
+			outgoingMessage.Write(new StringBuilder());
+			outgoingMessage.Write(new StringBuilder(""));
+			outgoingMessage.Write(new StringBuilder("yyyyyyyyyes"));
+			outgoingMessage.Write(new StringBuilder("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~!@#$%^&*()-_=+[{]}\\|;:'\"/?.>,<\r\n\t"));
+			Assert.AreEqual(112, outgoingMessage.Length);
+			IncomingMessage incomingMessage = new IncomingMessage(data);
+			StringBuilder stringBuilder = new StringBuilder(16);
+			{
+				incomingMessage.ReadString(stringBuilder);
+				Assert.AreEqual(string.Empty, stringBuilder.ToString());
+			}
+			{
+				incomingMessage.ReadString(stringBuilder);
+				Assert.AreEqual("", stringBuilder.ToString());
+			}
+			{
+				incomingMessage.ReadString(stringBuilder);
+				Assert.AreEqual("yyyyyyyyyes", stringBuilder.ToString());
+			}
+			{
+				incomingMessage.ReadString(stringBuilder);
+				Assert.AreEqual("yyyyyyyyyes" + "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~!@#$%^&*()-_=+[{]}\\|;:'\"/?.>,<\r\n\t", stringBuilder.ToString());
+			}
+		}
+
+		[Test]
+		public void OutgoingAndIncoming_StringBuilderToString()
+		{
+			byte[] data = new byte[512];
+			OutgoingMessage outgoingMessage = new OutgoingMessage(data);
+			Assert.AreEqual(0, outgoingMessage.Length);
+			outgoingMessage.Write(new StringBuilder());
+			outgoingMessage.Write(new StringBuilder(""));
+			outgoingMessage.Write(new StringBuilder("yyyyyyyyyes"));
+			outgoingMessage.Write(new StringBuilder("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~!@#$%^&*()-_=+[{]}\\|;:'\"/?.>,<\r\n\t"));
+			Assert.AreEqual(112, outgoingMessage.Length);
+			IncomingMessage incomingMessage = new IncomingMessage(data);
+			Assert.AreEqual(string.Empty, incomingMessage.ReadString());
+			Assert.AreEqual("", incomingMessage.ReadString());
+			Assert.AreEqual("yyyyyyyyyes", incomingMessage.ReadString());
+			Assert.AreEqual("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~!@#$%^&*()-_=+[{]}\\|;:'\"/?.>,<\r\n\t", incomingMessage.ReadString());
+		}
+
+		[Test]
+		public void OutgoingAndIncoming_StringToStringBuilder()
+		{
+			byte[] data = new byte[512];
+			OutgoingMessage outgoingMessage = new OutgoingMessage(data);
+			Assert.AreEqual(0, outgoingMessage.Length);
+			outgoingMessage.Write(string.Empty);
+			outgoingMessage.Write("");
+			outgoingMessage.Write("yyyyyyyyyes");
+			outgoingMessage.Write("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~!@#$%^&*()-_=+[{]}\\|;:'\"/?.>,<\r\n\t");
+			Assert.AreEqual(112, outgoingMessage.Length);
+			IncomingMessage incomingMessage = new IncomingMessage(data);
+			{
+				StringBuilder stringBuilder = new StringBuilder(16);
+				incomingMessage.ReadString(stringBuilder);
+				Assert.AreEqual(string.Empty, stringBuilder.ToString());
+			}
+			{
+				StringBuilder stringBuilder = new StringBuilder(16);
+				incomingMessage.ReadString(stringBuilder);
+				Assert.AreEqual("", stringBuilder.ToString());
+			}
+			{
+				StringBuilder stringBuilder = new StringBuilder(16);
+				incomingMessage.ReadString(stringBuilder);
+				Assert.AreEqual("yyyyyyyyyes", stringBuilder.ToString());
+			}
+			{
+				StringBuilder stringBuilder = new StringBuilder(16);
+				incomingMessage.ReadString(stringBuilder);
+				Assert.AreEqual("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~!@#$%^&*()-_=+[{]}\\|;:'\"/?.>,<\r\n\t", stringBuilder.ToString());
+			}
 		}
 
 		#endregion Tests
