@@ -14,82 +14,104 @@ namespace Entmoot.UnitTests
 		#region Tests
 
 		[Test]
+		public void OutgoingMessage_Reset()
+		{
+			byte[] data = new byte[256];
+			OutgoingMessage outgoingMessage = new OutgoingMessage(data);
+			outgoingMessage.Write(1234.555f);
+			outgoingMessage.Write(1200);
+			Assert.AreEqual(8, outgoingMessage.Length);
+			outgoingMessage.Reset();
+			Assert.AreEqual(0, outgoingMessage.Length);
+		}
+
+		[Test]
 		public void OutgoingAndIncoming_Byte()
 		{
 			byte[] data = new byte[256];
 			OutgoingMessage outgoingMessage = new OutgoingMessage(data);
-			for (byte value = byte.MinValue; value < byte.MaxValue; value++)
+			Assert.AreEqual(0, outgoingMessage.Length);
+			for (int value = byte.MinValue; value <= byte.MaxValue; value++)
 			{
-				outgoingMessage.Write(value);
+				outgoingMessage.Write((byte)value);
 			}
+			Assert.AreEqual(data.Length, outgoingMessage.Length);
 			IncomingMessage incomingMessage = new IncomingMessage(data);
-			for (byte value = byte.MinValue; value < byte.MaxValue; value++)
+			for (int value = byte.MinValue; value < byte.MaxValue; value++)
 			{
-				Assert.AreEqual(value, incomingMessage.ReadByte());
+				Assert.AreEqual((byte)value, incomingMessage.ReadByte());
 			}
 		}
 
 		[Test]
 		public void OutgoingAndIncoming_Int16()
 		{
-			byte[] data = new byte[257 * sizeof(short)];
+			byte[] data = new byte[258 * sizeof(short)];
 			OutgoingMessage outgoingMessage = new OutgoingMessage(data);
-			for (short value = short.MinValue; value < short.MaxValue; value += 255)
+			Assert.AreEqual(0, outgoingMessage.Length);
+			for (int value = short.MinValue; value <= short.MaxValue; value += 255)
 			{
-				outgoingMessage.Write(value);
+				outgoingMessage.Write((short)value);
 			}
+			Assert.AreEqual(data.Length, outgoingMessage.Length);
 			IncomingMessage incomingMessage = new IncomingMessage(data);
-			for (short value = short.MinValue; value < short.MaxValue; value += 255)
+			for (int value = short.MinValue; value <= short.MaxValue; value += 255)
 			{
-				Assert.AreEqual(value, incomingMessage.ReadInt16());
+				Assert.AreEqual((short)value, incomingMessage.ReadInt16());
 			}
 		}
 
 		[Test]
 		public void OutgoingAndIncoming_UInt16()
 		{
-			byte[] data = new byte[257 * sizeof(ushort)];
+			byte[] data = new byte[258 * sizeof(ushort)];
 			OutgoingMessage outgoingMessage = new OutgoingMessage(data);
-			for (ushort value = ushort.MinValue; value < ushort.MaxValue; value += 255)
+			Assert.AreEqual(0, outgoingMessage.Length);
+			for (uint value = ushort.MinValue; value <= ushort.MaxValue; value += 255)
 			{
-				outgoingMessage.Write(value);
+				outgoingMessage.Write((ushort)value);
 			}
+			Assert.AreEqual(data.Length, outgoingMessage.Length);
 			IncomingMessage incomingMessage = new IncomingMessage(data);
-			for (ushort value = ushort.MinValue; value < ushort.MaxValue; value += 255)
+			for (uint value = ushort.MinValue; value <= ushort.MaxValue; value += 255)
 			{
-				Assert.AreEqual(value, incomingMessage.ReadUInt16());
+				Assert.AreEqual((ushort)value, incomingMessage.ReadUInt16());
 			}
 		}
 
 		[Test]
 		public void OutgoingAndIncoming_Int32()
 		{
-			byte[] data = new byte[257 * sizeof(int)];
+			byte[] data = new byte[258 * sizeof(int)];
 			OutgoingMessage outgoingMessage = new OutgoingMessage(data);
-			for (int value = int.MinValue; value < int.MaxValue; value += 16711935)
+			Assert.AreEqual(0, outgoingMessage.Length);
+			for (long value = int.MinValue; value <= int.MaxValue; value += 16711935)
 			{
-				outgoingMessage.Write(value);
+				outgoingMessage.Write((int)value);
 			}
+			Assert.AreEqual(data.Length, outgoingMessage.Length);
 			IncomingMessage incomingMessage = new IncomingMessage(data);
-			for (int value = int.MinValue; value < int.MaxValue; value += 16711935)
+			for (long value = int.MinValue; value <= int.MaxValue; value += 16711935)
 			{
-				Assert.AreEqual(value, incomingMessage.ReadInt32());
+				Assert.AreEqual((int)value, incomingMessage.ReadInt32());
 			}
 		}
 
 		[Test]
 		public void OutgoingAndIncoming_UInt32()
 		{
-			byte[] data = new byte[257 * sizeof(uint)];
+			byte[] data = new byte[258 * sizeof(uint)];
 			OutgoingMessage outgoingMessage = new OutgoingMessage(data);
-			for (uint value = uint.MinValue; value < uint.MaxValue; value += 16711935)
+			Assert.AreEqual(0, outgoingMessage.Length);
+			for (ulong value = uint.MinValue; value <= uint.MaxValue; value += 16711935)
 			{
-				outgoingMessage.Write(value);
+				outgoingMessage.Write((uint)value);
 			}
+			Assert.AreEqual(data.Length, outgoingMessage.Length);
 			IncomingMessage incomingMessage = new IncomingMessage(data);
-			for (uint value = uint.MinValue; value < uint.MaxValue; value += 16711935)
+			for (ulong value = uint.MinValue; value <= uint.MaxValue; value += 16711935)
 			{
-				Assert.AreEqual(value, incomingMessage.ReadUInt32());
+				Assert.AreEqual((uint)value, incomingMessage.ReadUInt32());
 			}
 		}
 
@@ -98,6 +120,7 @@ namespace Entmoot.UnitTests
 		{
 			byte[] data = new byte[15 * sizeof(float)];
 			OutgoingMessage outgoingMessage = new OutgoingMessage(data);
+			Assert.AreEqual(0, outgoingMessage.Length);
 			outgoingMessage.Write(0.0f);
 			outgoingMessage.Write(-0.0f);
 			outgoingMessage.Write(10.0f);
@@ -113,6 +136,7 @@ namespace Entmoot.UnitTests
 			outgoingMessage.Write(Single.NegativeInfinity);
 			outgoingMessage.Write(Single.PositiveInfinity);
 			outgoingMessage.Write(Single.Epsilon);
+			Assert.AreEqual(data.Length, outgoingMessage.Length);
 			IncomingMessage incomingMessage = new IncomingMessage(data);
 			Assert.AreEqual(0.0f, incomingMessage.ReadSingle());
 			Assert.AreEqual(-0.0f, incomingMessage.ReadSingle());
@@ -136,12 +160,14 @@ namespace Entmoot.UnitTests
 		{
 			byte[] data = new byte[256];
 			OutgoingMessage outgoingMessage = new OutgoingMessage(data);
-			for (byte value = byte.MinValue; value < byte.MaxValue; value++)
+			Assert.AreEqual(0, outgoingMessage.Length);
+			for (int value = byte.MinValue; value <= byte.MaxValue; value++)
 			{
 				outgoingMessage.Write(((value % 2) == 0));
 			}
+			Assert.AreEqual(data.Length, outgoingMessage.Length);
 			IncomingMessage incomingMessage = new IncomingMessage(data);
-			for (byte value = byte.MinValue; value < byte.MaxValue; value++)
+			for (int value = byte.MinValue; value <= byte.MaxValue; value++)
 			{
 				Assert.AreEqual(((value % 2) == 0), incomingMessage.ReadBoolean());
 			}
@@ -152,10 +178,12 @@ namespace Entmoot.UnitTests
 		{
 			byte[] data = new byte[512];
 			OutgoingMessage outgoingMessage = new OutgoingMessage(data);
+			Assert.AreEqual(0, outgoingMessage.Length);
 			outgoingMessage.Write(string.Empty);
 			outgoingMessage.Write("");
 			outgoingMessage.Write("yyyyyyyyyes");
 			outgoingMessage.Write("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~!@#$%^&*()-_=+[{]}\\|;:'\"/?.>,<\r\n\t");
+			Assert.AreEqual(124, outgoingMessage.Length);
 			IncomingMessage incomingMessage = new IncomingMessage(data);
 			Assert.AreEqual(string.Empty, incomingMessage.ReadString());
 			Assert.AreEqual("", incomingMessage.ReadString());

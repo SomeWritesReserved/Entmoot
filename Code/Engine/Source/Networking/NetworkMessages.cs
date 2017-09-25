@@ -174,6 +174,11 @@ namespace Entmoot.Engine
 		/// </summary>
 		public byte[] MessageData { get; }
 
+		/// <summary>
+		/// Gets the length of this message (the amount of data that has been written to it).
+		/// </summary>
+		public int Length { get { return this.dataIndex; } }
+
 		#endregion Properties
 
 		#region Methods
