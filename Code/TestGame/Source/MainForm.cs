@@ -249,6 +249,9 @@ namespace Entmoot.TestGame
 		/// <summary>Gets the network tick that the client is currently reading from (which can be different from the client's current frame tick and render tick).</summary>
 		public int NetworkClientTick { get; private set; }
 
+		/// <summary>Gets whether or not this network connection is actually connected to another endpoint.</summary>
+		public bool IsConnected { get { return true; } }
+
 		#endregion Properties
 
 		#region Methods

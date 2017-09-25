@@ -880,6 +880,9 @@ namespace Entmoot.UnitTests
 			/// <summary>Gets the underlying GameClient object.</summary>
 			public GameClient<MockCommandData> GameClient { get; private set; }
 
+			/// <summary>Gets whether or not this network connection is actually connected to another endpoint.</summary>
+			public bool IsConnected { get { return true; } }
+
 			#endregion Properties
 
 			#region Methods
@@ -952,7 +955,7 @@ namespace Entmoot.UnitTests
 				this.serverEntitySnapshot.EntityArray.TryGetEntity(0, out Entity entity);
 				entity.AddComponent<MockComponent>().Position = mockServerUpdate.NewPosition;
 				this.serverEntitySnapshot.Update(mockServerUpdate.ServerFrameTick, this.serverEntitySnapshot.EntityArray);
-				
+
 				OutgoingMessage outgoingMessage = new OutgoingMessage(new byte[1024]);
 				ServerUpdateSerializer.Serialize(outgoingMessage, this.serverEntitySnapshot, mockServerUpdate.LatestClientTickReceived, mockServerUpdate.CommandingEntityID);
 				return new IncomingMessage(outgoingMessage.ToArray());

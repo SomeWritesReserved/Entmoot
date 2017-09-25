@@ -7,10 +7,19 @@ using System.Threading.Tasks;
 namespace Entmoot.Engine
 {
 	/// <summary>
-	/// Represents a connection between two endpoints over the network.
+	/// Represents a potential connection between two endpoints over the network.
 	/// </summary>
 	public interface INetworkConnection
 	{
+		#region Properties
+
+		/// <summary>
+		/// Gets whether or not this network connection is actually connected to another endpoint.
+		/// </summary>
+		bool IsConnected { get; }
+
+		#endregion Properties
+
 		#region Methods
 
 		/// <summary>

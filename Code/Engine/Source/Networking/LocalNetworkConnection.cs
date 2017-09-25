@@ -53,6 +53,11 @@ namespace Entmoot.Engine
 		/// </summary>
 		public int MaxMessageSize { get; }
 
+		/// <summary>
+		/// Gets whether or not this local connection is actually connected to another endpoint.
+		/// </summary>
+		public bool IsConnected { get { return this.pairedNetworkConnection != null; } }
+
 		#endregion Properties
 
 		#region Methods
@@ -78,7 +83,6 @@ namespace Entmoot.Engine
 		/// </summary>
 		public void SendMessage(OutgoingMessage outgoingMessage)
 		{
-			if (this.pairedNetworkConnection == null) { return; }
 			IncomingMessage nextIncomingMessage = this.pairedNetworkConnection.messageBuffer.GetMessageToAddToIncomingQueue();
 			nextIncomingMessage.CopyFrom(outgoingMessage);
 		}

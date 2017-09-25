@@ -76,7 +76,14 @@ namespace Entmoot.Engine
 
 			foreach (ClientProxy client in this.clients)
 			{
-				client.ProcessClientCommands(this.EntityArray);
+				if (client.IsConnected)
+				{
+					client.ProcessClientCommands(this.EntityArray);
+				}
+				else
+				{
+					client.Reset();
+				}
 			}
 
 			this.SystemCollection.Update(this.EntityArray);
@@ -90,7 +97,10 @@ namespace Entmoot.Engine
 			{
 				foreach (ClientProxy client in this.clients)
 				{
-					client.SendServerUpdate(newEntitySnapshot);
+					if (client.IsConnected)
+					{
+						client.SendServerUpdate(newEntitySnapshot);
+					}
 				}
 			}
 		}
@@ -149,6 +159,9 @@ namespace Entmoot.Engine
 
 			#region Properties
 
+			/// <summary>Gets whether or not this client proxy is actually connected to the server.</summary>
+			public bool IsConnected { get { return this.clientNetworkConnection.IsConnected; } }
+
 			/// <summary>Gets the most recent client tick that we got from the client.</summary>
 			public int LatestClientTickReceived { get; private set; } = -1;
 			/// <summary>Gets the most recent frame tick we sent that we know was received by the client.</summary>
@@ -192,6 +205,17 @@ namespace Entmoot.Engine
 			public void SendServerUpdate(EntitySnapshot entitySnapshot)
 			{
 				ServerUpdateSerializer.Send(this.clientNetworkConnection, entitySnapshot, this.LatestClientTickReceived, this.CommandingEntityID);
+			}
+
+			/// <summary>
+			/// Resets this client proxy to the state it would be in before a client connected.
+			/// </summary>
+			public void Reset()
+			{
+				this.LatestClientTickReceived = -1;
+				this.LatestFrameTickAcknowledgedByClient = -1;
+				this.CommandingEntityID = -1;
+
 			}
 
 			#endregion Methods
