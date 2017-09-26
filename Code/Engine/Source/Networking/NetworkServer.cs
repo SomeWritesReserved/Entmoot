@@ -21,8 +21,8 @@ namespace Entmoot.Engine
 		/// <summary>A lookup table from an incoming packet's source end point to a client ID (which is the index into the <see cref="clients"/> field).</summary>
 		private readonly Dictionary<IPEndPoint, int> endPointToClientID;
 
-		/// <summary>The local EndPoint the server will be bound to.</summary>
-		private readonly EndPoint localServerEndPoint;
+		/// <summary>The local end point the server will be bound to and listen on.</summary>
+		private readonly EndPoint boundEndPoint;
 		/// <summary>The actual socket that will be used for network communication between the server and hosted clients.</summary>
 		private readonly Socket socket;
 
@@ -54,7 +54,7 @@ namespace Entmoot.Engine
 				this.clients[clientID].SetStateDisconnected();
 			}
 
-			this.localServerEndPoint = new IPEndPoint(IPAddress.Any, listenPort);
+			this.boundEndPoint = new IPEndPoint(IPAddress.Any, listenPort);
 			this.socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
 			this.socket.Blocking = false;
 
@@ -91,7 +91,7 @@ namespace Entmoot.Engine
 		/// </summary>
 		public void Start()
 		{
-			this.socket.Bind(this.localServerEndPoint);
+			this.socket.Bind(this.boundEndPoint);
 		}
 
 		/// <summary>
@@ -210,7 +210,7 @@ namespace Entmoot.Engine
 		#region Nested Types
 
 		/// <summary>
-		/// Represents a network connection from the server to a client (can also represent a client slot that hasn't been filled yet,
+		/// Represents a network connection from a client to the server (can also represent a client slot that hasn't been filled yet,
 		/// see <see cref="ClientState.Disconnected"/>).
 		/// </summary>
 		private class ClientNetworkConnection : INetworkConnection
@@ -250,7 +250,7 @@ namespace Entmoot.Engine
 			public ClientState ClientState { get; private set; }
 
 			/// <summary>
-			/// Gets whether or not this client connection is actually connected to another endpoint.
+			/// Gets whether or not this client connection is actually connected to the server.
 			/// </summary>
 			public bool IsConnected { get { return this.ClientState != ClientState.Disconnected; } }
 
@@ -290,7 +290,7 @@ namespace Entmoot.Engine
 			}
 
 			/// <summary>
-			/// Copies the given incoming message into this client's next incoming message queue.
+			/// Copies the given incoming message into the servers's next incoming message queue from this client.
 			/// </summary>
 			public void EnqueueIncomingMessage(IncomingMessage incomingMessage)
 			{
@@ -311,7 +311,10 @@ namespace Entmoot.Engine
 			/// </summary>
 			OutgoingMessage INetworkConnection.GetOutgoingMessageToSend()
 			{
-				return this.messageBuffer.CreateOutgoingMessage();
+				OutgoingMessage outgoingMessage = this.messageBuffer.CreateOutgoingMessage();
+				outgoingMessage.Write((byte)PacketType.GameUpdate);
+				outgoingMessage.Write((byte)PacketTypeDetail.GameUpdateFromServer);
+				return outgoingMessage;
 			}
 
 			/// <summary>
@@ -339,24 +342,5 @@ namespace Entmoot.Engine
 		}
 
 		#endregion Nested Types
-	}
-
-	public enum PacketType : byte
-	{
-		None = 0,
-		GameUpdate,
-		ClientConnectRequest,
-		ServerConnectResponse,
-		ClientConnectFinalize,
-	}
-
-	public enum PacketTypeDetail : byte
-	{
-		None = 0,
-		GameUpdateFromServer,
-		GameUpdateFromClient,
-		ConnectResponseAccept,
-		ConnectResponseRejectAppMismatch,
-		ConnectResponseRejectServerFull,
 	}
 }
