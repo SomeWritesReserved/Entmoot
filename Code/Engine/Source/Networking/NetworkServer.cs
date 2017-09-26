@@ -11,7 +11,7 @@ namespace Entmoot.Engine
 	/// <summary>
 	/// Manages a server on a network that can listen for and accept client connections.
 	/// </summary>
-	/// <remarks>This class does not manage the game or update, it only managed the network connections and give the game server incoming packets from connected clients.</remarks>
+	/// <remarks>This class does not manage the game or update, it only manages the network connections and gives the game server incoming packets from connected clients.</remarks>
 	public class NetworkServer
 	{
 		#region Fields
@@ -87,16 +87,28 @@ namespace Entmoot.Engine
 		#region Methods
 
 		/// <summary>
+		/// Starts the server and begins listening for connections.
+		/// </summary>
+		public void Start()
+		{
+			this.socket.Bind(this.localServerEndPoint);
+		}
+
+		/// <summary>
+		/// Stops the server and shutdown the sockets.
+		/// </summary>
+		public void Stop()
+		{
+			this.socket.Shutdown(SocketShutdown.Receive);
+			this.socket.Close(1);
+		}
+
+		/// <summary>
 		/// Updates the connections by reading data and writing data to the network, as well as updating the state
 		/// of the clients.
 		/// </summary>
 		public void Update()
 		{
-			if (!this.socket.IsBound)
-			{
-				this.socket.Bind(this.localServerEndPoint);
-			}
-
 			while (this.socket.Available > 0)
 			{
 				this.receivedIncomingMessage.Clear();
