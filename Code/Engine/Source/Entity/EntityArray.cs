@@ -149,7 +149,7 @@ namespace Entmoot.Engine
 		/// </summary>
 		public void Interpolate(EntityArray otherA, EntityArray otherB, float amount)
 		{
-			Array.Copy(otherA.entityStates, this.entityStates, this.Capacity);
+			Array.Copy(otherB.entityStates, this.entityStates, this.Capacity);
 			for (int componentTypeID = 0; componentTypeID < this.componentArrays.Count; componentTypeID++)
 			{
 				this.componentArrays[componentTypeID].Interpolate(otherA.componentArrays[componentTypeID], otherB.componentArrays[componentTypeID], amount);

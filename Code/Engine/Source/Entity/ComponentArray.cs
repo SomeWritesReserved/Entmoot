@@ -207,11 +207,17 @@ namespace Entmoot.Engine
 		/// </summary>
 		public void Interpolate(ComponentArray<TComponent> otherA, ComponentArray<TComponent> otherB, float amount)
 		{
-			Array.Copy(otherA.components, this.components, this.Capacity);
-			otherA.componentStates.CopyTo(this.componentStates);
+			otherB.componentStates.CopyTo(this.componentStates);
 			for (int entityID = 0; entityID < this.Capacity; entityID++)
 			{
-				this.components[entityID].Interpolate(otherA.components[entityID], otherB.components[entityID], amount);
+				if (otherA.componentStates[entityID] && otherB.componentStates[entityID])
+				{
+					this.components[entityID].Interpolate(otherA.components[entityID], otherB.components[entityID], amount);
+				}
+				else
+				{
+					this.components[entityID] = otherB.components[entityID];
+				}
 			}
 		}
 
