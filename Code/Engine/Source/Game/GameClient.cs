@@ -111,7 +111,7 @@ namespace Entmoot.Engine
 				this.FrameTick++;
 			}
 
-			this.processServerUpdates();
+			this.receiveServerUpdates();
 
 			if (this.HasRenderingStarted)
 			{
@@ -135,7 +135,7 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Checks for and processes any new entity snapshot updates coming in from the server.
 		/// </summary>
-		private void processServerUpdates()
+		private void receiveServerUpdates()
 		{
 			IncomingMessage incomingMessage;
 			while ((incomingMessage = this.serverNetworkConnection.GetNextIncomingMessage()) != null)

@@ -78,7 +78,7 @@ namespace Entmoot.Engine
 			{
 				if (client.IsConnected)
 				{
-					client.ProcessClientCommands(this.EntityArray);
+					client.ReceiveClientUpdates(this.EntityArray);
 				}
 				else
 				{
@@ -176,7 +176,7 @@ namespace Entmoot.Engine
 			/// <summary>
 			/// Checks for and processes any new commands coming in from the client.
 			/// </summary>
-			public void ProcessClientCommands(EntityArray entityArray)
+			public void ReceiveClientUpdates(EntityArray entityArray)
 			{
 				IncomingMessage incomingMessage;
 				while ((incomingMessage = this.clientNetworkConnection.GetNextIncomingMessage()) != null)
