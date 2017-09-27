@@ -34,8 +34,9 @@ namespace Entmoot.TestGame3D
 		protected override void LoadContent()
 		{
 			this.basicEffect = new BasicEffect(this.GraphicsDevice);
-			this.basicEffect.LightingEnabled = false;
+			this.basicEffect.LightingEnabled = true;
 			this.basicEffect.TextureEnabled = true;
+			this.basicEffect.EnableDefaultLighting();
 			using (FileStream fileStream = new FileStream(@"Assets\dev_cube.png", FileMode.Open, FileAccess.Read))
 			{
 				this.basicEffect.Texture = Texture2D.FromStream(this.GraphicsDevice, fileStream);
