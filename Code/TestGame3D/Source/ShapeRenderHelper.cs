@@ -34,47 +34,47 @@ namespace Entmoot.TestGame3D
 			//   4
 			ShapeRenderHelper.boxRenderVertices = new VertexPositionNormalTexture[]
 			{
-				new VertexPositionNormalTexture(new Vector3(-1, -1, 1), Vector3.Right, new Vector2(x0, y2)),
-				new VertexPositionNormalTexture(new Vector3(-1, 1, 1), Vector3.Right, new Vector2(x0, y1)),
-				new VertexPositionNormalTexture(new Vector3(-1, 1, -1), Vector3.Right, new Vector2(x1, y1)),
-				new VertexPositionNormalTexture(new Vector3(-1, 1, -1), Vector3.Right, new Vector2(x1, y1)),
-				new VertexPositionNormalTexture(new Vector3(-1, -1, -1), Vector3.Right, new Vector2(x1, y2)),
-				new VertexPositionNormalTexture(new Vector3(-1, -1, 1), Vector3.Right, new Vector2(x0, y2)),
+				new VertexPositionNormalTexture(new Vector3(-1, 1, 1), Vector3.Right, new Vector2(x1, y1)),
+				new VertexPositionNormalTexture(new Vector3(-1, -1, 1), Vector3.Right, new Vector2(x1, y2)),
+				new VertexPositionNormalTexture(new Vector3(-1, 1, -1), Vector3.Right, new Vector2(x0, y1)),
+				new VertexPositionNormalTexture(new Vector3(-1, -1, -1), Vector3.Right, new Vector2(x0, y2)),
+				new VertexPositionNormalTexture(new Vector3(-1, 1, -1), Vector3.Right, new Vector2(x0, y1)),
+				new VertexPositionNormalTexture(new Vector3(-1, -1, 1), Vector3.Right, new Vector2(x1, y2)),
 
-				new VertexPositionNormalTexture(new Vector3(-1, 1, -1), Vector3.Down, new Vector2(x1, y1)),
-				new VertexPositionNormalTexture(new Vector3(-1, 1, 1), Vector3.Down, new Vector2(x1, y0)),
-				new VertexPositionNormalTexture(new Vector3(1, 1, 1), Vector3.Down, new Vector2(x2, y0)),
-				new VertexPositionNormalTexture(new Vector3(1, 1, 1), Vector3.Down, new Vector2(x2, y0)),
-				new VertexPositionNormalTexture(new Vector3(1, 1, -1), Vector3.Down, new Vector2(x2, y1)),
-				new VertexPositionNormalTexture(new Vector3(-1, 1, -1), Vector3.Down, new Vector2(x1, y1)),
+				new VertexPositionNormalTexture(new Vector3(-1, 1, 1), Vector3.Down, new Vector2(x2, y0)),
+				new VertexPositionNormalTexture(new Vector3(-1, 1, -1), Vector3.Down, new Vector2(x2, y1)),
+				new VertexPositionNormalTexture(new Vector3(1, 1, 1), Vector3.Down, new Vector2(x1, y0)),
+				new VertexPositionNormalTexture(new Vector3(1, 1, -1), Vector3.Down, new Vector2(x1, y1)),
+				new VertexPositionNormalTexture(new Vector3(1, 1, 1), Vector3.Down, new Vector2(x1, y0)),
+				new VertexPositionNormalTexture(new Vector3(-1, 1, -1), Vector3.Down, new Vector2(x2, y1)),
 
-				new VertexPositionNormalTexture(new Vector3(-1, -1, -1), Vector3.Backward, new Vector2(x1, y2)),
-				new VertexPositionNormalTexture(new Vector3(-1, 1, -1), Vector3.Backward, new Vector2(x1, y1)),
-				new VertexPositionNormalTexture(new Vector3(1, 1, -1), Vector3.Backward, new Vector2(x2, y1)),
-				new VertexPositionNormalTexture(new Vector3(1, 1, -1), Vector3.Backward, new Vector2(x2, y1)),
-				new VertexPositionNormalTexture(new Vector3(1, -1, -1), Vector3.Backward, new Vector2(x2, y2)),
-				new VertexPositionNormalTexture(new Vector3(-1, -1, -1), Vector3.Backward, new Vector2(x1, y2)),
+				new VertexPositionNormalTexture(new Vector3(-1, 1, -1), Vector3.Backward, new Vector2(x2, y1)),
+				new VertexPositionNormalTexture(new Vector3(-1, -1, -1), Vector3.Backward, new Vector2(x2, y2)),
+				new VertexPositionNormalTexture(new Vector3(1, 1, -1), Vector3.Backward, new Vector2(x1, y1)),
+				new VertexPositionNormalTexture(new Vector3(1, -1, -1), Vector3.Backward, new Vector2(x1, y2)),
+				new VertexPositionNormalTexture(new Vector3(1, 1, -1), Vector3.Backward, new Vector2(x1, y1)),
+				new VertexPositionNormalTexture(new Vector3(-1, -1, -1), Vector3.Backward, new Vector2(x2, y2)),
 
-				new VertexPositionNormalTexture(new Vector3(-1, -1, 1), Vector3.Up, new Vector2(x1, y3)),
-				new VertexPositionNormalTexture(new Vector3(-1, -1, -1), Vector3.Up, new Vector2(x1, y2)),
-				new VertexPositionNormalTexture(new Vector3(1, -1, -1), Vector3.Up, new Vector2(x2, y2)),
-				new VertexPositionNormalTexture(new Vector3(1, -1, -1), Vector3.Up, new Vector2(x2, y2)),
-				new VertexPositionNormalTexture(new Vector3(1, -1, 1), Vector3.Up, new Vector2(x2, y3)),
-				new VertexPositionNormalTexture(new Vector3(-1, -1, 1), Vector3.Up, new Vector2(x1, y3)),
+				new VertexPositionNormalTexture(new Vector3(-1, -1, -1), Vector3.Up, new Vector2(x2, y2)),
+				new VertexPositionNormalTexture(new Vector3(-1, -1, 1), Vector3.Up, new Vector2(x2, y3)),
+				new VertexPositionNormalTexture(new Vector3(1, -1, -1), Vector3.Up, new Vector2(x1, y2)),
+				new VertexPositionNormalTexture(new Vector3(1, -1, 1), Vector3.Up, new Vector2(x1, y3)),
+				new VertexPositionNormalTexture(new Vector3(1, -1, -1), Vector3.Up, new Vector2(x1, y2)),
+				new VertexPositionNormalTexture(new Vector3(-1, -1, 1), Vector3.Up, new Vector2(x2, y3)),
 
-				new VertexPositionNormalTexture(new Vector3(1, -1, -1), Vector3.Left, new Vector2(x2, y2)),
-				new VertexPositionNormalTexture(new Vector3(1, 1, -1), Vector3.Left, new Vector2(x2, y1)),
-				new VertexPositionNormalTexture(new Vector3(1, 1, 1), Vector3.Left, new Vector2(x3, y1)),
-				new VertexPositionNormalTexture(new Vector3(1, 1, 1), Vector3.Left, new Vector2(x3, y1)),
-				new VertexPositionNormalTexture(new Vector3(1, -1, 1), Vector3.Left, new Vector2(x3, y2)),
-				new VertexPositionNormalTexture(new Vector3(1, -1, -1), Vector3.Left, new Vector2(x2, y2)),
+				new VertexPositionNormalTexture(new Vector3(1, 1, -1), Vector3.Left, new Vector2(x3, y1)),
+				new VertexPositionNormalTexture(new Vector3(1, -1, -1), Vector3.Left, new Vector2(x3, y2)),
+				new VertexPositionNormalTexture(new Vector3(1, 1, 1), Vector3.Left, new Vector2(x2, y1)),
+				new VertexPositionNormalTexture(new Vector3(1, -1, 1), Vector3.Left, new Vector2(x2, y2)),
+				new VertexPositionNormalTexture(new Vector3(1, 1, 1), Vector3.Left, new Vector2(x2, y1)),
+				new VertexPositionNormalTexture(new Vector3(1, -1, -1), Vector3.Left, new Vector2(x3, y2)),
 
-				new VertexPositionNormalTexture(new Vector3(1, -1, 1), Vector3.Forward, new Vector2(x3, y2)),
-				new VertexPositionNormalTexture(new Vector3(1, 1, 1), Vector3.Forward, new Vector2(x3, y1)),
-				new VertexPositionNormalTexture(new Vector3(-1, 1, 1), Vector3.Forward, new Vector2(x4, y1)),
-				new VertexPositionNormalTexture(new Vector3(-1, 1, 1), Vector3.Forward, new Vector2(x4, y1)),
-				new VertexPositionNormalTexture(new Vector3(-1, -1, 1), Vector3.Forward, new Vector2(x4, y2)),
-				new VertexPositionNormalTexture(new Vector3(1, -1, 1), Vector3.Forward, new Vector2(x3, y2)),
+				new VertexPositionNormalTexture(new Vector3(1, 1, 1), Vector3.Forward, new Vector2(x4, y1)),
+				new VertexPositionNormalTexture(new Vector3(1, -1, 1), Vector3.Forward, new Vector2(x4, y2)),
+				new VertexPositionNormalTexture(new Vector3(-1, 1, 1), Vector3.Forward, new Vector2(x3, y1)),
+				new VertexPositionNormalTexture(new Vector3(-1, -1, 1), Vector3.Forward, new Vector2(x3, y2)),
+				new VertexPositionNormalTexture(new Vector3(-1, 1, 1), Vector3.Forward, new Vector2(x3, y1)),
+				new VertexPositionNormalTexture(new Vector3(1, -1, 1), Vector3.Forward, new Vector2(x4, y2)),
 			};
 		}
 
@@ -84,7 +84,7 @@ namespace Entmoot.TestGame3D
 
 		public static void DrawBox(GraphicsDevice graphicsDevice, BasicEffect basicEffect, Vector3 position, float rotation)
 		{
-			basicEffect.World = Matrix.CreateRotationX(rotation) * Matrix.CreateRotationY(rotation) * Matrix.CreateTranslation(position);
+			basicEffect.World = Matrix.CreateRotationY(rotation) * Matrix.CreateTranslation(position);
 			basicEffect.CurrentTechnique.Passes[0].Apply();
 			graphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList, ShapeRenderHelper.boxRenderVertices, 0, ShapeRenderHelper.boxRenderVertices.Length / 3);
 
