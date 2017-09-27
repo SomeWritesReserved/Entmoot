@@ -50,8 +50,8 @@ namespace Entmoot.Engine
 		/// </summary>
 		public void Update(TCommandData commandData)
 		{
-			this.GameServer.Update();
 			this.GameClient.Update(commandData);
+			this.GameServer.Update();
 		}
 
 		#endregion Methods
