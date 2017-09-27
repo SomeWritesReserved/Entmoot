@@ -47,13 +47,13 @@ namespace Entmoot.TestGame
 			this.gameServer = new GameServer<TestCommandData>(new[] { this.clientServerNetworkConnection }, 10, 5, componentsDefinition, new ISystem[] { new TestSystem(1) });
 			{
 				this.gameServer.EntityArray.TryCreateEntity(out Entity entity1);
-				entity1.AddComponent<PositionComponent>().Position = new Vector3(100, 50, 0);
+				entity1.AddComponent<PositionComponent>().Position = new Vec3(100, 50, 0);
 				this.gameServer.EntityArray.TryCreateEntity(out Entity entity2);
-				entity2.AddComponent<PositionComponent>().Position = new Vector3(0, 0, 0);
+				entity2.AddComponent<PositionComponent>().Position = new Vec3(0, 0, 0);
 				this.gameServer.EntityArray.TryCreateEntity(out Entity entity3);
 				this.gameServer.EntityArray.RemoveEntity(entity3);
 				this.gameServer.EntityArray.TryCreateEntity(out Entity entity4);
-				entity4.AddComponent<PositionComponent>().Position = new Vector3(200, 350, 0);
+				entity4.AddComponent<PositionComponent>().Position = new Vec3(200, 350, 0);
 			}
 
 			this.clientServerNetworkConnection.GameClient = this.gameClient;
@@ -462,7 +462,7 @@ namespace Entmoot.TestGame
 	{
 		#region Fields
 
-		public Vector3 Position;
+		public Vec3 Position;
 
 		#endregion Fields
 
@@ -470,7 +470,7 @@ namespace Entmoot.TestGame
 
 		public void Interpolate(PositionComponent otherA, PositionComponent otherB, float amount)
 		{
-			this.Position = Vector3.Interpolate(otherA.Position, otherB.Position, amount);
+			this.Position = Vec3.Interpolate(otherA.Position, otherB.Position, amount);
 		}
 
 		public void Serialize(IWriter writer)
