@@ -12,6 +12,7 @@ namespace Entmoot.Engine
 	/// Represents a specific aspect or facet of data that entities can take on, to be  managed by a component array.
 	/// </summary>
 	public interface IComponent<TComponent>
+		where TComponent : struct
 	{
 		#region Methods
 
