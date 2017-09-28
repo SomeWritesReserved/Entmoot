@@ -46,6 +46,7 @@ namespace Entmoot.Engine
 			for (int clientID = 0; clientID < clientNetworkConnections.Count; clientID++)
 			{
 				this.clients[clientID] = new ClientProxy(this, clientNetworkConnections[clientID]);
+				this.clients[clientID].CommandingEntityID = clientID;
 			}
 		}
 
