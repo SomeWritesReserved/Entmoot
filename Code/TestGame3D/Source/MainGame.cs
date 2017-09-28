@@ -106,7 +106,7 @@ namespace Entmoot.TestGame3D
 			this.basicEffect.LightingEnabled = true;
 			this.basicEffect.TextureEnabled = true;
 			this.basicEffect.EnableDefaultLighting();
-			using (FileStream fileStream = new FileStream(@"Assets\dev_cube.png", FileMode.Open, FileAccess.Read))
+			using (FileStream fileStream = new FileStream(@"Assets\dev_cubeface.png", FileMode.Open, FileAccess.Read))
 			{
 				this.basicEffect.Texture = Texture2D.FromStream(this.GraphicsDevice, fileStream);
 			}
