@@ -130,6 +130,11 @@ namespace Entmoot.Engine
 			this.updateRenderedSnapshot();
 
 			this.updatePrediction();
+
+			if (this.HasRenderingStarted)
+			{
+				this.SystemCollection.Update(this.RenderedSnapshot.EntityArray);
+			}
 		}
 
 		/// <summary>
