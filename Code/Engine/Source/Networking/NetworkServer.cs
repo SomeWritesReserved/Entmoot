@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -53,6 +54,7 @@ namespace Entmoot.Engine
 				this.clients[clientID] = new ClientNetworkConnection(this, maxMessageSize);
 				this.clients[clientID].SetStateDisconnected();
 			}
+			this.ClientNetworkConnections = new ReadOnlyCollection<INetworkConnection>(this.clients);
 
 			this.boundEndPoint = new IPEndPoint(IPAddress.Any, listenPort);
 			this.socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
@@ -81,6 +83,11 @@ namespace Entmoot.Engine
 		/// Gets that maximum size in bytes for a single message.
 		/// </summary>
 		public int MaxMessageSize { get; }
+
+		/// <summary>
+		/// Gets the collection of all possible client network connections up to <see cref="MaxClients"/> (this includes even disconnected clients).
+		/// </summary>
+		public ReadOnlyCollection<INetworkConnection> ClientNetworkConnections { get; }
 
 		#endregion Properties
 

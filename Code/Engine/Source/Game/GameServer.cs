@@ -215,7 +215,6 @@ namespace Entmoot.Engine
 			{
 				this.LatestClientTickReceived = -1;
 				this.LatestFrameTickAcknowledgedByClient = -1;
-				this.CommandingEntityID = -1;
 
 			}
 

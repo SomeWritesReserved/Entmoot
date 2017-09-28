@@ -47,7 +47,7 @@ namespace Entmoot.Engine
 			this.boundEndPoint = new IPEndPoint(IPAddress.Any, 0);
 			this.socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
 			this.socket.Blocking = false;
-			
+
 			this.messageBuffer = new MessageBuffer(maxMessageSize, 2);
 			this.outgoingMessage = new OutgoingMessage(new byte[maxMessageSize]);
 			this.receivedIncomingMessage = new IncomingMessage(new byte[maxMessageSize]);
