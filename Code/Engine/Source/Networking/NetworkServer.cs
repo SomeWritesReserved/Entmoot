@@ -59,6 +59,8 @@ namespace Entmoot.Engine
 			this.boundEndPoint = new IPEndPoint(IPAddress.Any, listenPort);
 			this.socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
 			this.socket.Blocking = false;
+			this.socket.ReceiveBufferSize = 131071;
+			this.socket.SendBufferSize = 131071;
 
 			this.outgoingMessage = new OutgoingMessage(new byte[maxMessageSize]);
 			this.receivedIncomingMessage = new IncomingMessage(new byte[maxMessageSize]);
@@ -99,6 +101,10 @@ namespace Entmoot.Engine
 		public void Start()
 		{
 			this.socket.Bind(this.boundEndPoint);
+			const uint IOC_IN = 0x80000000;
+			const uint IOC_VENDOR = 0x18000000;
+			uint SIO_UDP_CONNRESET = IOC_IN | IOC_VENDOR | 12;
+			this.socket.IOControl((int)SIO_UDP_CONNRESET, new byte[] { Convert.ToByte(false) }, null);
 		}
 
 		/// <summary>
