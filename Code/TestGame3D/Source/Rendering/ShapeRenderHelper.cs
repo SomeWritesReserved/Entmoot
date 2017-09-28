@@ -82,10 +82,11 @@ namespace Entmoot.TestGame3D
 
 		#region Methods
 
-		public static void DrawBox(GraphicsDevice graphicsDevice, BasicEffect basicEffect, Vector3 position, float rotation)
+		public static void RenderBox<TEffect>(GraphicsDevice graphicsDevice, TEffect effect, Vector3 position, Quaternion rotation)
+			where TEffect : Effect, IEffectMatrices
 		{
-			basicEffect.World = Matrix.CreateRotationY(rotation) * Matrix.CreateTranslation(position);
-			basicEffect.CurrentTechnique.Passes[0].Apply();
+			effect.World = Matrix.CreateFromQuaternion(rotation) * Matrix.CreateTranslation(position);
+			effect.CurrentTechnique.Passes[0].Apply();
 			graphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList, ShapeRenderHelper.boxRenderVertices, 0, ShapeRenderHelper.boxRenderVertices.Length / 3);
 
 		}
