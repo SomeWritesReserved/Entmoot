@@ -37,6 +37,10 @@ namespace Entmoot.TestGame3D
 
 		private KeyboardState currentKeyboardState;
 		private KeyboardState previousKeyboardState;
+		private MouseState currentMouseState;
+		private MouseState previousMouseState;
+		private Point mouseDownPoint;
+		bool isDragging;
 
 		#endregion Fields
 
@@ -44,6 +48,7 @@ namespace Entmoot.TestGame3D
 
 		public MainGame()
 		{
+			this.IsMouseVisible = true;
 			this.graphicsDeviceManager = new GraphicsDeviceManager(this);
 			this.graphicsDeviceManager.GraphicsProfile = GraphicsProfile.HiDef;
 			this.renderSystem = new RenderSystem(this.graphicsDeviceManager);
@@ -84,22 +89,6 @@ namespace Entmoot.TestGame3D
 
 		#region Methods
 
-		protected override void OnActivated(object sender, EventArgs args)
-		{
-			Mouse.SetPosition(this.GraphicsDevice.Viewport.Width / 2, this.GraphicsDevice.Viewport.Height / 2);
-			base.OnActivated(sender, args);
-		}
-
-		protected override void OnExiting(object sender, EventArgs args)
-		{
-			this.networkClient.Disconnect();
-			if (this.hasServer)
-			{
-				this.networkServer.Stop();
-			}
-			base.OnExiting(sender, args);
-		}
-
 		protected override void Initialize()
 		{
 			if (this.hasServer)
@@ -127,9 +116,27 @@ namespace Entmoot.TestGame3D
 			}
 		}
 
+		protected override void OnExiting(object sender, EventArgs args)
+		{
+			this.networkClient.Disconnect();
+			if (this.hasServer)
+			{
+				this.networkServer.Stop();
+			}
+			System.Threading.Thread.Sleep(250);
+			base.OnExiting(sender, args);
+		}
+
+		protected override void OnDeactivated(object sender, EventArgs args)
+		{
+			this.isDragging = false;
+			base.OnDeactivated(sender, args);
+		}
+
 		protected override void Update(GameTime gameTime)
 		{
 			this.currentKeyboardState = Keyboard.GetState();
+			this.currentMouseState = Mouse.GetState();
 
 			if (this.isKeyPressed(Keys.U) && !this.networkClient.IsConnected)
 			{
@@ -141,7 +148,25 @@ namespace Entmoot.TestGame3D
 				this.isNetworkedPaused = !this.isNetworkedPaused;
 			}
 
+			if (this.isKeyPressed(Keys.Escape))
+			{
+				this.Exit();
+			}
+
+			if (this.isRightMousePressed())
+			{
+				this.isDragging = true;
+				this.mouseDownPoint = new Point(this.currentMouseState.X, this.currentMouseState.Y);
+			}
+			else if (this.currentMouseState.RightButton == ButtonState.Released)
+			{
+				this.isDragging = false;
+			}
+
+			this.Window.Title = this.networkClient.IsConnected ? "Connected" : "Disconnected";
+
 			this.previousKeyboardState = this.currentKeyboardState;
+			this.previousMouseState = this.currentMouseState;
 		}
 
 		protected override void Draw(GameTime gameTime)
@@ -158,23 +183,21 @@ namespace Entmoot.TestGame3D
 				this.gameServer.Update();
 			}
 
-			MouseState mouseState = Mouse.GetState();
-			KeyboardState keyboardState = Keyboard.GetState();
 			{
-				if (this.IsActive && mouseState.RightButton == ButtonState.Pressed)
+				if (this.IsActive && this.isDragging)
 				{
-					float deltaX = (this.GraphicsDevice.Viewport.Width / 2 - mouseState.X) * 0.004f;
-					float deltaY = (this.GraphicsDevice.Viewport.Height / 2 - mouseState.Y) * 0.004f;
+					float deltaX = (this.mouseDownPoint.X - this.currentMouseState.X) * 0.004f;
+					float deltaY = (this.mouseDownPoint.Y - this.currentMouseState.Y) * 0.004f;
 					this.commandData.LookAngles.X += deltaX;
 					this.commandData.LookAngles.Y = MathHelper.Clamp(this.commandData.LookAngles.Y + deltaY, -MathHelper.Pi * 0.49f, MathHelper.Pi * 0.49f);
-					Mouse.SetPosition(this.GraphicsDevice.Viewport.Width / 2, this.GraphicsDevice.Viewport.Height / 2);
+					Mouse.SetPosition(this.mouseDownPoint.X, this.mouseDownPoint.Y);
 				}
 
 				this.commandData.Commands = Commands.None;
-				if (keyboardState.IsKeyDown(Keys.W)) { this.commandData.Commands |= Commands.MoveForward; }
-				if (keyboardState.IsKeyDown(Keys.S)) { this.commandData.Commands |= Commands.MoveBackward; }
-				if (keyboardState.IsKeyDown(Keys.A)) { this.commandData.Commands |= Commands.MoveLeft; }
-				if (keyboardState.IsKeyDown(Keys.D)) { this.commandData.Commands |= Commands.MoveRight; }
+				if (this.currentKeyboardState.IsKeyDown(Keys.W)) { this.commandData.Commands |= Commands.MoveForward; }
+				if (this.currentKeyboardState.IsKeyDown(Keys.S)) { this.commandData.Commands |= Commands.MoveBackward; }
+				if (this.currentKeyboardState.IsKeyDown(Keys.A)) { this.commandData.Commands |= Commands.MoveLeft; }
+				if (this.currentKeyboardState.IsKeyDown(Keys.D)) { this.commandData.Commands |= Commands.MoveRight; }
 
 				if (this.gameClient.HasRenderingStarted && this.gameClient.RenderedSnapshot.EntityArray.TryGetEntity(this.gameClient.CommandingEntityID, out Entity clientEntity))
 				{
@@ -197,8 +220,6 @@ namespace Entmoot.TestGame3D
 			}
 
 			this.drawDebugUI();
-
-			if (keyboardState.IsKeyDown(Keys.Escape)) { this.Exit(); }
 		}
 
 		private void drawDebugUI()
@@ -232,13 +253,13 @@ namespace Entmoot.TestGame3D
 
 			if (this.hasServer)
 			{
-				this.drawGraph(Log<LogNetworkServer>.History, (log) => log.ReceivedBytes, Color.MistyRose);
+				//this.drawGraph(Log<LogNetworkServer>.History, (log) => log.ReceivedBytes, Color.MistyRose);
 				this.drawGraph(Log<LogNetworkServer>.History, (log) => log.SentBytes, Color.AliceBlue);
 			}
 			else
 			{
 				this.drawGraph(Log<LogNetworkClient>.History, (log) => log.ReceivedBytes, Color.MistyRose);
-				this.drawGraph(Log<LogNetworkClient>.History, (log) => log.SentBytes, Color.AliceBlue);
+				//this.drawGraph(Log<LogNetworkClient>.History, (log) => log.SentBytes, Color.AliceBlue);
 			}
 		}
 
@@ -260,6 +281,11 @@ namespace Entmoot.TestGame3D
 		private bool isKeyPressed(Keys key)
 		{
 			return (this.currentKeyboardState.IsKeyDown(key) && this.previousKeyboardState.IsKeyUp(key));
+		}
+
+		private bool isRightMousePressed()
+		{
+			return (this.currentMouseState.RightButton == ButtonState.Pressed && this.previousMouseState.RightButton == ButtonState.Released);
 		}
 
 		#endregion Methods
