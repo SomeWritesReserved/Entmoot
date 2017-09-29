@@ -158,7 +158,7 @@ namespace Entmoot.Engine
 				}
 				else if (packetType == PacketType.GameUpdate && packetTypeDetail == PacketTypeDetail.GameUpdateFromClient)
 				{
-					client.EnqueueIncomingMessage(incomingMessage);
+					client.EnqueueGameUpdateIncomingMessage(incomingMessage);
 				}
 			}
 			else
@@ -313,9 +313,9 @@ namespace Entmoot.Engine
 			}
 
 			/// <summary>
-			/// Copies the given incoming message into the servers's next incoming message queue from this client.
+			/// Copies the given incoming message into the servers's next incoming message queue for game updates.
 			/// </summary>
-			public void EnqueueIncomingMessage(IncomingMessage incomingMessage)
+			public void EnqueueGameUpdateIncomingMessage(IncomingMessage incomingMessage)
 			{
 				IncomingMessage clientIncomingMessage = this.messageBuffer.GetMessageToAddToIncomingQueue();
 				clientIncomingMessage.CopyFrom(incomingMessage);
