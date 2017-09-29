@@ -98,6 +98,8 @@ namespace Entmoot.Engine
 				numberOfCommands++;
 			}
 			writer.WriteAt(positionOfCommandCount, numberOfCommands);
+
+			Log<LogGameClient>.Data.SentCommands += numberOfCommands;
 		}
 
 		/// <summary>

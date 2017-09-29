@@ -105,6 +105,8 @@ namespace Entmoot.Engine
 		/// </summary>
 		public void Update(TCommandData commandData)
 		{
+			Log<LogGameClient>.StartNew();
+
 			if (this.LatestServerTickReceived >= 0)
 			{
 				// Only tick the client if we started getting data from the server (i.e. fully connected)
@@ -307,5 +309,18 @@ namespace Entmoot.Engine
 		#endregion Helpers
 
 		#endregion Methods
+	}
+
+	/// <summary>
+	/// Log data for GameClient.
+	/// </summary>
+	public struct LogGameClient
+	{
+		#region Fields
+
+		/// <summary>The number of individual commands to the server sent over one entire update.</summary>
+		public int SentCommands;
+
+		#endregion Fields
 	}
 }
