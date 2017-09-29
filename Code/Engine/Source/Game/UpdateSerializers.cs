@@ -84,11 +84,19 @@ namespace Entmoot.Engine
 		{
 			// Todo: only write the commands that have data and are newer than what the server already acknowledged (LatestFrameTickAcknowledgedByServer)
 			writer.Write(latestServerTickReceived);
-			writer.Write((byte)clientCommands.Count());
+
+			// Remember where the command count should go, we'll overwrite it later once we know the real count
+			int positionOfCommandCount = writer.Length;
+			writer.Write((byte)0);
+
+			byte numberOfCommands = 0;
 			foreach (ClientCommand<TCommandData> clientCommand in clientCommands)
 			{
 				clientCommand.Serialize(writer);
+				numberOfCommands++;
 			}
+
+			writer.WriteAt(positionOfCommandCount, numberOfCommands);
 		}
 
 		/// <summary>

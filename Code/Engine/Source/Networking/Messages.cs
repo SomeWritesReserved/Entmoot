@@ -39,7 +39,7 @@ namespace Entmoot.Engine
 		public byte[] MessageData { get; }
 
 		/// <summary>
-		/// Gets the length of this message (the amount of data that has been written to it).
+		/// Gets the length of this message (the amount of data that has can be read from it).
 		/// </summary>
 		public int Length { get; set; }
 
@@ -255,6 +255,14 @@ namespace Entmoot.Engine
 			byte[] newData = new byte[this.dataIndex];
 			Array.Copy(this.MessageData, newData, newData.Length);
 			return newData;
+		}
+
+		/// <summary>
+		/// Writes an unsigned byte at a specific location in data source.
+		/// </summary>
+		public void WriteAt(int position, byte value)
+		{
+			this.MessageData[position] = value;
 		}
 
 		/// <summary>

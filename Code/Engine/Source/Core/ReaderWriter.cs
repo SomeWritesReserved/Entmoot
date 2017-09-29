@@ -11,6 +11,25 @@ namespace Entmoot.Engine
 	/// </summary>
 	public interface IReader
 	{
+		#region Properties
+
+		/// <summary>
+		/// Gets the length of the data (the amount of data that can be read).
+		/// </summary>
+		int Length { get; }
+
+		/// <summary>
+		/// Gets the current position of the read head (showing which data will be read next).
+		/// </summary>
+		int Position { get; }
+
+		/// <summary>
+		/// Gets the number of bytes left in the data that can still be read.
+		/// </summary>
+		int BytesLeft { get; }
+
+		#endregion Properties
+
 		#region Methods
 
 		/// <summary>
@@ -61,7 +80,21 @@ namespace Entmoot.Engine
 	/// </summary>
 	public interface IWriter
 	{
+		#region Properties
+
+		/// <summary>
+		/// Gets the length of the data (the amount of data that has been written).
+		/// </summary>
+		int Length { get; }
+
+		#endregion Properties
+
 		#region Methods
+
+		/// <summary>
+		/// Writes an unsigned byte at a specific location in data source.
+		/// </summary>
+		void WriteAt(int position, byte value);
 
 		/// <summary>
 		/// Writes an unsigned byte.
