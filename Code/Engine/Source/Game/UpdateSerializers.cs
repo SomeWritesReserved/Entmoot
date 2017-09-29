@@ -70,19 +70,18 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Serializes the given client update (client commands) and immediately sends a packet.
 		/// </summary>
-		public static void Send(INetworkConnection serverNetworkConnection, IEnumerable<ClientCommand<TCommandData>> clientCommands, int latestServerTickReceived)
+		public static void Send(INetworkConnection serverNetworkConnection, IEnumerable<ClientCommand<TCommandData>> clientCommands, int latestServerTickReceived, int latestFrameTickAcknowledgedByServer)
 		{
 			OutgoingMessage outgoingMessage = serverNetworkConnection.GetOutgoingMessageToSend();
-			ClientUpdateSerializer<TCommandData>.Serialize(outgoingMessage, clientCommands, latestServerTickReceived);
+			ClientUpdateSerializer<TCommandData>.Serialize(outgoingMessage, clientCommands, latestServerTickReceived, latestFrameTickAcknowledgedByServer);
 			serverNetworkConnection.SendMessage(outgoingMessage);
 		}
 
 		/// <summary>
 		/// Serializes the given client update (client commands) to the given writer.
 		/// </summary>
-		public static void Serialize(IWriter writer, IEnumerable<ClientCommand<TCommandData>> clientCommands, int latestServerTickReceived)
+		public static void Serialize(IWriter writer, IEnumerable<ClientCommand<TCommandData>> clientCommands, int latestServerTickReceived, int latestFrameTickAcknowledgedByServer)
 		{
-			// Todo: only write the commands that have data and are newer than what the server already acknowledged (LatestFrameTickAcknowledgedByServer)
 			writer.Write(latestServerTickReceived);
 
 			// Remember where the command count should go, we'll overwrite it later once we know the real count
@@ -92,10 +91,12 @@ namespace Entmoot.Engine
 			byte numberOfCommands = 0;
 			foreach (ClientCommand<TCommandData> clientCommand in clientCommands)
 			{
+				// Don't send the server commands its already received and acknowledged
+				if (clientCommand.ClientFrameTick <= latestFrameTickAcknowledgedByServer) { continue; }
+
 				clientCommand.Serialize(writer);
 				numberOfCommands++;
 			}
-
 			writer.WriteAt(positionOfCommandCount, numberOfCommands);
 		}
 

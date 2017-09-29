@@ -123,7 +123,7 @@ namespace Entmoot.Engine
 
 				if (this.FrameTick % this.NetworkSendRate == 0)
 				{
-					ClientUpdateSerializer<TCommandData>.Send(this.serverNetworkConnection, this.clientCommandHistory, this.LatestServerTickReceived);
+					ClientUpdateSerializer<TCommandData>.Send(this.serverNetworkConnection, this.clientCommandHistory, this.LatestServerTickReceived, this.LatestFrameTickAcknowledgedByServer);
 				}
 			}
 
