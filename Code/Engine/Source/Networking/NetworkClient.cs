@@ -155,7 +155,7 @@ namespace Entmoot.Engine
 			this.outgoingMessage.Write(this.ApplicationID.GetHashCode());
 			this.outgoingMessage.Write(this.MaxMessageSize);
 			this.outgoingMessage.Write("znamez");
-			this.socket.SendTo(this.outgoingMessage.MessageData, this.serverEndPoint);
+			((INetworkConnection)this).SendMessage(this.outgoingMessage);
 		}
 
 		/// <summary>

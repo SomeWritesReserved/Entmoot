@@ -212,7 +212,7 @@ namespace Entmoot.Engine
 			this.outgoingMessage.Write(clientID);
 			this.outgoingMessage.Write(this.ApplicationID.GetHashCode());
 			this.outgoingMessage.Write(this.MaxMessageSize);
-			this.socket.SendTo(this.outgoingMessage.MessageData, toEndPoint);
+			((INetworkConnection)this.clients[clientID]).SendMessage(this.outgoingMessage);
 		}
 
 		/// <summary>
@@ -384,7 +384,7 @@ namespace Entmoot.Engine
 		public int SentBytes;
 		/// <summary>The number of complete packets sent over one entire update.</summary>
 		public int SentPackets;
-		
+
 		/// <summary>The number of clients in the process of connecting at the end of an update.</summary>
 		public int ConnectingClients;
 		/// <summary>The number of clients fully connected at the end of an update.</summary>
