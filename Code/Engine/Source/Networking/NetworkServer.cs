@@ -122,11 +122,21 @@ namespace Entmoot.Engine
 		/// </summary>
 		public void Update()
 		{
+			Log<LogNetworkServer>.StartNew();
+
 			while (this.socket.Available > 0)
 			{
 				this.receivedIncomingMessage.Clear();
 				this.receivedIncomingMessage.Length = this.socket.ReceiveFrom(this.receivedIncomingMessage.MessageData, ref this.receivedEndPoint);
 				this.processIncomingMessage(this.receivedIncomingMessage, (IPEndPoint)this.receivedEndPoint);
+				Log<LogNetworkServer>.Data.ReceivedBytes += this.receivedIncomingMessage.Length;
+				Log<LogNetworkServer>.Data.ReceivedPackets++;
+			}
+
+			foreach (ClientNetworkConnection client in this.clients)
+			{
+				if (client.ClientState == ClientState.AwaitingConnectFinalize) { Log<LogNetworkServer>.Data.ConnectingClients++; }
+				if (client.ClientState == ClientState.Connected) { Log<LogNetworkServer>.Data.ConnectedClients++; }
 			}
 		}
 
@@ -336,6 +346,8 @@ namespace Entmoot.Engine
 			void INetworkConnection.SendMessage(OutgoingMessage outgoingMessage)
 			{
 				this.parentServer.socket.SendTo(outgoingMessage.MessageData, outgoingMessage.Length, SocketFlags.None, this.clientEndPoint);
+				Log<LogNetworkServer>.Data.SentBytes += outgoingMessage.Length;
+				Log<LogNetworkServer>.Data.SentPackets++;
 			}
 
 			#endregion Methods
@@ -355,5 +367,29 @@ namespace Entmoot.Engine
 		}
 
 		#endregion Nested Types
+	}
+
+	/// <summary>
+	/// Log data for <see cref="NetworkServer"/>.
+	/// </summary>
+	public struct LogNetworkServer
+	{
+		#region Fields
+
+		/// <summary>The number of bytes received over one entire update.</summary>
+		public int ReceivedBytes;
+		/// <summary>The number of complete packets received over one entire update.</summary>
+		public int ReceivedPackets;
+		/// <summary>The number of bytes sent over one entire update.</summary>
+		public int SentBytes;
+		/// <summary>The number of complete packets sent over one entire update.</summary>
+		public int SentPackets;
+		
+		/// <summary>The number of clients in the process of connecting at the end of an update.</summary>
+		public int ConnectingClients;
+		/// <summary>The number of clients fully connected at the end of an update.</summary>
+		public int ConnectedClients;
+
+		#endregion Fields
 	}
 }

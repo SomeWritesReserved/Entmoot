@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Source\Core\Log.cs" />
     <Compile Include="Source\Core\ReaderWriter.cs" />
     <Compile Include="Source\Entity\ComponentArray.cs" />
     <Compile Include="Source\Entity\ComponentsDefinition.cs" />

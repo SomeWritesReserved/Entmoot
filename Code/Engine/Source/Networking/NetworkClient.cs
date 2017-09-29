@@ -109,11 +109,15 @@ namespace Entmoot.Engine
 		/// </summary>
 		public void Update()
 		{
+			Log<LogNetworkClient>.StartNew();
+
 			while (this.socket.Available > 0)
 			{
 				this.receivedIncomingMessage.Clear();
 				this.receivedIncomingMessage.Length = this.socket.ReceiveFrom(this.receivedIncomingMessage.MessageData, ref this.receivedEndPoint);
 				this.processIncomingMessage(this.receivedIncomingMessage, (IPEndPoint)this.receivedEndPoint);
+				Log<LogNetworkClient>.Data.ReceivedBytes += this.receivedIncomingMessage.Length;
+				Log<LogNetworkClient>.Data.ReceivedPackets++;
 			}
 		}
 
@@ -188,8 +192,29 @@ namespace Entmoot.Engine
 		void INetworkConnection.SendMessage(OutgoingMessage outgoingMessage)
 		{
 			this.socket.SendTo(outgoingMessage.MessageData, outgoingMessage.Length, SocketFlags.None, this.serverEndPoint);
+			Log<LogNetworkClient>.Data.SentBytes += outgoingMessage.Length;
+			Log<LogNetworkClient>.Data.SentPackets++;
 		}
 
 		#endregion Methods
+	}
+
+	/// <summary>
+	/// Log data for <see cref="NetworkClient"/>.
+	/// </summary>
+	public struct LogNetworkClient
+	{
+		#region Fields
+
+		/// <summary>The number of bytes received over one entire update.</summary>
+		public int ReceivedBytes;
+		/// <summary>The number of complete packets received over one entire update.</summary>
+		public int ReceivedPackets;
+		/// <summary>The number of bytes sent over one entire update.</summary>
+		public int SentBytes;
+		/// <summary>The number of complete packets sent over one entire update.</summary>
+		public int SentPackets;
+
+		#endregion Fields
 	}
 }
