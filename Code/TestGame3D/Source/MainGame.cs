@@ -23,6 +23,7 @@ namespace Entmoot.TestGame3D
 		private readonly StringBuilder stringBuilder = new StringBuilder(2048);
 		private SpriteBatch spriteBatch;
 		private SpriteFont spriteFont;
+		private Graph graph;
 
 		private readonly bool hasServer;
 		private readonly RenderSystem renderSystem;
@@ -31,6 +32,7 @@ namespace Entmoot.TestGame3D
 		private readonly GameServer<CommandData> gameServer;
 		private readonly GameClient<CommandData> gameClient;
 		private CommandData commandData = new CommandData();
+		private bool startedConnecting;
 
 		#endregion Fields
 
@@ -100,7 +102,6 @@ namespace Entmoot.TestGame3D
 			{
 				this.networkServer.Start();
 			}
-			this.networkClient.Connect(new System.Net.IPEndPoint(System.Net.IPAddress.Loopback, 19876));
 
 			base.Initialize();
 		}
@@ -109,6 +110,8 @@ namespace Entmoot.TestGame3D
 		{
 			this.spriteBatch = new SpriteBatch(this.GraphicsDevice);
 			this.spriteFont = this.Content.Load<SpriteFont>("dev_font");
+			this.graph = new Graph(this.GraphicsDevice, new Point(this.GraphicsDevice.Viewport.Width, 100));
+			this.graph.Position = new Vector2(0, this.GraphicsDevice.Viewport.Height - 5);
 
 			this.basicEffect = new BasicEffect(this.GraphicsDevice);
 			this.basicEffect.LightingEnabled = true;
@@ -122,6 +125,12 @@ namespace Entmoot.TestGame3D
 
 		protected override void Update(GameTime gameTime)
 		{
+			KeyboardState keyboardState = Keyboard.GetState();
+			if (!this.startedConnecting && keyboardState.IsKeyDown(Keys.U))
+			{
+				this.networkClient.Connect(new System.Net.IPEndPoint(System.Net.IPAddress.Loopback, 19876));
+				startedConnecting = true;
+			}
 		}
 
 		protected override void Draw(GameTime gameTime)
@@ -179,7 +188,7 @@ namespace Entmoot.TestGame3D
 
 			if (this.hasServer)
 			{
-				this.stringBuilder.Append("SERVER\n RecvBytes/s ");
+				this.stringBuilder.Append("\nSERVER\n RecvBytes/s ");
 				this.stringBuilder.Append(Log<LogNetworkServer>.History.Sum((d) => d.ReceivedBytes) / 2);
 				this.stringBuilder.Append("\n SentBytes/s ");
 				this.stringBuilder.Append(Log<LogNetworkServer>.History.Sum((d) => d.SentBytes) / 2);
@@ -201,6 +210,23 @@ namespace Entmoot.TestGame3D
 			this.spriteBatch.End();
 			this.GraphicsDevice.BlendState = blendState;
 			this.GraphicsDevice.DepthStencilState = depthStencilState;
+
+			this.drawGraph(Log<LogNetworkServer>.History, (log) => log.SentPackets, Color.Wheat);
+		}
+
+		private float[] graphData = new float[120];
+		private void drawGraph<T>(IReadOnlyCollection<T> history, Func<T, float> selector, Color color)
+		{
+			float max = 0;
+			int index = this.graphData.Length - history.Count;
+			foreach (T t in history)
+			{
+				float value = selector(t);
+				if (value > max) { max = value; }
+				this.graphData[index++] = value;
+			}
+			this.graph.MaxValue = max;
+			this.graph.Draw(this.graphData, color);
 		}
 
 		#endregion Methods
