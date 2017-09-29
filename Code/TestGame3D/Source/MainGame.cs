@@ -230,7 +230,16 @@ namespace Entmoot.TestGame3D
 			this.GraphicsDevice.BlendState = blendState;
 			this.GraphicsDevice.DepthStencilState = depthStencilState;
 
-			this.drawGraph(Log<LogNetworkServer>.History, (log) => log.ReceivedBytes, Color.Wheat);
+			if (this.hasServer)
+			{
+				this.drawGraph(Log<LogNetworkServer>.History, (log) => log.ReceivedBytes, Color.MistyRose);
+				this.drawGraph(Log<LogNetworkServer>.History, (log) => log.SentBytes, Color.AliceBlue);
+			}
+			else
+			{
+				this.drawGraph(Log<LogNetworkClient>.History, (log) => log.ReceivedBytes, Color.MistyRose);
+				this.drawGraph(Log<LogNetworkClient>.History, (log) => log.SentBytes, Color.AliceBlue);
+			}
 		}
 
 		private float[] graphData = new float[120];
