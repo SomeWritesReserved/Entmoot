@@ -32,7 +32,11 @@ namespace Entmoot.TestGame3D
 		private readonly GameServer<CommandData> gameServer;
 		private readonly GameClient<CommandData> gameClient;
 		private CommandData commandData = new CommandData();
-		private bool startedConnecting;
+
+		private bool isNetworkedPaused;
+
+		private KeyboardState currentKeyboardState;
+		private KeyboardState previousKeyboardState;
 
 		#endregion Fields
 
@@ -125,12 +129,19 @@ namespace Entmoot.TestGame3D
 
 		protected override void Update(GameTime gameTime)
 		{
-			KeyboardState keyboardState = Keyboard.GetState();
-			if (!this.startedConnecting && keyboardState.IsKeyDown(Keys.U))
+			this.currentKeyboardState = Keyboard.GetState();
+
+			if (this.isKeyPressed(Keys.U) && !this.networkClient.IsConnected)
 			{
 				this.networkClient.Connect(new System.Net.IPEndPoint(System.Net.IPAddress.Loopback, 19876));
-				startedConnecting = true;
 			}
+
+			if (this.isKeyPressed(Keys.P))
+			{
+				this.isNetworkedPaused = !this.isNetworkedPaused;
+			}
+
+			this.previousKeyboardState = this.currentKeyboardState;
 		}
 
 		protected override void Draw(GameTime gameTime)
@@ -141,7 +152,7 @@ namespace Entmoot.TestGame3D
 			this.basicEffect.Projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(90.0f), this.GraphicsDevice.Viewport.AspectRatio, 0.1f, 1000.0f);
 			this.renderSystem.BasicEffect = this.basicEffect;
 
-			if (this.hasServer)
+			if (this.hasServer && !this.isNetworkedPaused)
 			{
 				this.networkServer.Update();
 				this.gameServer.Update();
@@ -173,8 +184,16 @@ namespace Entmoot.TestGame3D
 						this.basicEffect.View = Matrix.CreateLookAt(spatialComponent.Position, spatialComponent.Position + Vector3.Transform(Vector3.Forward, spatialComponent.Rotation), Vector3.Up);
 					}
 				}
-				this.networkClient.Update();
-				this.gameClient.Update(this.commandData);
+
+				if (!this.isNetworkedPaused)
+				{
+					this.networkClient.Update();
+					this.gameClient.Update(this.commandData);
+				}
+				else
+				{
+					this.renderSystem.Update(this.gameClient.RenderedSnapshot.EntityArray);
+				}
 			}
 
 			this.drawDebugUI();
@@ -211,7 +230,7 @@ namespace Entmoot.TestGame3D
 			this.GraphicsDevice.BlendState = blendState;
 			this.GraphicsDevice.DepthStencilState = depthStencilState;
 
-			this.drawGraph(Log<LogNetworkServer>.History, (log) => log.SentPackets, Color.Wheat);
+			this.drawGraph(Log<LogNetworkServer>.History, (log) => log.ReceivedBytes, Color.Wheat);
 		}
 
 		private float[] graphData = new float[120];
@@ -227,6 +246,11 @@ namespace Entmoot.TestGame3D
 			}
 			this.graph.MaxValue = max;
 			this.graph.Draw(this.graphData, color);
+		}
+
+		private bool isKeyPressed(Keys key)
+		{
+			return (this.currentKeyboardState.IsKeyDown(key) && this.previousKeyboardState.IsKeyUp(key));
 		}
 
 		#endregion Methods
