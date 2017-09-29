@@ -20,6 +20,10 @@ namespace Entmoot.TestGame3D
 		private readonly GraphicsDeviceManager graphicsDeviceManager;
 		private BasicEffect basicEffect;
 
+		private readonly StringBuilder stringBuilder = new StringBuilder(2048);
+		private SpriteBatch spriteBatch;
+		private SpriteFont spriteFont;
+
 		private readonly bool hasServer;
 		private readonly RenderSystem renderSystem;
 		private readonly NetworkServer networkServer;
@@ -37,6 +41,7 @@ namespace Entmoot.TestGame3D
 			this.graphicsDeviceManager = new GraphicsDeviceManager(this);
 			this.graphicsDeviceManager.GraphicsProfile = GraphicsProfile.HiDef;
 			this.renderSystem = new RenderSystem(this.graphicsDeviceManager);
+			this.Content.RootDirectory = "Assets";
 
 			ComponentsDefinition componentsDefinition = new ComponentsDefinition();
 			componentsDefinition.RegisterComponentType<SpatialComponent>();
@@ -102,6 +107,9 @@ namespace Entmoot.TestGame3D
 
 		protected override void LoadContent()
 		{
+			this.spriteBatch = new SpriteBatch(this.GraphicsDevice);
+			this.spriteFont = this.Content.Load<SpriteFont>("dev_font");
+
 			this.basicEffect = new BasicEffect(this.GraphicsDevice);
 			this.basicEffect.LightingEnabled = true;
 			this.basicEffect.TextureEnabled = true;
@@ -160,7 +168,39 @@ namespace Entmoot.TestGame3D
 				this.gameClient.Update(this.commandData);
 			}
 
+			this.drawDebugUI();
+
 			if (keyboardState.IsKeyDown(Keys.Escape)) { this.Exit(); }
+		}
+
+		private void drawDebugUI()
+		{
+			this.stringBuilder.Clear();
+
+			if (this.hasServer)
+			{
+				this.stringBuilder.Append("SERVER\n RecvBytes/s ");
+				this.stringBuilder.Append(Log<LogNetworkServer>.History.Sum((d) => d.ReceivedBytes) / 2);
+				this.stringBuilder.Append("\n SentBytes/s ");
+				this.stringBuilder.Append(Log<LogNetworkServer>.History.Sum((d) => d.SentBytes) / 2);
+				this.stringBuilder.Append("\n NumClients  ");
+				this.stringBuilder.Append(Log<LogNetworkServer>.Data.ConnectedClients);
+				this.stringBuilder.Append("\n ClientsWait ");
+				this.stringBuilder.Append(Log<LogNetworkServer>.Data.ConnectingClients);
+			}
+
+			this.stringBuilder.Append("\nCLIENT\n RecvBytes/s ");
+			this.stringBuilder.Append(Log<LogNetworkClient>.History.Sum((d) => d.ReceivedBytes) / 2);
+			this.stringBuilder.Append("\n SentBytes/s ");
+			this.stringBuilder.Append(Log<LogNetworkClient>.History.Sum((d) => d.SentBytes) / 2);
+
+			BlendState blendState = this.GraphicsDevice.BlendState;
+			DepthStencilState depthStencilState = this.GraphicsDevice.DepthStencilState;
+			this.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
+			this.spriteBatch.DrawString(this.spriteFont, this.stringBuilder, Vector2.One, Color.White);
+			this.spriteBatch.End();
+			this.GraphicsDevice.BlendState = blendState;
+			this.GraphicsDevice.DepthStencilState = depthStencilState;
 		}
 
 		#endregion Methods
