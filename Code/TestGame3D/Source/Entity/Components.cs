@@ -47,6 +47,12 @@ namespace Entmoot.TestGame3D
 			this.Rotation.W = reader.ReadSingle();
 		}
 
+		public void ResetToDefaults()
+		{
+			this.Position = Vector3.Zero;
+			this.Rotation = Quaternion.Identity;
+		}
+
 		#endregion Methods
 	}
 }

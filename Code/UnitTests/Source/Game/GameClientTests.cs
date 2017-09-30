@@ -1045,6 +1045,11 @@ namespace Entmoot.UnitTests
 				this.Position = reader.ReadSingle();
 			}
 
+			public void ResetToDefaults()
+			{
+				this = default(MockComponent);
+			}
+
 			#endregion Methods
 		}
 

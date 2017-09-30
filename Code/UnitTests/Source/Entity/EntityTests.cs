@@ -628,6 +628,11 @@ namespace Entmoot.UnitTests
 				this.PositionY = reader.ReadSingle();
 			}
 
+			public void ResetToDefaults()
+			{
+				this = default(PositionComponent2D);
+			}
+
 			#endregion Methods
 		}
 
@@ -656,6 +661,11 @@ namespace Entmoot.UnitTests
 				this.HealthAmount = reader.ReadInt32();
 			}
 
+			public void ResetToDefaults()
+			{
+				this = default(HealthComponent);
+			}
+
 			#endregion Methods
 		}
 
@@ -682,6 +692,11 @@ namespace Entmoot.UnitTests
 			public void Deserialize(IReader reader)
 			{
 				this.StringValue = reader.ReadString();
+			}
+
+			public void ResetToDefaults()
+			{
+				this = default(StringComponent);
 			}
 
 			#endregion Methods

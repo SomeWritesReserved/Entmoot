@@ -69,7 +69,7 @@ namespace Entmoot.TestGame3D
 				for (int clientID = 0; clientID < MainGame.maxClients; clientID++)
 				{
 					this.gameServer.EntityArray.TryCreateEntity(out Entity clientEntity);
-					clientEntity.AddComponent<SpatialComponent>().Rotation = Quaternion.Identity;
+					clientEntity.AddComponent<SpatialComponent>();
 				}
 
 				// Add some stuff to the world
@@ -79,7 +79,6 @@ namespace Entmoot.TestGame3D
 					{
 						this.gameServer.EntityArray.TryCreateEntity(out Entity entity);
 						entity.AddComponent<SpatialComponent>().Position = new Vector3(x * 5, 0, z * 5);
-						entity.AddComponent<SpatialComponent>().Rotation = Quaternion.Identity;
 					}
 				}
 			}

@@ -488,6 +488,11 @@ namespace Entmoot.TestGame
 			this.Position.Z = reader.ReadSingle();
 		}
 
+		public void ResetToDefaults()
+		{
+			this = default(PositionComponent);
+		}
+
 		#endregion Methods
 	}
 

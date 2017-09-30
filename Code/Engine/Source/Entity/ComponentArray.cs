@@ -31,6 +31,11 @@ namespace Entmoot.Engine
 		/// </summary>
 		void Deserialize(IReader reader);
 
+		/// <summary>
+		/// Resets this component to have its default values.
+		/// </summary>
+		void ResetToDefaults();
+
 		#endregion Methods
 	}
 
@@ -111,8 +116,12 @@ namespace Entmoot.Engine
 		public ComponentArray(int capacity)
 		{
 			this.Capacity = capacity;
-			this.components = new TComponent[this.Capacity];
 			this.componentStates = new StateArray(this.Capacity);
+			this.components = new TComponent[this.Capacity];
+			foreach (TComponent component in this.components)
+			{
+				component.ResetToDefaults();
+			}
 		}
 
 		#endregion Constructors
@@ -165,7 +174,7 @@ namespace Entmoot.Engine
 		/// </summary>
 		public void RemoveComponent(Entity entity)
 		{
-			this.components[entity.ID] = default(TComponent);
+			this.components[entity.ID].ResetToDefaults();
 			this.componentStates[entity.ID] = false;
 		}
 
