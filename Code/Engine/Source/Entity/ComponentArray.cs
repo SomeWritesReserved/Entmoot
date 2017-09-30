@@ -81,12 +81,12 @@ namespace Entmoot.Engine
 		void Interpolate(IComponentArray otherA, IComponentArray otherB, float amount);
 
 		/// <summary>
-		/// Writes the state of all component data to a binary source.
+		/// Writes the state of all component data to a binary source, only writing data that has changed from a previous component array.
 		/// </summary>
 		void Serialize(IComponentArray previousComponentArray, IWriter writer);
 
 		/// <summary>
-		/// Reads and overwrites the current state of all component data from a binary source.
+		/// Reads and overwrites the current state of all component data from a binary source, basing incoming data on a previous component array's data.
 		/// </summary>
 		void Deserialize(IComponentArray previousComponentArray, IReader reader);
 
@@ -243,7 +243,7 @@ namespace Entmoot.Engine
 		}
 
 		/// <summary>
-		/// Writes the state of all component data to a binary source.
+		/// Writes the state of all component data to a binary source, only writing data that has changed from a previous component array.
 		/// </summary>
 		public void Serialize(ComponentArray<TComponent> previousComponentArray, IWriter writer)
 		{
@@ -264,7 +264,7 @@ namespace Entmoot.Engine
 		}
 
 		/// <summary>
-		/// Writes the state of all component data to a binary source.
+		/// Writes the state of all component data to a binary source, only writing data that has changed from a previous component array.
 		/// </summary>
 		void IComponentArray.Serialize(IComponentArray previousComponentArray, IWriter writer)
 		{
@@ -272,7 +272,7 @@ namespace Entmoot.Engine
 		}
 
 		/// <summary>
-		/// Reads and overwrites the current state of all component data from a binary source.
+		/// Reads and overwrites the current state of all component data from a binary source, basing incoming data on a previous component array's data.
 		/// </summary>
 		public void Deserialize(ComponentArray<TComponent> previousComponentArray, IReader reader)
 		{
@@ -293,7 +293,7 @@ namespace Entmoot.Engine
 		}
 
 		/// <summary>
-		/// Reads and overwrites the current state of all component data from a binary source.
+		/// Reads and overwrites the current state of all component data from a binary source, basing incoming data on a previous component array's data.
 		/// </summary>
 		void IComponentArray.Deserialize(IComponentArray previousComponentArray, IReader reader)
 		{

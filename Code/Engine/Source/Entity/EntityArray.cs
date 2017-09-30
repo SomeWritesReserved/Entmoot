@@ -157,7 +157,7 @@ namespace Entmoot.Engine
 		}
 
 		/// <summary>
-		/// Writes all entity and component data to a binary source.
+		/// Writes all entity and component data to a binary source, only writing data that has changed from a previous entity array.
 		/// </summary>
 		public void Serialize(EntityArray previousEntityArray, IWriter writer)
 		{
@@ -169,7 +169,7 @@ namespace Entmoot.Engine
 		}
 
 		/// <summary>
-		/// Reads and overwrites all current entity and component data from a binary source.
+		/// Reads and overwrites all current entity and component data from a binary source, basing incoming data on a previous entity array's data.
 		/// </summary>
 		public void Deserialize(EntityArray previousEntityArray, IReader reader)
 		{

@@ -15,7 +15,7 @@ namespace Entmoot.Engine
 		#region Methods
 
 		/// <summary>
-		/// Serializes the given server update (entity snapshot and client-specific data) and immediately sends a packet.
+		/// Serializes the given server update (entity snapshot and client-specific data) and immediately sends a packet, only writing data that has changed from a previous snapshot..
 		/// </summary>
 		public static void Send(INetworkConnection clientNetworkConnection, EntitySnapshot previousEntitySnapshot, EntitySnapshot latestEntitySnapshot, int latestClientTickReceived, int clientCommandingEntityID)
 		{
@@ -25,7 +25,7 @@ namespace Entmoot.Engine
 		}
 
 		/// <summary>
-		/// Serializes the given server update (entity snapshot and client-specific data) to the given writer.
+		/// Serializes the given server update (entity snapshot and client-specific data) to the given writer, only writing data that has changed from a previous snapshot.
 		/// </summary>
 		public static void Serialize(IWriter writer, EntitySnapshot previousEntitySnapshot, EntitySnapshot latestEntitySnapshot, int latestClientTickReceived, int clientCommandingEntityID)
 		{
@@ -36,7 +36,7 @@ namespace Entmoot.Engine
 		}
 
 		/// <summary>
-		/// Deserializes a server update (entity snapshot and client-specific data) based on the given reader.
+		/// Deserializes a server update (entity snapshot and client-specific data) based on the given reader, basing incoming data on a previous snapshot's data.
 		/// </summary>
 		public static void Deserialize(IReader reader, EntitySnapshot[] previousEntitySnapshots, EntitySnapshot latestEntitySnapshot, out int latestClientTickAcknowledgedByServer, out int clientCommandingEntityID)
 		{
@@ -56,8 +56,8 @@ namespace Entmoot.Engine
 		}
 
 		/// <summary>
-		/// Deserializes a server update (entity snapshot and client-specific data) based on the given reader, but only if the reader contains a newer server update.
-		/// Returns true if the entity snapshot was actually updated from the reader.
+		/// Deserializes a server update (entity snapshot and client-specific data) based on the given reader, basing incoming data on a previous snapshot's data.
+		/// Only overwrites if the reader contains a newer server update. Returns true if the entity snapshot was actually updated from the reader.
 		/// </summary>
 		public static bool DeserializeIfNewer(IReader reader, EntitySnapshot[] previousEntitySnapshots, EntitySnapshot latestEntitySnapshot, out int latestClientTickAcknowledgedByServer, out int clientCommandingEntityID)
 		{

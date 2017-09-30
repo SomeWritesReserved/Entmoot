@@ -74,7 +74,7 @@ namespace Entmoot.Engine
 		}
 
 		/// <summary>
-		/// Writes this entity snapshot's data to a binary source.
+		/// Writes this entity snapshot's data to a binary source, only writing data that has changed from a previous snapshot.
 		/// </summary>
 		public void Serialize(EntitySnapshot previousEntitySnapshot, IWriter writer)
 		{
@@ -83,7 +83,7 @@ namespace Entmoot.Engine
 		}
 
 		/// <summary>
-		/// Reads and overwrites this entity snapshot with data from a binary source.
+		/// Reads and overwrites this entity snapshot with data from a binary source, basing incoming data on a previous snapshot's data.
 		/// </summary>
 		public void Deserialize(EntitySnapshot previousEntitySnapshot, IReader reader)
 		{
