@@ -118,9 +118,9 @@ namespace Entmoot.Engine
 			this.Capacity = capacity;
 			this.componentStates = new StateArray(this.Capacity);
 			this.components = new TComponent[this.Capacity];
-			foreach (TComponent component in this.components)
+			for (int entityID = 0; entityID < this.Capacity; entityID++)
 			{
-				component.ResetToDefaults();
+				this.components[entityID].ResetToDefaults();
 			}
 		}
 
