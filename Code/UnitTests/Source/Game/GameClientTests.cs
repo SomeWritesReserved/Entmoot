@@ -957,7 +957,7 @@ namespace Entmoot.UnitTests
 				this.serverEntitySnapshot.Update(mockServerUpdate.ServerFrameTick, this.serverEntitySnapshot.EntityArray);
 
 				OutgoingMessage outgoingMessage = new OutgoingMessage(new byte[1024]);
-				ServerUpdateSerializer.Serialize(outgoingMessage, this.serverEntitySnapshot, mockServerUpdate.LatestClientTickReceived, mockServerUpdate.CommandingEntityID);
+				ServerUpdateSerializer.Serialize(outgoingMessage, null, this.serverEntitySnapshot, mockServerUpdate.LatestClientTickReceived, mockServerUpdate.CommandingEntityID);
 				return new IncomingMessage(outgoingMessage.ToArray());
 			}
 

@@ -401,12 +401,12 @@ namespace Entmoot.UnitTests
 			byte[] serializedBytes = new byte[512];
 			{
 				OutgoingMessage outgoingMessage = new OutgoingMessage(serializedBytes);
-				sourceEntityArray.Serialize(outgoingMessage);
+				sourceEntityArray.Serialize(null,outgoingMessage);
 				serializedBytes = outgoingMessage.ToArray();
 			}
 			{
 				IncomingMessage incomingMessage = new IncomingMessage(serializedBytes);
-				destinationEntityArray.Deserialize(incomingMessage);
+				destinationEntityArray.Deserialize(null,incomingMessage);
 			}
 			EntityTests.AssertStandardEntityArray(destinationEntityArray);
 		}
@@ -437,12 +437,12 @@ namespace Entmoot.UnitTests
 			byte[] serializedBytes = new byte[512];
 			{
 				OutgoingMessage outgoingMessage = new OutgoingMessage(serializedBytes);
-				sourceEntityArray.Serialize(outgoingMessage);
+				sourceEntityArray.Serialize(null,outgoingMessage);
 				serializedBytes = outgoingMessage.ToArray();
 			}
 			{
 				IncomingMessage incomingMessage = new IncomingMessage(serializedBytes);
-				destinationEntityArray.Deserialize(incomingMessage);
+				destinationEntityArray.Deserialize(null,incomingMessage);
 			}
 			EntityTests.AssertStandardEntityArray(destinationEntityArray);
 		}
