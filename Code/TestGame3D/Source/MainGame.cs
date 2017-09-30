@@ -61,22 +61,23 @@ namespace Entmoot.TestGame3D
 			if (this.hasServer)
 			{
 				this.networkServer = new NetworkServer("1", MainGame.maxClients, 4000, 19876);
-				this.gameServer = new GameServer<CommandData>(this.networkServer.ClientNetworkConnections, 20, 30, componentsDefinition, new ISystem[0]);
+				this.gameServer = new GameServer<CommandData>(this.networkServer.ClientNetworkConnections, 20, 30, componentsDefinition, new ISystem[] { new SpinnerSystem() });
 
 				// Reserve the first entities for all potential clients
 				for (int clientID = 0; clientID < MainGame.maxClients; clientID++)
 				{
 					this.gameServer.EntityArray.TryCreateEntity(out Entity clientEntity);
-					clientEntity.AddComponent<SpatialComponent>();
+					clientEntity.AddComponent<SpatialComponent>().Rotation = Quaternion.Identity;
 				}
 
 				// Add some stuff to the world
-				for (int x = -2; x <= 2; x++)
+				for (int x = -1; x <= 1; x++)
 				{
-					for (int z = -2; z <= 2; z++)
+					for (int z = -1; z <= 1; z++)
 					{
 						this.gameServer.EntityArray.TryCreateEntity(out Entity entity);
 						entity.AddComponent<SpatialComponent>().Position = new Vector3(x * 5, 0, z * 5);
+						entity.AddComponent<SpatialComponent>().Rotation = Quaternion.Identity;
 					}
 				}
 			}
@@ -228,7 +229,10 @@ namespace Entmoot.TestGame3D
 
 			if (this.hasServer)
 			{
-				this.stringBuilder.Append("\nSERVER\n RecvBytes/s ");
+				this.stringBuilder.Append("\nSERVER");
+				this.stringBuilder.Append("\n FrameTick   ");
+				this.stringBuilder.Append(this.gameServer.FrameTick);
+				this.stringBuilder.Append("\n RecvBytes/s ");
 				this.stringBuilder.Append(Log<LogNetworkServer>.History.Sum((d) => d.ReceivedBytes) / 2);
 				this.stringBuilder.Append("\n SentBytes/s ");
 				this.stringBuilder.Append(Log<LogNetworkServer>.History.Sum((d) => d.SentBytes) / 2);
@@ -238,7 +242,10 @@ namespace Entmoot.TestGame3D
 				this.stringBuilder.Append(Log<LogNetworkServer>.Data.ConnectingClients);
 			}
 
-			this.stringBuilder.Append("\nCLIENT\n RecvBytes/s ");
+			this.stringBuilder.Append("\nCLIENT");
+			this.stringBuilder.Append("\n FrameTick   ");
+			this.stringBuilder.Append(this.gameClient.FrameTick);
+			this.stringBuilder.Append("\n RecvBytes/s ");
 			this.stringBuilder.Append(Log<LogNetworkClient>.History.Sum((d) => d.ReceivedBytes) / 2);
 			this.stringBuilder.Append("\n SentBytes/s ");
 			this.stringBuilder.Append(Log<LogNetworkClient>.History.Sum((d) => d.SentBytes) / 2);
@@ -253,12 +260,12 @@ namespace Entmoot.TestGame3D
 
 			if (this.hasServer)
 			{
-				//this.drawGraph(Log<LogNetworkServer>.History, (log) => log.ReceivedBytes, Color.MistyRose);
-				this.drawGraph(Log<LogNetworkServer>.History, (log) => log.SentBytes, Color.AliceBlue);
+				this.drawGraph(Log<LogNetworkServer>.History, (log) => log.ReceivedBytes, Color.AliceBlue);
+				//this.drawGraph(Log<LogNetworkServer>.History, (log) => log.SentBytes, Color.AliceBlue);
 			}
 			else
 			{
-				this.drawGraph(Log<LogNetworkClient>.History, (log) => log.ReceivedBytes, Color.MistyRose);
+				this.drawGraph(Log<LogNetworkClient>.History, (log) => log.ReceivedBytes, Color.AliceBlue);
 				//this.drawGraph(Log<LogNetworkClient>.History, (log) => log.SentBytes, Color.AliceBlue);
 			}
 		}
