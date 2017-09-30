@@ -247,6 +247,7 @@ namespace Entmoot.Engine
 			this.componentStates.Serialize(writer);
 			for (int entityID = 0; entityID < this.Capacity; entityID++)
 			{
+				if (!this.componentStates[entityID]) { continue; }
 				this.components[entityID].Serialize(writer);
 			}
 		}
@@ -259,6 +260,7 @@ namespace Entmoot.Engine
 			this.componentStates.Deserialize(reader);
 			for (int entityID = 0; entityID < this.Capacity; entityID++)
 			{
+				if (!this.componentStates[entityID]) { continue; }
 				this.components[entityID].Deserialize(reader);
 			}
 		}
