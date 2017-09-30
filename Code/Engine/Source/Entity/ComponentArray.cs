@@ -83,7 +83,7 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Writes the state of all component data to a binary source.
 		/// </summary>
-		void Serialize(IWriter writer);
+		void Serialize(IComponentArray previousComponentArray, IWriter writer);
 
 		/// <summary>
 		/// Reads and overwrites the current state of all component data from a binary source.
@@ -105,6 +105,8 @@ namespace Entmoot.Engine
 		private readonly TComponent[] components;
 		/// <summary>Stores whether or not this component type has been added to a given entity ID.</summary>
 		private readonly StateArray componentStates;
+		/// <summary>Used during serialization/deserialization to show which components have been excluded from serialization because they haven't changed (delta compression) or don't exist.</summary>
+		private readonly StateArray serializedStates;
 
 		#endregion Fields
 
@@ -117,6 +119,7 @@ namespace Entmoot.Engine
 		{
 			this.Capacity = capacity;
 			this.componentStates = new StateArray(this.Capacity);
+			this.serializedStates = new StateArray(this.Capacity);
 			this.components = new TComponent[this.Capacity];
 			for (int entityID = 0; entityID < this.Capacity; entityID++)
 			{
@@ -242,14 +245,29 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Writes the state of all component data to a binary source.
 		/// </summary>
-		public void Serialize(IWriter writer)
+		public void Serialize(ComponentArray<TComponent> previousComponentArray, IWriter writer)
 		{
-			this.componentStates.Serialize(writer);
+			// Only serialize components that are attached and that have changed compared to the previous component state
 			for (int entityID = 0; entityID < this.Capacity; entityID++)
 			{
-				if (!this.componentStates[entityID]) { continue; }
+				this.serializedStates[entityID] = this.componentStates[entityID] && !this.components[entityID].Equals(previousComponentArray.components[entityID]);
+			}
+
+			this.componentStates.Serialize(writer);
+			this.serializedStates.Serialize(writer);
+			for (int entityID = 0; entityID < this.Capacity; entityID++)
+			{
+				if (!this.serializedStates[entityID]) { continue; }
 				this.components[entityID].Serialize(writer);
 			}
+		}
+
+		/// <summary>
+		/// Writes the state of all component data to a binary source.
+		/// </summary>
+		void IComponentArray.Serialize(IComponentArray previousComponentArray, IWriter writer)
+		{
+			this.Serialize((ComponentArray<TComponent>)previousComponentArray, writer);
 		}
 
 		/// <summary>
@@ -258,9 +276,10 @@ namespace Entmoot.Engine
 		public void Deserialize(IReader reader)
 		{
 			this.componentStates.Deserialize(reader);
+			this.serializedStates.Deserialize(reader);
 			for (int entityID = 0; entityID < this.Capacity; entityID++)
 			{
-				if (!this.componentStates[entityID]) { continue; }
+				if (!this.serializedStates[entityID]) { continue; }
 				this.components[entityID].Deserialize(reader);
 			}
 		}

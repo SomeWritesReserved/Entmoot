@@ -21,6 +21,8 @@ namespace Entmoot.Engine
 		private readonly Queue<EntitySnapshot> entitySnapshotHistory;
 		/// <summary>The collection of client proxies (all client proxies exist all the time even if no client is connected for that client ID).</summary>
 		private readonly ClientProxy[] clients;
+		/// <summary>An entity snapshot that is always default which is used for a baseline for serialization.</summary>
+		private readonly EntitySnapshot defaultEntitySnapshot;
 
 		#endregion Fields
 
@@ -40,6 +42,7 @@ namespace Entmoot.Engine
 			{
 				this.entitySnapshotHistory.Enqueue(new EntitySnapshot(entityCapacity, componentsDefinition));
 			}
+			this.defaultEntitySnapshot = new EntitySnapshot(entityCapacity, componentsDefinition);
 
 			// Create all the client proxies now, bound directly to the client network connections
 			this.clients = new ClientProxy[clientNetworkConnections.Count];
@@ -116,6 +119,19 @@ namespace Entmoot.Engine
 			{
 				clientCommand.CommandData.ApplyToEntity(commandingEntity);
 			}
+		}
+
+		/// <summary>
+		/// Returns the stored entity snapshot that was taken at a taken at a given frame tick. Returns the default snapshot if no snapshot
+		/// is found (either because a snapshot wasn't taken at that tick or the tick is too old and the entity snapshot was already removed).
+		/// </summary>
+		private EntitySnapshot getEntitySnapshotForServerFrameTick(int serverFrameTick)
+		{
+			foreach (EntitySnapshot entitySnapshot in this.entitySnapshotHistory)
+			{
+				if (entitySnapshot.ServerFrameTick == serverFrameTick) { return entitySnapshot; }
+			}
+			return this.defaultEntitySnapshot;
 		}
 
 		#endregion Methods
@@ -203,9 +219,10 @@ namespace Entmoot.Engine
 			/// <summary>
 			/// Sends the client an update of the given entity state and other information.
 			/// </summary>
-			public void SendServerUpdate(EntitySnapshot entitySnapshot)
+			public void SendServerUpdate(EntitySnapshot latestEntitySnapshot)
 			{
-				ServerUpdateSerializer.Send(this.clientNetworkConnection, entitySnapshot, this.LatestClientTickReceived, this.CommandingEntityID);
+				EntitySnapshot previousEntitySnapshot = this.parentServer.getEntitySnapshotForServerFrameTick(this.LatestFrameTickAcknowledgedByClient);
+				ServerUpdateSerializer.Send(this.clientNetworkConnection, previousEntitySnapshot, latestEntitySnapshot, this.LatestClientTickReceived, this.CommandingEntityID);
 			}
 
 			/// <summary>
@@ -215,7 +232,6 @@ namespace Entmoot.Engine
 			{
 				this.LatestClientTickReceived = -1;
 				this.LatestFrameTickAcknowledgedByClient = -1;
-
 			}
 
 			#endregion Methods

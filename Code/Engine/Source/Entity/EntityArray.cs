@@ -159,12 +159,12 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Writes all entity and component data to a binary source.
 		/// </summary>
-		public void Serialize(IWriter writer)
+		public void Serialize(EntityArray previousEntityArray, IWriter writer)
 		{
 			for (int i = 0; i < this.entityStates.Length; i++) { writer.Write((byte)this.entityStates[i]); }
 			for (int componentTypeID = 0; componentTypeID < this.componentArrays.Count; componentTypeID++)
 			{
-				this.componentArrays[componentTypeID].Serialize(writer);
+				this.componentArrays[componentTypeID].Serialize(previousEntityArray.componentArrays[componentTypeID], writer);
 			}
 		}
 

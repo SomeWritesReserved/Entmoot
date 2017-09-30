@@ -17,21 +17,21 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Serializes the given server update (entity snapshot and client-specific data) and immediately sends a packet.
 		/// </summary>
-		public static void Send(INetworkConnection clientNetworkConnection, EntitySnapshot entitySnapshot, int latestClientTickReceived, int clientCommandingEntityID)
+		public static void Send(INetworkConnection clientNetworkConnection, EntitySnapshot previousEntitySnapshot, EntitySnapshot latestEntitySnapshot, int latestClientTickReceived, int clientCommandingEntityID)
 		{
 			OutgoingMessage outgoingMessage = clientNetworkConnection.GetOutgoingMessageToSend();
-			ServerUpdateSerializer.Serialize(outgoingMessage, entitySnapshot, latestClientTickReceived, clientCommandingEntityID);
+			ServerUpdateSerializer.Serialize(outgoingMessage, previousEntitySnapshot, latestEntitySnapshot, latestClientTickReceived, clientCommandingEntityID);
 			clientNetworkConnection.SendMessage(outgoingMessage);
 		}
 
 		/// <summary>
 		/// Serializes the given server update (entity snapshot and client-specific data) to the given writer.
 		/// </summary>
-		public static void Serialize(IWriter writer, EntitySnapshot entitySnapshot, int latestClientTickReceived, int clientCommandingEntityID)
+		public static void Serialize(IWriter writer, EntitySnapshot previousEntitySnapshot, EntitySnapshot latestEntitySnapshot, int latestClientTickReceived, int clientCommandingEntityID)
 		{
 			writer.Write(latestClientTickReceived);
 			writer.Write(clientCommandingEntityID);
-			entitySnapshot.Serialize(writer);
+			latestEntitySnapshot.Serialize(previousEntitySnapshot, writer);
 		}
 
 		/// <summary>
