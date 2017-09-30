@@ -79,7 +79,7 @@ namespace Entmoot.Engine
 		public void Serialize(EntitySnapshot previousEntitySnapshot, IWriter writer)
 		{
 			writer.Write(this.ServerFrameTick);
-			this.EntityArray.Serialize(previousEntitySnapshot.EntityArray, writer);
+			this.EntityArray.Serialize(previousEntitySnapshot?.EntityArray, writer);
 		}
 
 		/// <summary>

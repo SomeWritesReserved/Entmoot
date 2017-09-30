@@ -164,7 +164,7 @@ namespace Entmoot.Engine
 			for (int i = 0; i < this.entityStates.Length; i++) { writer.Write((byte)this.entityStates[i]); }
 			for (int componentTypeID = 0; componentTypeID < this.componentArrays.Count; componentTypeID++)
 			{
-				this.componentArrays[componentTypeID].Serialize(previousEntityArray.componentArrays[componentTypeID], writer);
+				this.componentArrays[componentTypeID].Serialize(previousEntityArray?.componentArrays[componentTypeID], writer);
 			}
 		}
 

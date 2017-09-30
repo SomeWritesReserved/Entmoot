@@ -250,7 +250,8 @@ namespace Entmoot.Engine
 			// Only serialize components that are attached and that have changed compared to the previous component state
 			for (int entityID = 0; entityID < this.Capacity; entityID++)
 			{
-				this.serializedStates[entityID] = this.componentStates[entityID] && !this.components[entityID].Equals(previousComponentArray.components[entityID]);
+				this.serializedStates[entityID] = this.componentStates[entityID] &&
+					(previousComponentArray == null || !previousComponentArray.components[entityID].Equals(this.components[entityID]));
 			}
 
 			this.componentStates.Serialize(writer);

@@ -21,8 +21,6 @@ namespace Entmoot.Engine
 		private readonly Queue<EntitySnapshot> entitySnapshotHistory;
 		/// <summary>The collection of client proxies (all client proxies exist all the time even if no client is connected for that client ID).</summary>
 		private readonly ClientProxy[] clients;
-		/// <summary>An entity snapshot that is always default which is used for a baseline for serialization.</summary>
-		private readonly EntitySnapshot defaultEntitySnapshot;
 
 		#endregion Fields
 
@@ -42,7 +40,6 @@ namespace Entmoot.Engine
 			{
 				this.entitySnapshotHistory.Enqueue(new EntitySnapshot(entityCapacity, componentsDefinition));
 			}
-			this.defaultEntitySnapshot = new EntitySnapshot(entityCapacity, componentsDefinition);
 
 			// Create all the client proxies now, bound directly to the client network connections
 			this.clients = new ClientProxy[clientNetworkConnections.Count];
@@ -122,8 +119,8 @@ namespace Entmoot.Engine
 		}
 
 		/// <summary>
-		/// Returns the stored entity snapshot that was taken at a taken at a given frame tick. Returns the default snapshot if no snapshot
-		/// is found (either because a snapshot wasn't taken at that tick or the tick is too old and the entity snapshot was already removed).
+		/// Returns the stored entity snapshot that was taken at a taken at a given frame tick. Returns null if no snapshot is found
+		/// (either because a snapshot wasn't taken at that tick or the tick is too old and the entity snapshot was already removed).
 		/// </summary>
 		private EntitySnapshot getEntitySnapshotForServerFrameTick(int serverFrameTick)
 		{
@@ -131,7 +128,7 @@ namespace Entmoot.Engine
 			{
 				if (entitySnapshot.ServerFrameTick == serverFrameTick) { return entitySnapshot; }
 			}
-			return this.defaultEntitySnapshot;
+			return null;
 		}
 
 		#endregion Methods
