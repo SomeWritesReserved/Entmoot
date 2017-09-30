@@ -72,6 +72,10 @@ namespace Entmoot.TestGame3D
 					clientEntity.AddComponent<SpatialComponent>();
 				}
 
+				// Make some dummy entities that we'll remove to have a gap in entity IDs
+				this.gameServer.EntityArray.TryCreateEntity(out Entity dummy1);
+				this.gameServer.EntityArray.TryCreateEntity(out Entity dummy2);
+
 				// Add some stuff to the world
 				for (int x = -1; x <= 1; x++)
 				{
@@ -81,6 +85,11 @@ namespace Entmoot.TestGame3D
 						entity.AddComponent<SpatialComponent>().Position = new Vector3(x * 5, 0, z * 5);
 					}
 				}
+
+				// Remove those dummy entities to have a gap in entity IDs
+				this.gameServer.EntityArray.RemoveEntity(dummy1);
+				this.gameServer.EntityArray.RemoveEntity(dummy2);
+				this.gameServer.EntityArray.EndUpdate();
 			}
 
 			this.networkClient = new NetworkClient("1", 4000);

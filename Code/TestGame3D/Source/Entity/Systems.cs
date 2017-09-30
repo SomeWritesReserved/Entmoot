@@ -40,7 +40,7 @@ namespace Entmoot.TestGame3D
 
 				this.BasicEffect.AmbientLightColor = Vector3.One * 0.25f;
 				this.BasicEffect.DiffuseColor = entity.ID < 4 ? new Vector3(0.5f, 0.5f, 1.0f) : Vector3.One;
-				if (entity.ID == 10 || entity.ID == 9)
+				if (entity.ID == 12 || entity.ID == 11)
 				{
 					this.BasicEffect.DiffuseColor = new Vector3(1.0f, 0.5f, 0.5f);
 				}
@@ -64,11 +64,11 @@ namespace Entmoot.TestGame3D
 
 				ref SpatialComponent spatialComponent = ref entity.GetComponent<SpatialComponent>();
 
-				if (entity.ID == 10)
+				if (entity.ID == 12)
 				{
 					spatialComponent.Rotation *= Quaternion.CreateFromYawPitchRoll(0.034f, 0, 0);
 				}
-				else if (entity.ID == 9)
+				else if (entity.ID == 11)
 				{
 					spatialComponent.Rotation *= Quaternion.CreateFromYawPitchRoll(0, 0, 0.02f);
 				}
