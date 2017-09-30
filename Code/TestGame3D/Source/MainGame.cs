@@ -34,13 +34,14 @@ namespace Entmoot.TestGame3D
 		private CommandData commandData = new CommandData();
 
 		private bool isNetworkedPaused;
+		private int slowFrames;
 
 		private KeyboardState currentKeyboardState;
 		private KeyboardState previousKeyboardState;
 		private MouseState currentMouseState;
 		private MouseState previousMouseState;
 		private Point mouseDownPoint;
-		bool isDragging;
+		private bool isDragging;
 
 		#endregion Fields
 
@@ -48,6 +49,7 @@ namespace Entmoot.TestGame3D
 
 		public MainGame()
 		{
+			this.InactiveSleepTime = TimeSpan.Zero;
 			this.IsMouseVisible = true;
 			this.graphicsDeviceManager = new GraphicsDeviceManager(this);
 			this.graphicsDeviceManager.GraphicsProfile = GraphicsProfile.HiDef;
@@ -136,6 +138,8 @@ namespace Entmoot.TestGame3D
 
 		protected override void Update(GameTime gameTime)
 		{
+			if (gameTime.IsRunningSlowly) { this.slowFrames++; }
+
 			this.currentKeyboardState = Keyboard.GetState();
 			this.currentMouseState = Mouse.GetState();
 
@@ -172,6 +176,7 @@ namespace Entmoot.TestGame3D
 
 		protected override void Draw(GameTime gameTime)
 		{
+			if (gameTime.IsRunningSlowly) { this.slowFrames++; }
 			this.GraphicsDevice.Clear(Color.Gray);
 
 			this.basicEffect.View = Matrix.CreateLookAt(Vector3.Zero, Vector3.Forward, Vector3.Up);
@@ -227,6 +232,8 @@ namespace Entmoot.TestGame3D
 		{
 			this.stringBuilder.Clear();
 
+			this.stringBuilder.Append("SlowFrames   ");
+			this.stringBuilder.Append(this.slowFrames);
 			if (this.hasServer)
 			{
 				this.stringBuilder.Append("\nSERVER");
