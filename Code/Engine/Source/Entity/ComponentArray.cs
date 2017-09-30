@@ -88,7 +88,7 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Reads and overwrites the current state of all component data from a binary source.
 		/// </summary>
-		void Deserialize(IReader reader);
+		void Deserialize(IComponentArray previousComponentArray, IReader reader);
 
 		#endregion Methods
 	}
@@ -274,15 +274,30 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Reads and overwrites the current state of all component data from a binary source.
 		/// </summary>
-		public void Deserialize(IReader reader)
+		public void Deserialize(ComponentArray<TComponent> previousComponentArray, IReader reader)
 		{
 			this.componentStates.Deserialize(reader);
 			this.serializedStates.Deserialize(reader);
 			for (int entityID = 0; entityID < this.Capacity; entityID++)
 			{
-				if (!this.serializedStates[entityID]) { continue; }
-				this.components[entityID].Deserialize(reader);
+				if (this.serializedStates[entityID])
+				{
+					this.components[entityID].Deserialize(reader);
+				}
+				else if (previousComponentArray != null)
+				{
+					// Components not explicitly sent are assumed to be the same as previously (the case where the component does not exist is a dont-care)
+					this.components[entityID] = previousComponentArray.components[entityID];
+				}
 			}
+		}
+
+		/// <summary>
+		/// Reads and overwrites the current state of all component data from a binary source.
+		/// </summary>
+		void IComponentArray.Deserialize(IComponentArray previousComponentArray, IReader reader)
+		{
+			this.Deserialize((ComponentArray<TComponent>)previousComponentArray, reader);
 		}
 
 		#endregion Methods

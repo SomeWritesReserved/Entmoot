@@ -31,28 +31,49 @@ namespace Entmoot.Engine
 		{
 			writer.Write(latestClientTickReceived);
 			writer.Write(clientCommandingEntityID);
+			writer.Write((previousEntitySnapshot == null) ? -1 : previousEntitySnapshot.ServerFrameTick);
 			latestEntitySnapshot.Serialize(previousEntitySnapshot, writer);
 		}
 
 		/// <summary>
 		/// Deserializes a server update (entity snapshot and client-specific data) based on the given reader.
 		/// </summary>
-		public static void Deserialize(IReader reader, EntitySnapshot entitySnapshot, out int latestClientTickAcknowledgedByServer, out int clientCommandingEntityID)
+		public static void Deserialize(IReader reader, EntitySnapshot[] previousEntitySnapshots, EntitySnapshot latestEntitySnapshot, out int latestClientTickAcknowledgedByServer, out int clientCommandingEntityID)
 		{
 			latestClientTickAcknowledgedByServer = reader.ReadInt32();
 			clientCommandingEntityID = reader.ReadInt32();
-			entitySnapshot.Deserialize(reader);
+			int previousServerFrameTick = reader.ReadInt32();
+			EntitySnapshot previousEntitySnapshot = null;
+			foreach (EntitySnapshot entitySnapshot in previousEntitySnapshots)
+			{
+				if (entitySnapshot.ServerFrameTick == previousServerFrameTick)
+				{
+					previousEntitySnapshot = entitySnapshot;
+					break;
+				}
+			}
+			latestEntitySnapshot.Deserialize(previousEntitySnapshot, reader);
 		}
 
 		/// <summary>
 		/// Deserializes a server update (entity snapshot and client-specific data) based on the given reader, but only if the reader contains a newer server update.
 		/// Returns true if the entity snapshot was actually updated from the reader.
 		/// </summary>
-		public static bool DeserializeIfNewer(IReader reader, EntitySnapshot entitySnapshot, out int latestClientTickAcknowledgedByServer, out int clientCommandingEntityID)
+		public static bool DeserializeIfNewer(IReader reader, EntitySnapshot[] previousEntitySnapshots, EntitySnapshot latestEntitySnapshot, out int latestClientTickAcknowledgedByServer, out int clientCommandingEntityID)
 		{
 			latestClientTickAcknowledgedByServer = reader.ReadInt32();
 			clientCommandingEntityID = reader.ReadInt32();
-			return entitySnapshot.DeserializeIfNewer(reader);
+			int previousServerFrameTick = reader.ReadInt32();
+			EntitySnapshot previousEntitySnapshot = null;
+			foreach (EntitySnapshot entitySnapshot in previousEntitySnapshots)
+			{
+				if (entitySnapshot.ServerFrameTick == previousServerFrameTick)
+				{
+					previousEntitySnapshot = entitySnapshot;
+					break;
+				}
+			}
+			return latestEntitySnapshot.DeserializeIfNewer(previousEntitySnapshot, reader);
 		}
 
 		#endregion Methods

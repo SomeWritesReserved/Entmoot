@@ -171,12 +171,12 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Reads and overwrites all current entity and component data from a binary source.
 		/// </summary>
-		public void Deserialize(IReader reader)
+		public void Deserialize(EntityArray previousEntityArray, IReader reader)
 		{
 			for (int i = 0; i < this.entityStates.Length; i++) { this.entityStates[i] = (EntityState)reader.ReadByte(); }
 			for (int componentTypeID = 0; componentTypeID < this.componentArrays.Count; componentTypeID++)
 			{
-				this.componentArrays[componentTypeID].Deserialize(reader);
+				this.componentArrays[componentTypeID].Deserialize(previousEntityArray?.componentArrays[componentTypeID], reader);
 			}
 		}
 

@@ -85,23 +85,23 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Reads and overwrites this entity snapshot with data from a binary source.
 		/// </summary>
-		public void Deserialize(IReader reader)
+		public void Deserialize(EntitySnapshot previousEntitySnapshot, IReader reader)
 		{
 			this.ServerFrameTick = reader.ReadInt32();
-			this.EntityArray.Deserialize(reader);
+			this.EntityArray.Deserialize(previousEntitySnapshot?.EntityArray, reader);
 		}
 
 		/// <summary>
 		/// Reads and overwrites this entity snapshot with data from a binary source, but only if the binary source represents a newer snapshot.
 		/// Returns true if this snapshot was actually updated from the deserialied binary source.
 		/// </summary>
-		public bool DeserializeIfNewer(IReader reader)
+		public bool DeserializeIfNewer(EntitySnapshot previousEntitySnapshot, IReader reader)
 		{
 			int newServerFrameTick = reader.ReadInt32();
 			if (newServerFrameTick <= this.ServerFrameTick) { return false; }
 
 			this.ServerFrameTick = newServerFrameTick;
-			this.EntityArray.Deserialize(reader);
+			this.EntityArray.Deserialize(previousEntitySnapshot?.EntityArray, reader);
 			return true;
 		}
 
