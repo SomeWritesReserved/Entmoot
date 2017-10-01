@@ -99,7 +99,12 @@ namespace Entmoot.Engine
 		public ComponentArray<TComponent> GetComponentArray<TComponent>()
 			where TComponent : struct, IComponent<TComponent>
 		{
-			return this.componentArrays.OfType<ComponentArray<TComponent>>().Single();
+			for (int componentTypeID = 0; componentTypeID < this.componentArrays.Count; componentTypeID++)
+			{
+				ComponentArray<TComponent> componentArray = this.componentArrays[componentTypeID] as ComponentArray<TComponent>;
+				if (componentArray != null) { return componentArray; }
+			}
+			throw new ArgumentException("The component type has not been registered.", nameof(TComponent));
 		}
 
 		/// <summary>
@@ -183,9 +188,17 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Returns an enumerator that iterates only over the entities in this entity array that exist.
 		/// </summary>
-		public IEnumerator<Entity> GetEnumerator()
+		public Enumerator GetEnumerator()
 		{
 			return new Enumerator(this);
+		}
+
+		/// <summary>
+		/// Returns an enumerator that iterates only over the entities in this entity array that exist.
+		/// </summary>
+		IEnumerator<Entity> IEnumerable<Entity>.GetEnumerator()
+		{
+			return this.GetEnumerator();
 		}
 
 		/// <summary>
