@@ -258,6 +258,50 @@ namespace Entmoot.UnitTests
 		}
 
 		[Test]
+		public void TestCase2B2_Mispredict_Prediction()
+		{
+			MockClient client = GameClientTests.createTestCase2B_2();
+			client.GameClient.ShouldInterpolate = true;
+			client.GameClient.InterpolationRenderDelay = 8;
+			client.GameClient.ShouldPredictInput = true;
+			GameClientTests.updateClientAndAssertState(client, 1, 1, false, null);
+			GameClientTests.updateClientAndAssertState(client, 2, 1, false, null);
+			GameClientTests.updateClientAndAssertState(client, 3, 1, false, null);
+			GameClientTests.updateClientAndAssertState(client, 4, 4, false, null);
+			GameClientTests.updateClientAndAssertState(client, 5, 4, false, null);
+			GameClientTests.updateClientAndAssertState(client, 6, 4, false, null);
+			GameClientTests.updateClientAndAssertState(client, 7, 7, false, null);
+			GameClientTests.updateClientAndAssertState(client, 8, 7, false, null);
+			GameClientTests.updateClientAndAssertState(client, 9, 7, true, 10.0f);
+			GameClientTests.updateClientAndAssertState(client, 10, 10, true, 10.0f);
+			GameClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveRight, 11, 10, true, 15.0f);
+			GameClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveRight, 12, 10, true, 20.0f);
+			GameClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveRight, 13, 13, true, 25.0f);
+			GameClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveRight, 14, 13, true, 30.0f);
+			GameClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveRight, 15, 13, true, 35.0f);
+			GameClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveRight, 16, 16, true, 35.0f);
+			GameClientTests.updateClientAndAssertState(client, 17, 16, true, 35.0f);
+			GameClientTests.updateClientAndAssertState(client, 18, 16, true, 35.0f);
+			GameClientTests.updateClientAndAssertState(client, 19, 19, true, 20.0f);
+			GameClientTests.updateClientAndAssertState(client, 20, 19, true, 20.0f);
+			GameClientTests.updateClientAndAssertState(client, 21, 19, true, 20.0f);
+			GameClientTests.updateClientAndAssertState(client, 22, 22, true, 20.0f); // <- packets dropped after this
+			GameClientTests.updateClientAndAssertState(client, 23, 22, true, 20.0f);
+			GameClientTests.updateClientAndAssertState(client, 24, 22, true, 20.0f);
+			GameClientTests.updateClientAndAssertState(client, 25, 22, true, 20.0f);
+			GameClientTests.updateClientAndAssertState(client, 26, 22, true, 20.0f);
+			GameClientTests.updateClientAndAssertState(client, 27, 22, true, 20.0f);
+			GameClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveRight, 28, 22, true, 25.0f);
+			GameClientTests.updateClientAndAssertState(client, 29, 22, true, 25.0f);
+			GameClientTests.updateClientAndAssertState(client, 30, 22, true, 25.0f);
+			GameClientTests.updateClientAndAssertState(client, 31, 22, true, 25.0f, extrapolatedFrames: 1);
+			GameClientTests.updateClientAndAssertState(client, 32, 22, true, 25.0f, extrapolatedFrames: 2);
+			GameClientTests.updateClientAndAssertState(client, MockCommandKeys.MoveRight, 33, 22, true, 30.0f, extrapolatedFrames: 3);
+			GameClientTests.updateClientAndAssertState(client, 34, 22, true, 30.0f, extrapolatedFrames: 3, noInterpFrames: 1);
+			GameClientTests.updateClientAndAssertState(client, 35, 22, true, 30.0f, extrapolatedFrames: 3, noInterpFrames: 2);
+		}
+
+		[Test]
 		public void TestCase2C_Jitter_Interpolation()
 		{
 			MockClient client = GameClientTests.createTestCase2C();
@@ -749,6 +793,28 @@ namespace Entmoot.UnitTests
 			client.QueueIncomingStateUpdate(16, 16, 12, 15.0f);
 			client.QueueIncomingStateUpdate(19, 19, 15, 20.0f);
 			client.QueueIncomingStateUpdate(22, 22, 18, 25.0f);
+			return client;
+		}
+
+		/// <summary>
+		/// Creates and returns a standard test case of incoming packets; simulates 2 tick latecy to server, 3 tick server network update rate,
+		/// but doesn't simulate connecting (i.e. mock a mid-stream connection). No packet jitter. Mock server acknowledgements of client commands.
+		/// Client mis-predicts several times and corrected by server.
+		/// </summary>
+		private static MockClient createTestCase2B_2()
+		{
+			MockClient client = MockClient.CreateMockClient();
+			client.GameClient.InterpolationRenderDelay = 8;
+			client.GameClient.MaxExtrapolationTicks = 3;
+			client.GameClient.ShouldPredictInput = false;
+			client.QueueIncomingStateUpdate(1, 1, -1, 10.0f);
+			client.QueueIncomingStateUpdate(4, 4, -1, 10.0f);
+			client.QueueIncomingStateUpdate(7, 7, 3, 10.0f);
+			client.QueueIncomingStateUpdate(10, 10, 6, 10.0f);
+			client.QueueIncomingStateUpdate(13, 13, 9, 10.0f);
+			client.QueueIncomingStateUpdate(16, 16, 12, 15.0f);
+			client.QueueIncomingStateUpdate(19, 19, 15, 15.0f);
+			client.QueueIncomingStateUpdate(22, 22, 18, 20.0f);
 			return client;
 		}
 
