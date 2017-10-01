@@ -68,7 +68,7 @@ namespace Entmoot.TestGame3D
 
 		public void Interpolate(ColorComponent otherA, ColorComponent otherB, float amount)
 		{
-			this = otherB;
+			this.Color = Color.Lerp(otherA.Color, otherB.Color, amount);
 		}
 
 		public void Serialize(IWriter writer)

@@ -57,8 +57,22 @@ namespace Entmoot.TestGame3D
 	{
 		#region Methods
 
+		private int tick;
+		private Entity newEntity;
 		public void Update(EntityArray entityArray)
 		{
+			this.tick++;
+			if (this.tick == 400)
+			{
+				entityArray.TryCreateEntity(out this.newEntity);
+				this.newEntity.AddComponent<SpatialComponent>().Position = new Vector3(10, 10, 10);
+				this.newEntity.AddComponent<SpatialComponent>().Rotation = Quaternion.CreateFromAxisAngle(Vector3.Up, 0.707f);
+			}
+			else if (this.tick == 600)
+			{
+				this.newEntity.AddComponent<ColorComponent>().Color = new Color(1.0f, 0, 0);
+			}
+
 			foreach (Entity entity in entityArray)
 			{
 				if (!entity.HasComponent<SpatialComponent>()) { continue; }
