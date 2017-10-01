@@ -58,6 +58,7 @@ namespace Entmoot.TestGame3D
 
 			ComponentsDefinition componentsDefinition = new ComponentsDefinition();
 			componentsDefinition.RegisterComponentType<SpatialComponent>();
+			componentsDefinition.RegisterComponentType<ColorComponent>();
 
 			this.hasServer = Environment.GetCommandLineArgs().Any((arg) => arg.Equals("-s", StringComparison.OrdinalIgnoreCase));
 			if (this.hasServer)
@@ -70,6 +71,7 @@ namespace Entmoot.TestGame3D
 				{
 					this.gameServer.EntityArray.TryCreateEntity(out Entity clientEntity);
 					clientEntity.AddComponent<SpatialComponent>();
+					clientEntity.AddComponent<ColorComponent>().Color = new Color(0.5f, 0.5f, 1.0f);
 				}
 
 				// Make some dummy entities that we'll remove to have a gap in entity IDs
@@ -83,6 +85,14 @@ namespace Entmoot.TestGame3D
 					{
 						this.gameServer.EntityArray.TryCreateEntity(out Entity entity);
 						entity.AddComponent<SpatialComponent>().Position = new Vector3(x * 5, 0, z * 5);
+						if (entity.ID == 11)
+						{
+							entity.AddComponent<ColorComponent>().Color = new Color(1.0f, 0.5f, 0.5f);
+						}
+						else if (entity.ID == 12)
+						{
+							entity.AddComponent<ColorComponent>().Color = new Color(0.0f, 1.0f, 0.5f);
+						}
 					}
 				}
 

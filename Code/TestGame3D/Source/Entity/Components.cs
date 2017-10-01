@@ -55,4 +55,41 @@ namespace Entmoot.TestGame3D
 
 		#endregion Methods
 	}
+
+	public struct ColorComponent : IComponent<ColorComponent>
+	{
+		#region Fields
+
+		public Color Color;
+
+		#endregion Fields
+
+		#region Methods
+
+		public void Interpolate(ColorComponent otherA, ColorComponent otherB, float amount)
+		{
+			this = otherB;
+		}
+
+		public void Serialize(IWriter writer)
+		{
+			writer.Write(this.Color.R);
+			writer.Write(this.Color.G);
+			writer.Write(this.Color.B);
+		}
+
+		public void Deserialize(IReader reader)
+		{
+			this.Color.R = reader.ReadByte();
+			this.Color.G = reader.ReadByte();
+			this.Color.B = reader.ReadByte();
+		}
+
+		public void ResetToDefaults()
+		{
+			this.Color = Color.White;
+		}
+
+		#endregion Methods
+	}
 }

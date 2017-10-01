@@ -37,12 +37,13 @@ namespace Entmoot.TestGame3D
 				if (!entity.HasComponent<SpatialComponent>()) { continue; }
 
 				ref SpatialComponent spatialComponent = ref entity.GetComponent<SpatialComponent>();
+				ref ColorComponent colorComponent = ref entity.GetComponent<ColorComponent>();
 
 				this.BasicEffect.AmbientLightColor = Vector3.One * 0.25f;
-				this.BasicEffect.DiffuseColor = entity.ID < 4 ? new Vector3(0.5f, 0.5f, 1.0f) : Vector3.One;
-				if (entity.ID == 12 || entity.ID == 11)
+				this.BasicEffect.DiffuseColor = Color.White.ToVector3();
+				if (entity.HasComponent<ColorComponent>())
 				{
-					this.BasicEffect.DiffuseColor = new Vector3(1.0f, 0.5f, 0.5f);
+					this.BasicEffect.DiffuseColor = colorComponent.Color.ToVector3();
 				}
 
 				ShapeRenderHelper.RenderBox(this.GraphicsDeviceManager.GraphicsDevice, this.BasicEffect, spatialComponent.Position, spatialComponent.Rotation);
