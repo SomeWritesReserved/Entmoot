@@ -19,7 +19,7 @@ namespace Entmoot.Engine
 		/// <summary>Stores the states for each available entity ID, defining whether an entity exists in an index or not.</summary>
 		private readonly EntityState[] entityStates;
 		/// <summary>Stores the arrays of different component types that define what components these entities can have (not all component types will be added to all entities).</summary>
-		private readonly ReadOnlyCollection<IComponentArray> componentArrays;
+		private readonly IComponentArray[] componentArrays;
 
 		#endregion Fields
 
@@ -99,7 +99,7 @@ namespace Entmoot.Engine
 		public ComponentArray<TComponent> GetComponentArray<TComponent>()
 			where TComponent : struct, IComponent<TComponent>
 		{
-			for (int componentTypeID = 0; componentTypeID < this.componentArrays.Count; componentTypeID++)
+			for (int componentTypeID = 0; componentTypeID < this.componentArrays.Length; componentTypeID++)
 			{
 				ComponentArray<TComponent> componentArray = this.componentArrays[componentTypeID] as ComponentArray<TComponent>;
 				if (componentArray != null) { return componentArray; }
@@ -132,7 +132,7 @@ namespace Entmoot.Engine
 		public void CopyTo(EntityArray other)
 		{
 			Array.Copy(this.entityStates, other.entityStates, this.Capacity);
-			for (int componentTypeID = 0; componentTypeID < this.componentArrays.Count; componentTypeID++)
+			for (int componentTypeID = 0; componentTypeID < this.componentArrays.Length; componentTypeID++)
 			{
 				this.componentArrays[componentTypeID].CopyTo(other.componentArrays[componentTypeID]);
 			}
@@ -143,7 +143,7 @@ namespace Entmoot.Engine
 		/// </summary>
 		public void CopyEntityTo(int thisEntityID, EntityArray otherEntityArray, int otherEntityID)
 		{
-			for (int componentTypeID = 0; componentTypeID < this.componentArrays.Count; componentTypeID++)
+			for (int componentTypeID = 0; componentTypeID < this.componentArrays.Length; componentTypeID++)
 			{
 				this.componentArrays[componentTypeID].CopyEntityTo(thisEntityID, otherEntityArray.componentArrays[componentTypeID], otherEntityID);
 			}
@@ -155,7 +155,7 @@ namespace Entmoot.Engine
 		public void Interpolate(EntityArray otherA, EntityArray otherB, float amount)
 		{
 			Array.Copy(otherB.entityStates, this.entityStates, this.Capacity);
-			for (int componentTypeID = 0; componentTypeID < this.componentArrays.Count; componentTypeID++)
+			for (int componentTypeID = 0; componentTypeID < this.componentArrays.Length; componentTypeID++)
 			{
 				this.componentArrays[componentTypeID].Interpolate(otherA.componentArrays[componentTypeID], otherB.componentArrays[componentTypeID], amount);
 			}
@@ -167,7 +167,7 @@ namespace Entmoot.Engine
 		public void Serialize(EntityArray previousEntityArray, IWriter writer)
 		{
 			for (int i = 0; i < this.entityStates.Length; i++) { writer.Write((byte)this.entityStates[i]); }
-			for (int componentTypeID = 0; componentTypeID < this.componentArrays.Count; componentTypeID++)
+			for (int componentTypeID = 0; componentTypeID < this.componentArrays.Length; componentTypeID++)
 			{
 				this.componentArrays[componentTypeID].Serialize(previousEntityArray?.componentArrays[componentTypeID], writer);
 			}
@@ -179,7 +179,7 @@ namespace Entmoot.Engine
 		public void Deserialize(EntityArray previousEntityArray, IReader reader)
 		{
 			for (int i = 0; i < this.entityStates.Length; i++) { this.entityStates[i] = (EntityState)reader.ReadByte(); }
-			for (int componentTypeID = 0; componentTypeID < this.componentArrays.Count; componentTypeID++)
+			for (int componentTypeID = 0; componentTypeID < this.componentArrays.Length; componentTypeID++)
 			{
 				this.componentArrays[componentTypeID].Deserialize(previousEntityArray?.componentArrays[componentTypeID], reader);
 			}

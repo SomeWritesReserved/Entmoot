@@ -33,11 +33,10 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Returns a collection of component arrays for the different component types that have been registered.
 		/// </summary>
-		public ReadOnlyCollection<IComponentArray> CreateComponentArrays(int capacity)
+		public IComponentArray[] CreateComponentArrays(int capacity)
 		{
 			return this.componentArrayCreators.Select((componentArrayCreator) => componentArrayCreator(capacity))
-				.ToList()
-				.AsReadOnly();
+				.ToArray();
 		}
 
 		#endregion Methods

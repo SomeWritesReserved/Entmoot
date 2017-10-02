@@ -296,7 +296,7 @@ namespace Entmoot.TestGame3D
 		}
 
 		private float[] graphData = new float[120];
-		private void drawGraph<T>(IReadOnlyCollection<T> history, Func<T, float> selector, Color color)
+		private void drawGraph<T>(Queue<T> history, Func<T, float> selector, Color color)
 		{
 			float max = 0;
 			int index = this.graphData.Length - history.Count;

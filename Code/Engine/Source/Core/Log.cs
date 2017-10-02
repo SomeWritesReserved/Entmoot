@@ -45,7 +45,7 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Gets the history of logged data.
 		/// </summary>
-		public static IReadOnlyCollection<T> History { get { return dataHistory; } }
+		public static Queue<T> History { get { return dataHistory; } }
 
 		#endregion Properties
 

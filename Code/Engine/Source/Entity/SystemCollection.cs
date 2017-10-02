@@ -15,7 +15,7 @@ namespace Entmoot.Engine
 		#region Fields
 
 		/// <summary>The collection of systems that will update entities and components.</summary>
-		private ReadOnlyCollection<ISystem> systems;
+		private ISystem[] systems;
 
 		#endregion Fields
 
@@ -26,7 +26,7 @@ namespace Entmoot.Engine
 		/// </summary>
 		public SystemCollection(IEnumerable<ISystem> systems)
 		{
-			this.systems = systems.ToList().AsReadOnly();
+			this.systems = systems.ToArray();
 		}
 
 		#endregion Constructors
