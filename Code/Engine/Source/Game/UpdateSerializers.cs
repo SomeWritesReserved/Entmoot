@@ -91,7 +91,7 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Serializes the given client update (client commands) and immediately sends a packet.
 		/// </summary>
-		public static void Send(INetworkConnection serverNetworkConnection, IEnumerable<ClientCommand<TCommandData>> clientCommands, int latestServerTickReceived, int latestFrameTickAcknowledgedByServer)
+		public static void Send(INetworkConnection serverNetworkConnection, Queue<ClientCommand<TCommandData>> clientCommands, int latestServerTickReceived, int latestFrameTickAcknowledgedByServer)
 		{
 			OutgoingMessage outgoingMessage = serverNetworkConnection.GetOutgoingMessageToSend();
 			ClientUpdateSerializer<TCommandData>.Serialize(outgoingMessage, clientCommands, latestServerTickReceived, latestFrameTickAcknowledgedByServer);
@@ -101,7 +101,7 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Serializes the given client update (client commands) to the given writer.
 		/// </summary>
-		public static void Serialize(IWriter writer, IEnumerable<ClientCommand<TCommandData>> clientCommands, int latestServerTickReceived, int latestFrameTickAcknowledgedByServer)
+		public static void Serialize(IWriter writer, Queue<ClientCommand<TCommandData>> clientCommands, int latestServerTickReceived, int latestFrameTickAcknowledgedByServer)
 		{
 			writer.Write(latestServerTickReceived);
 
