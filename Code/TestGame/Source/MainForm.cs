@@ -469,6 +469,11 @@ namespace Entmoot.TestGame
 
 		#region Methods
 
+		public bool Equals(PositionComponent other)
+		{
+			return this.Position == other.Position;
+		}
+
 		public void Interpolate(PositionComponent otherA, PositionComponent otherB, float amount)
 		{
 			this.Position = Vector3.Lerp(otherA.Position, otherB.Position, amount);

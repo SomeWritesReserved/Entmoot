@@ -401,12 +401,12 @@ namespace Entmoot.UnitTests
 			byte[] serializedBytes = new byte[512];
 			{
 				OutgoingMessage outgoingMessage = new OutgoingMessage(serializedBytes);
-				sourceEntityArray.Serialize(null,outgoingMessage);
+				sourceEntityArray.Serialize(null, outgoingMessage);
 				serializedBytes = outgoingMessage.ToArray();
 			}
 			{
 				IncomingMessage incomingMessage = new IncomingMessage(serializedBytes);
-				destinationEntityArray.Deserialize(null,incomingMessage);
+				destinationEntityArray.Deserialize(null, incomingMessage);
 			}
 			EntityTests.AssertStandardEntityArray(destinationEntityArray);
 		}
@@ -437,12 +437,12 @@ namespace Entmoot.UnitTests
 			byte[] serializedBytes = new byte[512];
 			{
 				OutgoingMessage outgoingMessage = new OutgoingMessage(serializedBytes);
-				sourceEntityArray.Serialize(null,outgoingMessage);
+				sourceEntityArray.Serialize(null, outgoingMessage);
 				serializedBytes = outgoingMessage.ToArray();
 			}
 			{
 				IncomingMessage incomingMessage = new IncomingMessage(serializedBytes);
-				destinationEntityArray.Deserialize(null,incomingMessage);
+				destinationEntityArray.Deserialize(null, incomingMessage);
 			}
 			EntityTests.AssertStandardEntityArray(destinationEntityArray);
 		}
@@ -610,6 +610,11 @@ namespace Entmoot.UnitTests
 
 			#region Methods
 
+			public bool Equals(PositionComponent2D other)
+			{
+				return this.PositionX == other.PositionX && this.PositionY == other.PositionY;
+			}
+
 			public void Interpolate(PositionComponent2D otherA, PositionComponent2D otherB, float amount)
 			{
 				this.PositionX = otherA.PositionX + (otherB.PositionX - otherA.PositionX) * amount;
@@ -646,6 +651,11 @@ namespace Entmoot.UnitTests
 
 			#region Methods
 
+			public bool Equals(HealthComponent other)
+			{
+				return this.HealthAmount == other.HealthAmount;
+			}
+
 			public void Interpolate(HealthComponent otherA, HealthComponent otherB, float amount)
 			{
 				this.HealthAmount = otherA.HealthAmount;
@@ -678,6 +688,11 @@ namespace Entmoot.UnitTests
 			#endregion Fields
 
 			#region Methods
+
+			public bool Equals(StringComponent other)
+			{
+				return this.StringValue == other.StringValue;
+			}
 
 			public void Interpolate(StringComponent otherA, StringComponent otherB, float amount)
 			{

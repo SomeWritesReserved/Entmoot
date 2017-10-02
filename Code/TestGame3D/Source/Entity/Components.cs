@@ -19,6 +19,11 @@ namespace Entmoot.TestGame3D
 
 		#region Methods
 
+		public bool Equals(SpatialComponent other)
+		{
+			return this.Position == other.Position && this.Rotation == other.Rotation;
+		}
+
 		public void Interpolate(SpatialComponent otherA, SpatialComponent otherB, float amount)
 		{
 			Vector3.Lerp(ref otherA.Position, ref otherB.Position, amount, out this.Position);
@@ -65,6 +70,11 @@ namespace Entmoot.TestGame3D
 		#endregion Fields
 
 		#region Methods
+
+		public bool Equals(ColorComponent other)
+		{
+			return this.Color == other.Color;
+		}
 
 		public void Interpolate(ColorComponent otherA, ColorComponent otherB, float amount)
 		{

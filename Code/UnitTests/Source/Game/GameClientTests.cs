@@ -1096,6 +1096,11 @@ namespace Entmoot.UnitTests
 
 			#region Methods
 
+			public bool Equals(MockComponent other)
+			{
+				return this.Position == other.Position;
+			}
+
 			public void Interpolate(MockComponent otherA, MockComponent otherB, float amount)
 			{
 				this.Position = otherA.Position + (otherB.Position - otherA.Position) * amount;

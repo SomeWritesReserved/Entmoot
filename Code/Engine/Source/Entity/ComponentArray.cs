@@ -17,6 +17,11 @@ namespace Entmoot.Engine
 		#region Methods
 
 		/// <summary>
+		/// Returns whether or not this component equals another component.
+		/// </summary>
+		bool Equals(TComponent other);
+
+		/// <summary>
 		/// Updates this component to an interpolated value between two other components.
 		/// </summary>
 		void Interpolate(TComponent otherA, TComponent otherB, float amount);
