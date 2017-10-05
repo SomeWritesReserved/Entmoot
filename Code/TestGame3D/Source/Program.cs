@@ -65,7 +65,7 @@ namespace Entmoot.TestGame3D
 				}
 
 				NetworkClient networkClient = new NetworkClient("1", 4000);
-				GameClient<CommandData> gameClient = new GameClient<CommandData>(networkClient, 20, 30, componentsDefinition, new ISystem[] { });
+				GameClient<CommandData> gameClient = new GameClient<CommandData>(networkClient, 20, 30, componentsDefinition, new ISystem[] { }, new ISystem[]{ });
 				{
 					networkClient.Connect(new System.Net.IPEndPoint(System.Net.IPAddress.Loopback, 19876));
 				}

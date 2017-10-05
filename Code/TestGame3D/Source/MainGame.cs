@@ -106,8 +106,8 @@ namespace Entmoot.TestGame3D
 			}
 
 			this.networkClient = new NetworkClient("1", 4000);
-			this.gameClient = new GameClient<CommandData>(this.networkClient, 20, 30, componentsDefinition, new ISystem[] { this.renderSystem });
-			this.gameClient.ShouldPredictInput = false;
+			this.gameClient = new GameClient<CommandData>(this.networkClient, 20, 30, componentsDefinition, new ISystem[] { this.renderSystem }, new ISystem[] { new PhysicsSystem() });
+			this.gameClient.ShouldPredictInput = true;
 		}
 
 		#endregion Constructors

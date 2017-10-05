@@ -19,6 +19,11 @@ namespace Entmoot.Engine
 		/// </summary>
 		void Update(EntityArray entityArray);
 
+		/// <summary>
+		/// Processes this system over the given array of entities but only updates the single given entity.
+		/// </summary>
+		void UpdateSingleEntity(EntityArray entityArray, Entity entity);
+
 		#endregion Methods
 	}
 }

@@ -46,6 +46,19 @@ namespace Entmoot.Engine
 			entityArray.EndUpdate();
 		}
 
+		/// <summary>
+		/// Updates the systems, allowing for each <see cref="ISystem"/> to run its logic on the given <see cref="EntityArray"/> but only updates the single given entity.
+		/// </summary>
+		public void UpdateSingleEntity(EntityArray entityArray, Entity entity)
+		{
+			entityArray.BeginUpdate();
+			foreach (ISystem system in this.systems)
+			{
+				system.UpdateSingleEntity(entityArray, entity);
+			}
+			entityArray.EndUpdate();
+		}
+
 		#endregion Methods
 	}
 }

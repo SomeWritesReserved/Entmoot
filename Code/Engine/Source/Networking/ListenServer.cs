@@ -18,12 +18,12 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		public ListenServer(int maxMessageSize, int maxEntityHistory, int entityCapacity, ComponentsDefinition componentsDefinition, IEnumerable<ISystem> serverSystems, IEnumerable<ISystem> clientSystems)
+		public ListenServer(int maxMessageSize, int maxEntityHistory, int entityCapacity, ComponentsDefinition componentsDefinition, IEnumerable<ISystem> serverSystems, IEnumerable<ISystem> clientSystems, IEnumerable<ISystem> clientPredictionSystems)
 		{
 			LocalNetworkConnection clientNetworkConnection = new LocalNetworkConnection(maxMessageSize);
 			LocalNetworkConnection serverNetworkConnection = clientNetworkConnection.GetPairedNetworkConnection();
 			this.GameServer = new GameServer<TCommandData>(new[] { clientNetworkConnection }, maxEntityHistory, entityCapacity, componentsDefinition, serverSystems);
-			this.GameClient = new GameClient<TCommandData>(serverNetworkConnection, maxEntityHistory, entityCapacity, componentsDefinition, clientSystems);
+			this.GameClient = new GameClient<TCommandData>(serverNetworkConnection, maxEntityHistory, entityCapacity, componentsDefinition, clientSystems, clientPredictionSystems);
 		}
 
 		#endregion Constructors
