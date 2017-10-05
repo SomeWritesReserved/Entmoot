@@ -58,19 +58,21 @@ namespace Entmoot.TestGame3D
 
 			ComponentsDefinition componentsDefinition = new ComponentsDefinition();
 			componentsDefinition.RegisterComponentType<SpatialComponent>();
+			componentsDefinition.RegisterComponentType<PhysicsComponent>();
 			componentsDefinition.RegisterComponentType<ColorComponent>();
 
 			this.hasServer = Environment.GetCommandLineArgs().Any((arg) => arg.Equals("-s", StringComparison.OrdinalIgnoreCase));
 			if (this.hasServer)
 			{
 				this.networkServer = new NetworkServer("1", MainGame.maxClients, 4000, 19876);
-				this.gameServer = new GameServer<CommandData>(this.networkServer.ClientNetworkConnections, 20, 30, componentsDefinition, new ISystem[] { new SpinnerSystem() });
+				this.gameServer = new GameServer<CommandData>(this.networkServer.ClientNetworkConnections, 20, 30, componentsDefinition, new ISystem[] { new SpinnerSystem(), new PhysicsSystem() });
 
 				// Reserve the first entities for all potential clients
 				for (int clientID = 0; clientID < MainGame.maxClients; clientID++)
 				{
 					this.gameServer.EntityArray.TryCreateEntity(out Entity clientEntity);
 					clientEntity.AddComponent<SpatialComponent>();
+					clientEntity.AddComponent<PhysicsComponent>();
 					clientEntity.AddComponent<ColorComponent>().Color = new Color(0.5f, 0.5f, 1.0f);
 				}
 
@@ -85,6 +87,7 @@ namespace Entmoot.TestGame3D
 					{
 						this.gameServer.EntityArray.TryCreateEntity(out Entity entity);
 						entity.AddComponent<SpatialComponent>().Position = new Vector3(x * 5, 0, z * 5);
+						entity.AddComponent<PhysicsComponent>();
 						if (entity.ID == 11)
 						{
 							entity.AddComponent<ColorComponent>().Color = new Color(1.0f, 0.5f, 0.5f);
@@ -104,6 +107,7 @@ namespace Entmoot.TestGame3D
 
 			this.networkClient = new NetworkClient("1", 4000);
 			this.gameClient = new GameClient<CommandData>(this.networkClient, 20, 30, componentsDefinition, new ISystem[] { this.renderSystem });
+			this.gameClient.ShouldPredictInput = false;
 		}
 
 		#endregion Constructors
@@ -169,6 +173,14 @@ namespace Entmoot.TestGame3D
 			if (this.isKeyPressed(Keys.P))
 			{
 				this.isNetworkedPaused = !this.isNetworkedPaused;
+			}
+
+			if (this.isKeyPressed(Keys.B))
+			{
+				if (this.gameServer.EntityArray.TryGetEntity(6, out Entity entity))
+				{
+					entity.AddComponent<PhysicsComponent>().Velocity += new Vector3(10, 0, 0);
+				}
 			}
 
 			if (this.isKeyPressed(Keys.Escape))

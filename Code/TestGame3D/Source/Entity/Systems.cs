@@ -92,4 +92,25 @@ namespace Entmoot.TestGame3D
 
 		#endregion Methods
 	}
+
+	public class PhysicsSystem : ISystem
+	{
+		public void Update(EntityArray entityArray)
+		{
+			foreach (Entity entity in entityArray)
+			{
+				if (!entity.HasComponent<SpatialComponent>()) { continue; }
+				if (!entity.HasComponent<PhysicsComponent>()) { continue; }
+
+				ref SpatialComponent spatialComponent = ref entity.GetComponent<SpatialComponent>();
+				ref PhysicsComponent physicsComponent = ref entity.GetComponent<PhysicsComponent>();
+
+				float elapsedTime = (1.0f / 60.0f);
+				spatialComponent.Position += (physicsComponent.Velocity * elapsedTime) + (physicsComponent.Acceleration * elapsedTime * elapsedTime / 2);
+				physicsComponent.Velocity += physicsComponent.Acceleration * elapsedTime;
+				physicsComponent.Velocity *= 0.9f;
+				physicsComponent.Acceleration = Vector3.Zero;
+			}
+		}
+	}
 }
