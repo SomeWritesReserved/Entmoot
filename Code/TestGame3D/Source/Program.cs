@@ -20,7 +20,7 @@ namespace Entmoot.TestGame3D
 
 			if (args.Any((arg) => arg.Equals("-ds", StringComparison.OrdinalIgnoreCase)))
 			{
-				const int maxClient = 4;
+				/*const int maxClient = 4;
 				ComponentsDefinition componentsDefinition = new ComponentsDefinition();
 				componentsDefinition.RegisterComponentType<SpatialComponent>();
 				componentsDefinition.RegisterComponentType<ColorComponent>();
@@ -73,7 +73,7 @@ namespace Entmoot.TestGame3D
 				GC.Collect(10, GCCollectionMode.Forced, true, true);
 
 				Program.runDedicatedServer(networkServer, gameServer, networkClient, gameClient);
-
+				*/
 			}
 			else
 			{

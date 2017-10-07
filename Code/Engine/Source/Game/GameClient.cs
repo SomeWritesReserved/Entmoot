@@ -30,11 +30,11 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		public GameClient(INetworkConnection serverNetworkConnection, int maxEntityHistory, int entityCapacity, ComponentsDefinition componentsDefinition, IEnumerable<ISystem> systems, IEnumerable<ISystem> predictionSystems)
+		public GameClient(INetworkConnection serverNetworkConnection, int maxEntityHistory, int entityCapacity, ComponentsDefinition componentsDefinition, IEnumerable<ISystem> systems, IEnumerable<IClientCommandedSystem<TCommandData>> clientCommandedSystems)
 		{
 			this.serverNetworkConnection = serverNetworkConnection;
 			this.SystemCollection = new SystemCollection(systems);
-			this.PredictionSystemCollection = new SystemCollection(predictionSystems);
+			this.ClientCommandedSystemCollection = new ClientCommandedSystemCollection<TCommandData>(clientCommandedSystems);
 
 			// Create the snapshots that will need to be mutated/updates, these need to be separately created to avoid accidentally mutating another snapshot reference
 			this.InterpolationStartSnapshot = new EntitySnapshot(entityCapacity, componentsDefinition);
@@ -79,9 +79,9 @@ namespace Entmoot.Engine
 		public EntitySnapshot InterpolationEndSnapshot { get; }
 		/// <summary>Gets the collection of systems that will update entities.</summary>
 		public SystemCollection SystemCollection { get; }
-		/// <summary>Gets the collection of systems that allow for client commands to be predicted locally..</summary>
-		public SystemCollection PredictionSystemCollection { get; }
-		/// <summary>Gets the entity that is currently owned by this client (and might take part in client-side prediction).</summary>
+		/// <summary>Gets the collection of systems that will update the client's commanded entity during prediction.</summary>
+		public ClientCommandedSystemCollection<TCommandData> ClientCommandedSystemCollection { get; }
+		/// <summary>Gets the entity that is currently being commanded by this client (and might take part in client-side prediction).</summary>
 		public int CommandingEntityID { get; private set; } = -1;
 
 		/// <summary>Gets the most recent server tick that we got from the server.</summary>
@@ -265,8 +265,7 @@ namespace Entmoot.Engine
 						if (!clientCommand.HasData || clientCommand.ClientFrameTick <= this.LatestFrameTickAcknowledgedByServer || clientCommand.CommandingEntityID != this.CommandingEntityID) { continue; }
 
 						// Reapply all the commands we've sent that the server hasn't processed yet to get us to where we predict we should be
-						clientCommand.CommandData.ApplyToEntity(predictedEntity);
-						this.PredictionSystemCollection.UpdateSingleEntity(this.RenderedSnapshot.EntityArray, predictedEntity);
+						this.ClientCommandedSystemCollection.ProcessClientCommand(this.RenderedSnapshot.EntityArray, clientCommand.CommandData, predictedEntity, null);
 					}
 				}
 			}

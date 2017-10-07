@@ -46,17 +46,38 @@ namespace Entmoot.Engine
 			entityArray.EndUpdate();
 		}
 
+		#endregion Methods
+	}
+
+	public sealed class ClientCommandedSystemCollection<TCommandData>
+		where TCommandData : struct, ICommandData
+	{
+		#region Fields
+
+		private IClientCommandedSystem<TCommandData>[] clientCommandedSystems;
+
+		#endregion Fields
+
+		#region Constructors
+
 		/// <summary>
-		/// Updates the systems, allowing for each <see cref="ISystem"/> to run its logic on the given <see cref="EntityArray"/> but only updates the single given entity.
+		/// Constructor.
 		/// </summary>
-		public void UpdateSingleEntity(EntityArray entityArray, Entity entity)
+		public ClientCommandedSystemCollection(IEnumerable<IClientCommandedSystem<TCommandData>> clientCommandedSystems)
 		{
-			entityArray.BeginUpdate();
-			foreach (ISystem system in this.systems)
+			this.clientCommandedSystems = clientCommandedSystems.ToArray();
+		}
+
+		#endregion Constructors
+
+		#region Methods
+
+		public void ProcessClientCommand(EntityArray entityArray, TCommandData commandData, Entity commandingEntity, EntitySnapshot lagCompensationSnapshot)
+		{
+			foreach (IClientCommandedSystem<TCommandData> clientCommandedSystem in this.clientCommandedSystems)
 			{
-				system.UpdateSingleEntity(entityArray, entity);
+				clientCommandedSystem.ProcessClientCommand(entityArray, commandData, commandingEntity, lagCompensationSnapshot);
 			}
-			entityArray.EndUpdate();
 		}
 
 		#endregion Methods

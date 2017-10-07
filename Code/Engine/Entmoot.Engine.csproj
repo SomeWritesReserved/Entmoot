@@ -51,7 +51,6 @@
     <Compile Include="Source\Game\EntitySnapshot.cs" />
     <Compile Include="Source\Game\INetworkConnection.cs" />
     <Compile Include="Source\Networking\MessageBuffer.cs" />
-    <Compile Include="Source\Networking\ListenServer.cs" />
     <Compile Include="Source\Networking\Messages.cs" />
     <Compile Include="Source\Networking\LocalNetworkConnection.cs" />
     <Compile Include="Source\Game\UpdateSerializers.cs" />

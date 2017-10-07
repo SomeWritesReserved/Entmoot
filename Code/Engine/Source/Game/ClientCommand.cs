@@ -24,11 +24,6 @@ namespace Entmoot.Engine
 		/// </summary>
 		void Deserialize(IReader reader);
 
-		/// <summary>
-		/// Applies this command data to a given entity (whatever that may mean for the type of command).
-		/// </summary>
-		void ApplyToEntity(Entity entity);
-
 		#endregion Methods
 	}
 

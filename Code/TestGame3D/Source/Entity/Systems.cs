@@ -50,10 +50,6 @@ namespace Entmoot.TestGame3D
 			}
 		}
 
-		public void UpdateSingleEntity(EntityArray entityArray, Entity entity)
-		{
-		}
-
 		#endregion Methods
 	}
 
@@ -94,10 +90,6 @@ namespace Entmoot.TestGame3D
 			}
 		}
 
-		public void UpdateSingleEntity(EntityArray entityArray, Entity entity)
-		{
-		}
-
 		#endregion Methods
 	}
 
@@ -109,23 +101,56 @@ namespace Entmoot.TestGame3D
 		{
 			foreach (Entity entity in entityArray)
 			{
-				this.UpdateSingleEntity(entityArray, entity);
+				if (!entity.HasComponent<SpatialComponent>()) { return; }
+				if (!entity.HasComponent<PhysicsComponent>()) { return; }
+
+				ref SpatialComponent spatialComponent = ref entity.GetComponent<SpatialComponent>();
+				ref PhysicsComponent physicsComponent = ref entity.GetComponent<PhysicsComponent>();
+
+				float elapsedTime = (1.0f / 60.0f);
+				spatialComponent.Position += (physicsComponent.Velocity * elapsedTime) + (physicsComponent.Acceleration * elapsedTime * elapsedTime / 2);
+				physicsComponent.Velocity += physicsComponent.Acceleration * elapsedTime;
+				physicsComponent.Velocity *= 0.9f;
+				physicsComponent.Acceleration = Vector3.Zero;
 			}
 		}
 
-		public void UpdateSingleEntity(EntityArray entityArray, Entity entity)
-		{
-			if (!entity.HasComponent<SpatialComponent>()) { return; }
-			if (!entity.HasComponent<PhysicsComponent>()) { return; }
+		#endregion Methods
+	}
 
-			ref SpatialComponent spatialComponent = ref entity.GetComponent<SpatialComponent>();
-			ref PhysicsComponent physicsComponent = ref entity.GetComponent<PhysicsComponent>();
+	public class PlayerMovementSystem : IClientCommandedSystem<CommandData>
+	{
+		#region Methods
+
+		public void ProcessClientCommand(EntityArray entityArray, CommandData commandData, Entity commandingEntity, EntitySnapshot lagCompensationSnapshot)
+		{
+			if (!commandingEntity.HasComponent<SpatialComponent>()) { return; }
+			if (!commandingEntity.HasComponent<PlayerMovementComponent>()) { return; }
+
+			Vector3 movement = Vector3.Zero;
+			if ((commandData.Commands & Commands.MoveForward) != 0) { movement += Vector3.Forward; }
+			if ((commandData.Commands & Commands.MoveBackward) != 0) { movement += Vector3.Backward; }
+			if ((commandData.Commands & Commands.MoveLeft) != 0) { movement += Vector3.Left; }
+			if ((commandData.Commands & Commands.MoveRight) != 0) { movement += Vector3.Right; }
+
+			if (movement != Vector3.Zero)
+			{
+				movement.Normalize();
+				Quaternion lookMoveRotation = Quaternion.CreateFromAxisAngle(Vector3.Up, commandData.LookAngles.X);
+				Vector3.Transform(ref movement, ref lookMoveRotation, out movement);
+			}
+
+			ref SpatialComponent spatialComponent = ref commandingEntity.GetComponent<SpatialComponent>();
+			ref PlayerMovementComponent playerMovementComponent = ref commandingEntity.GetComponent<PlayerMovementComponent>();
+			playerMovementComponent.Acceleration += movement * CommandData.MoveImpulse;
+			spatialComponent.Rotation = Quaternion.CreateFromYawPitchRoll(commandData.LookAngles.X, commandData.LookAngles.Y, 0.0f);
+
 
 			float elapsedTime = (1.0f / 60.0f);
-			spatialComponent.Position += (physicsComponent.Velocity * elapsedTime) + (physicsComponent.Acceleration * elapsedTime * elapsedTime / 2);
-			physicsComponent.Velocity += physicsComponent.Acceleration * elapsedTime;
-			physicsComponent.Velocity *= 0.9f;
-			physicsComponent.Acceleration = Vector3.Zero;
+			spatialComponent.Position += (playerMovementComponent.Velocity * elapsedTime) + (playerMovementComponent.Acceleration * elapsedTime * elapsedTime / 2);
+			playerMovementComponent.Velocity += playerMovementComponent.Acceleration * elapsedTime;
+			playerMovementComponent.Velocity *= 0.9f;
+			playerMovementComponent.Acceleration = Vector3.Zero;
 		}
 
 		#endregion Methods

@@ -48,30 +48,6 @@ namespace Entmoot.TestGame3D
 			this.LookAngles.Y = reader.ReadSingle();
 		}
 
-		public void ApplyToEntity(Entity entity)
-		{
-			if (!entity.HasComponent<SpatialComponent>()) { return; }
-			if (!entity.HasComponent<PhysicsComponent>()) { return; }
-
-			Vector3 movement = Vector3.Zero;
-			if ((this.Commands & Commands.MoveForward) != 0) { movement += Vector3.Forward; }
-			if ((this.Commands & Commands.MoveBackward) != 0) { movement += Vector3.Backward; }
-			if ((this.Commands & Commands.MoveLeft) != 0) { movement += Vector3.Left; }
-			if ((this.Commands & Commands.MoveRight) != 0) { movement += Vector3.Right; }
-
-			if (movement != Vector3.Zero)
-			{
-				movement.Normalize();
-				Quaternion lookMoveRotation = Quaternion.CreateFromAxisAngle(Vector3.Up, this.LookAngles.X);
-				Vector3.Transform(ref movement, ref lookMoveRotation, out movement);
-			}
-			
-			ref SpatialComponent spatialComponent = ref entity.GetComponent<SpatialComponent>();
-			ref PhysicsComponent physicsComponent = ref entity.GetComponent<PhysicsComponent>();
-			physicsComponent.Acceleration += movement * CommandData.MoveImpulse;
-			spatialComponent.Rotation = Quaternion.CreateFromYawPitchRoll(this.LookAngles.X, this.LookAngles.Y, 0.0f);
-		}
-
 		#endregion Methods
 	}
 }
