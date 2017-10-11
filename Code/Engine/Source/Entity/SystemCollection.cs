@@ -46,37 +46,37 @@ namespace Entmoot.Engine
 			entityArray.EndUpdate();
 		}
 
-		#endregion Methods
-	}
-
-	public sealed class ClientCommandedSystemCollection<TCommandData>
-		where TCommandData : struct, ICommandData
-	{
-		#region Fields
-
-		private IClientCommandedSystem<TCommandData>[] clientCommandedSystems;
-
-		#endregion Fields
-
-		#region Constructors
-
 		/// <summary>
-		/// Constructor.
+		/// Updates the IClientCommandedSystem systems, allowing for each to process the given client command on the given commanding entity.
 		/// </summary>
-		public ClientCommandedSystemCollection(IEnumerable<IClientCommandedSystem<TCommandData>> clientCommandedSystems)
+		/// <typeparam name="TCommandData">The type of data that is used as a command.</typeparam>
+		public void ProcessClientCommand<TCommandData>(EntityArray currentEntityArray, TCommandData commandData, Entity commandingEntity, EntityArray lagCompensatedEntityArray)
+			where TCommandData : struct, ICommandData
 		{
-			this.clientCommandedSystems = clientCommandedSystems.ToArray();
+			foreach (ISystem system in this.systems)
+			{
+				IClientCommandedSystem<TCommandData> clientCommandedSystem = system as IClientCommandedSystem<TCommandData>;
+				if (clientCommandedSystem != null)
+				{
+					clientCommandedSystem.ProcessClientCommand(currentEntityArray, commandData, commandingEntity, lagCompensatedEntityArray);
+				}
+			}
 		}
 
-		#endregion Constructors
-
-		#region Methods
-
-		public void ProcessClientCommand(EntityArray entityArray, TCommandData commandData, Entity commandingEntity, EntitySnapshot lagCompensationSnapshot)
+		/// <summary>
+		/// Updates the IClientCommandedSystem systems, allowing for each to predict the result of the given client command on the given commanding.
+		/// </summary>
+		/// <typeparam name="TCommandData">The type of data that is used as a command.</typeparam>
+		public void PredictClientCommand<TCommandData>(EntityArray entityArray, TCommandData commandData, Entity commandingEntity)
+			where TCommandData : struct, ICommandData
 		{
-			foreach (IClientCommandedSystem<TCommandData> clientCommandedSystem in this.clientCommandedSystems)
+			foreach (ISystem system in this.systems)
 			{
-				clientCommandedSystem.ProcessClientCommand(entityArray, commandData, commandingEntity, lagCompensationSnapshot);
+				IClientCommandedSystem<TCommandData> clientCommandedSystem = system as IClientCommandedSystem<TCommandData>;
+				if (clientCommandedSystem != null)
+				{
+					clientCommandedSystem.PredictClientCommand(entityArray, commandData, commandingEntity);
+				}
 			}
 		}
 

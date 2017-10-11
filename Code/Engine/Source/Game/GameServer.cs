@@ -29,11 +29,10 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		public GameServer(IList<INetworkConnection> clientNetworkConnections, int maxEntityHistory, int entityCapacity, ComponentsDefinition componentsDefinition, IEnumerable<ISystem> systems, IEnumerable<IClientCommandedSystem<TCommandData>> clientCommandedSystems)
+		public GameServer(IList<INetworkConnection> clientNetworkConnections, int maxEntityHistory, int entityCapacity, ComponentsDefinition componentsDefinition, IEnumerable<ISystem> systems)
 		{
 			this.EntityArray = new EntityArray(entityCapacity, componentsDefinition);
 			this.SystemCollection = new SystemCollection(systems);
-			this.ClientCommandedSystemCollection = new ClientCommandedSystemCollection<TCommandData>(clientCommandedSystems);
 
 			// Populate the entire history buffer with data that will be overwritten as needed
 			this.entitySnapshotHistory = new Queue<EntitySnapshot>();
@@ -64,8 +63,6 @@ namespace Entmoot.Engine
 		public EntityArray EntityArray { get; }
 		/// <summary>Gets the collection of systems that will update entities.</summary>
 		public SystemCollection SystemCollection { get; }
-		/// <summary>Gets the collection of systems that will update the entities being commanded by clients for a given client command.</summary>
-		public ClientCommandedSystemCollection<TCommandData> ClientCommandedSystemCollection { get; }
 
 		#endregion Properties
 
@@ -118,7 +115,7 @@ namespace Entmoot.Engine
 			if (client.CommandingEntityID != -1 && clientCommand.CommandingEntityID == client.CommandingEntityID && this.EntityArray.TryGetEntity(client.CommandingEntityID, out Entity commandingEntity))
 			{
 				EntitySnapshot lagCompensationSnapshot = this.getEntitySnapshotForServerFrameTick(clientCommand.RenderedTick);
-				this.ClientCommandedSystemCollection.ProcessClientCommand(this.EntityArray, clientCommand.CommandData, commandingEntity, lagCompensationSnapshot);
+				this.SystemCollection.ProcessClientCommand(this.EntityArray, clientCommand.CommandData, commandingEntity, lagCompensationSnapshot.EntityArray);
 			}
 		}
 

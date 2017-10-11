@@ -22,12 +22,27 @@ namespace Entmoot.Engine
 		#endregion Methods
 	}
 
-	public interface IClientCommandedSystem<TCommandData>
+	/// <summary>
+	/// Represents a system that will handle and process client commands.
+	/// </summary>
+	/// <remarks>
+	/// Not all IClientCommandedSystem implementers care about both <see cref="ProcessClientCommand"/> and <see cref="PredictClientCommand"/>.
+	/// </remarks>
+	/// <typeparam name="TCommandData">The type of data that is used as a command.</typeparam>
+	public interface IClientCommandedSystem<TCommandData> : ISystem
 		where TCommandData : struct, ICommandData
 	{
 		#region Methods
-		
-		void ProcessClientCommand(EntityArray entityArray, TCommandData commandData, Entity commandingEntity, EntitySnapshot lagCompensationSnapshot);
+
+		/// <summary>
+		/// Processes the given client command on the given commanding entity. This happens server-side to execute a client's command.
+		/// </summary>
+		void ProcessClientCommand(EntityArray currentEntityArray, TCommandData commandData, Entity commandingEntity, EntityArray lagCompensatedEntityArray);
+
+		/// <summary>
+		/// Predicts the result of the the given client command on the given commanding entity. This happens client-side to predict the results of a client's command immediately.
+		/// </summary>
+		void PredictClientCommand(EntityArray entityArray, TCommandData commandData, Entity commandingEntity);
 
 		#endregion Methods
 	}

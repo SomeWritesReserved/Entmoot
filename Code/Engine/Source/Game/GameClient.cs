@@ -30,11 +30,10 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		public GameClient(INetworkConnection serverNetworkConnection, int maxEntityHistory, int entityCapacity, ComponentsDefinition componentsDefinition, IEnumerable<ISystem> systems, IEnumerable<IClientCommandedSystem<TCommandData>> clientCommandedSystems)
+		public GameClient(INetworkConnection serverNetworkConnection, int maxEntityHistory, int entityCapacity, ComponentsDefinition componentsDefinition, IEnumerable<ISystem> systems)
 		{
 			this.serverNetworkConnection = serverNetworkConnection;
 			this.SystemCollection = new SystemCollection(systems);
-			this.ClientCommandedSystemCollection = new ClientCommandedSystemCollection<TCommandData>(clientCommandedSystems);
 
 			// Create the snapshots that will need to be mutated/updates, these need to be separately created to avoid accidentally mutating another snapshot reference
 			this.InterpolationStartSnapshot = new EntitySnapshot(entityCapacity, componentsDefinition);
@@ -79,8 +78,6 @@ namespace Entmoot.Engine
 		public EntitySnapshot InterpolationEndSnapshot { get; }
 		/// <summary>Gets the collection of systems that will update entities.</summary>
 		public SystemCollection SystemCollection { get; }
-		/// <summary>Gets the collection of systems that will update the client's commanded entity during prediction.</summary>
-		public ClientCommandedSystemCollection<TCommandData> ClientCommandedSystemCollection { get; }
 		/// <summary>Gets the entity that is currently being commanded by this client (and might take part in client-side prediction).</summary>
 		public int CommandingEntityID { get; private set; } = -1;
 
@@ -265,7 +262,7 @@ namespace Entmoot.Engine
 						if (!clientCommand.HasData || clientCommand.ClientFrameTick <= this.LatestFrameTickAcknowledgedByServer || clientCommand.CommandingEntityID != this.CommandingEntityID) { continue; }
 
 						// Reapply all the commands we've sent that the server hasn't processed yet to get us to where we predict we should be
-						this.ClientCommandedSystemCollection.ProcessClientCommand(this.RenderedSnapshot.EntityArray, clientCommand.CommandData, predictedEntity, null);
+						this.SystemCollection.PredictClientCommand(this.RenderedSnapshot.EntityArray, clientCommand.CommandData, predictedEntity);
 					}
 				}
 			}

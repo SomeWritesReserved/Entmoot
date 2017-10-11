@@ -59,21 +59,20 @@ namespace Entmoot.TestGame3D
 			ComponentsDefinition componentsDefinition = new ComponentsDefinition();
 			componentsDefinition.RegisterComponentType<SpatialComponent>();
 			componentsDefinition.RegisterComponentType<PhysicsComponent>();
-			componentsDefinition.RegisterComponentType<PlayerMovementComponent>();
 			componentsDefinition.RegisterComponentType<ColorComponent>();
 
 			this.hasServer = Environment.GetCommandLineArgs().Any((arg) => arg.Equals("-s", StringComparison.OrdinalIgnoreCase));
 			if (this.hasServer)
 			{
 				this.networkServer = new NetworkServer("1", MainGame.maxClients, 4000, 19876);
-				this.gameServer = new GameServer<CommandData>(this.networkServer.ClientNetworkConnections, 20, 30, componentsDefinition, new ISystem[] { new SpinnerSystem(), new PhysicsSystem() }, new IClientCommandedSystem<CommandData>[] { new PlayerMovementSystem() });
+				this.gameServer = new GameServer<CommandData>(this.networkServer.ClientNetworkConnections, 20, 30, componentsDefinition, new ISystem[] { new PlayerMovementSystem(), new SpinnerSystem(), new PhysicsSystem(true), });
 
 				// Reserve the first entities for all potential clients
 				for (int clientID = 0; clientID < MainGame.maxClients; clientID++)
 				{
 					this.gameServer.EntityArray.TryCreateEntity(out Entity clientEntity);
 					clientEntity.AddComponent<SpatialComponent>();
-					clientEntity.AddComponent<PlayerMovementComponent>();
+					clientEntity.AddComponent<PhysicsComponent>();
 					clientEntity.AddComponent<ColorComponent>().Color = new Color(0.5f, 0.5f, 1.0f);
 				}
 
@@ -107,7 +106,7 @@ namespace Entmoot.TestGame3D
 			}
 
 			this.networkClient = new NetworkClient("1", 4000);
-			this.gameClient = new GameClient<CommandData>(this.networkClient, 20, 30, componentsDefinition, new ISystem[] { this.renderSystem }, new IClientCommandedSystem<CommandData>[] { new PlayerMovementSystem() });
+			this.gameClient = new GameClient<CommandData>(this.networkClient, 20, 30, componentsDefinition, new ISystem[] { new PlayerMovementSystem(), new PhysicsSystem(false), this.renderSystem });
 			this.gameClient.ShouldPredictInput = true;
 		}
 
@@ -236,15 +235,7 @@ namespace Entmoot.TestGame3D
 				if (this.currentKeyboardState.IsKeyDown(Keys.A)) { this.commandData.Commands |= Commands.MoveLeft; }
 				if (this.currentKeyboardState.IsKeyDown(Keys.D)) { this.commandData.Commands |= Commands.MoveRight; }
 
-				if (this.gameClient.HasRenderingStarted && this.gameClient.RenderedSnapshot.EntityArray.TryGetEntity(this.gameClient.CommandingEntityID, out Entity clientEntity))
-				{
-					if (clientEntity.HasComponent<SpatialComponent>())
-					{
-						ref SpatialComponent spatialComponent = ref clientEntity.GetComponent<SpatialComponent>();
-						this.basicEffect.View = Matrix.CreateLookAt(spatialComponent.Position, spatialComponent.Position + Vector3.Transform(Vector3.Forward, spatialComponent.Rotation), Vector3.Up);
-					}
-				}
-
+				this.renderSystem.CommandingEntity = this.gameClient.CommandingEntityID;
 				if (!this.isNetworkedPaused)
 				{
 					this.networkClient.Update();
