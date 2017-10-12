@@ -36,6 +36,15 @@ namespace Entmoot.TestGame3D
 
 		public void Render(EntityArray entityArray, int commandingEntityID)
 		{
+			if (entityArray.TryGetEntity(commandingEntityID, out Entity clientEntity))
+			{
+				if (clientEntity.HasComponent<SpatialComponent>())
+				{
+					ref SpatialComponent spatialComponent = ref clientEntity.GetComponent<SpatialComponent>();
+					this.BasicEffect.View = Matrix.CreateLookAt(spatialComponent.Position, spatialComponent.Position + Vector3.Transform(Vector3.Forward, spatialComponent.Rotation), Vector3.Up);
+				}
+			}
+
 			foreach (Entity entity in entityArray)
 			{
 				if (!entity.HasComponent<SpatialComponent>()) { continue; }

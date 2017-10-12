@@ -130,7 +130,9 @@ namespace Entmoot.TestGame3D
 			this.basicEffect = new BasicEffect(this.GraphicsDevice);
 			this.basicEffect.LightingEnabled = true;
 			this.basicEffect.TextureEnabled = true;
+			this.basicEffect.Projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(90.0f), this.GraphicsDevice.Viewport.AspectRatio, 0.1f, 1000.0f);
 			this.basicEffect.EnableDefaultLighting();
+
 			using (FileStream fileStream = new FileStream(@"Assets\dev_cubeface.png", FileMode.Open, FileAccess.Read))
 			{
 				this.basicEffect.Texture = Texture2D.FromStream(this.GraphicsDevice, fileStream);
@@ -165,13 +167,11 @@ namespace Entmoot.TestGame3D
 			{
 				this.networkClient.Connect(new System.Net.IPEndPoint(System.Net.IPAddress.Loopback, 19876));
 			}
-
-			if (this.isKeyPressed(Keys.P))
+			else if (this.isKeyPressed(Keys.P))
 			{
 				this.isNetworkedPaused = !this.isNetworkedPaused;
 			}
-
-			if (this.isKeyPressed(Keys.Escape))
+			else if (this.isKeyPressed(Keys.Escape))
 			{
 				this.Exit();
 			}
@@ -186,6 +186,7 @@ namespace Entmoot.TestGame3D
 				this.isDragging = false;
 			}
 
+			this.updateClientAndServer();
 			this.Window.Title = this.networkClient.IsConnected ? "Connected" : "Disconnected";
 
 			this.previousKeyboardState = this.currentKeyboardState;
@@ -195,18 +196,26 @@ namespace Entmoot.TestGame3D
 		protected override void Draw(GameTime gameTime)
 		{
 			if (gameTime.IsRunningSlowly) { this.slowFrames++; }
+
 			this.GraphicsDevice.Clear(Color.Gray);
+			if (this.gameClient.HasRenderingStarted)
+			{
+				this.renderSystem.BasicEffect = this.basicEffect;
+				this.gameClient.SystemArray.Render(this.gameClient.RenderedSnapshot.EntityArray, this.gameClient.CommandingEntityID);
+			}
 
-			this.basicEffect.View = Matrix.CreateLookAt(Vector3.Zero, Vector3.Forward, Vector3.Up);
-			this.basicEffect.Projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(90.0f), this.GraphicsDevice.Viewport.AspectRatio, 0.1f, 1000.0f);
-			this.renderSystem.BasicEffect = this.basicEffect;
+			this.drawDebugUI();
+		}
 
+		private void updateClientAndServer()
+		{
 			if (this.hasServer && !this.isNetworkedPaused)
 			{
 				this.networkServer.Update();
 				this.gameServer.Update();
 			}
 
+			// Client
 			{
 				if (this.IsActive && this.isDragging)
 				{
@@ -223,25 +232,12 @@ namespace Entmoot.TestGame3D
 				if (this.currentKeyboardState.IsKeyDown(Keys.A)) { this.commandData.Commands |= Commands.MoveLeft; }
 				if (this.currentKeyboardState.IsKeyDown(Keys.D)) { this.commandData.Commands |= Commands.MoveRight; }
 
-				if (this.gameClient.HasRenderingStarted && this.gameClient.RenderedSnapshot.EntityArray.TryGetEntity(this.gameClient.CommandingEntityID, out Entity clientEntity))
-				{
-					if (clientEntity.HasComponent<SpatialComponent>())
-					{
-						ref SpatialComponent spatialComponent = ref clientEntity.GetComponent<SpatialComponent>();
-						this.basicEffect.View = Matrix.CreateLookAt(spatialComponent.Position, spatialComponent.Position + Vector3.Transform(Vector3.Forward, spatialComponent.Rotation), Vector3.Up);
-					}
-				}
-
 				if (!this.isNetworkedPaused)
 				{
 					this.networkClient.Update();
 					this.gameClient.Update(this.commandData);
 				}
-				
-				this.gameClient.SystemArray.Render(this.gameClient.RenderedSnapshot.EntityArray, this.gameClient.CommandingEntityID);
 			}
-
-			this.drawDebugUI();
 		}
 
 		private void drawDebugUI()
