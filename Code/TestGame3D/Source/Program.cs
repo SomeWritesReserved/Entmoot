@@ -25,7 +25,7 @@ namespace Entmoot.TestGame3D
 				componentsDefinition.RegisterComponentType<SpatialComponent>();
 				componentsDefinition.RegisterComponentType<ColorComponent>();
 				NetworkServer networkServer = new NetworkServer("1", maxClient, 4000, 19876);
-				GameServer<CommandData> gameServer = new GameServer<CommandData>(networkServer.ClientNetworkConnections, 20, 30, componentsDefinition, new ISystem[] { new SpinnerSystem() });
+				GameServer<CommandData> gameServer = new GameServer<CommandData>(networkServer.ClientNetworkConnections, 20, 30, componentsDefinition, new IServerSystem[] { new SpinnerSystem() });
 				{
 					// Reserve the first entities for all potential clients
 					for (int clientID = 0; clientID < maxClient; clientID++)
@@ -65,7 +65,7 @@ namespace Entmoot.TestGame3D
 				}
 
 				NetworkClient networkClient = new NetworkClient("1", 4000);
-				GameClient<CommandData> gameClient = new GameClient<CommandData>(networkClient, 20, 30, componentsDefinition, new ISystem[] { });
+				GameClient<CommandData> gameClient = new GameClient<CommandData>(networkClient, 20, 30, componentsDefinition, new IClientSystem[] { });
 				{
 					networkClient.Connect(new System.Net.IPEndPoint(System.Net.IPAddress.Loopback, 19876));
 				}

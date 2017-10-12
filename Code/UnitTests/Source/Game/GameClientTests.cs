@@ -966,7 +966,7 @@ namespace Entmoot.UnitTests
 				};
 				Assert.IsTrue(mockClient.serverEntitySnapshot.EntityArray.TryCreateEntity(out _));
 				mockClient.serverEntitySnapshot.EntityArray.EndUpdate();
-				GameClient<MockCommandData> gameClient = new GameClient<MockCommandData>(mockClient, 10, mockClient.serverEntitySnapshot.EntityArray.Capacity, componentsDefinition, new ISystem[0]);
+				GameClient<MockCommandData> gameClient = new GameClient<MockCommandData>(mockClient, 10, mockClient.serverEntitySnapshot.EntityArray.Capacity, componentsDefinition, new IClientSystem[0]);
 				mockClient.GameClient = gameClient;
 				return mockClient;
 			}

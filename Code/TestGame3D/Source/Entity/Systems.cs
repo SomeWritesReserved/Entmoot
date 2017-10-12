@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Entmoot.TestGame3D
 {
-	public class RenderSystem : ISystem
+	public class RenderSystem : IClientSystem
 	{
 		#region Constructors
 
@@ -30,7 +30,11 @@ namespace Entmoot.TestGame3D
 
 		#region Methods
 
-		public void Update(EntityArray entityArray)
+		public void Update(EntityArray entityArray, int commandingEntityID)
+		{
+		}
+
+		public void Render(EntityArray entityArray, int commandingEntityID)
 		{
 			foreach (Entity entity in entityArray)
 			{
@@ -53,7 +57,7 @@ namespace Entmoot.TestGame3D
 		#endregion Methods
 	}
 
-	public class SpinnerSystem : ISystem
+	public class SpinnerSystem : IServerSystem
 	{
 		#region Methods
 

@@ -30,10 +30,10 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		public GameClient(INetworkConnection serverNetworkConnection, int maxEntityHistory, int entityCapacity, ComponentsDefinition componentsDefinition, IEnumerable<ISystem> systems)
+		public GameClient(INetworkConnection serverNetworkConnection, int maxEntityHistory, int entityCapacity, ComponentsDefinition componentsDefinition, IEnumerable<IClientSystem> systems)
 		{
 			this.serverNetworkConnection = serverNetworkConnection;
-			this.SystemCollection = new SystemCollection(systems);
+			this.SystemArray = new ClientSystemArray(systems);
 
 			// Create the snapshots that will need to be mutated/updates, these need to be separately created to avoid accidentally mutating another snapshot reference
 			this.InterpolationStartSnapshot = new EntitySnapshot(entityCapacity, componentsDefinition);
@@ -76,8 +76,8 @@ namespace Entmoot.Engine
 		public EntitySnapshot InterpolationStartSnapshot { get; }
 		/// <summary>Gets the entity snapshot that is currently being used as the ending interpolation tick (where we are going to).</summary>
 		public EntitySnapshot InterpolationEndSnapshot { get; }
-		/// <summary>Gets the collection of systems that will update entities.</summary>
-		public SystemCollection SystemCollection { get; }
+		/// <summary>Gets the collection of systems that will update and render client entities.</summary>
+		public ClientSystemArray SystemArray { get; }
 		/// <summary>Gets the entity that is currently owned by this client (and might take part in client-side prediction).</summary>
 		public int CommandingEntityID { get; private set; } = -1;
 
@@ -135,7 +135,7 @@ namespace Entmoot.Engine
 
 			if (this.HasRenderingStarted)
 			{
-				this.SystemCollection.Update(this.RenderedSnapshot.EntityArray);
+				this.SystemArray.Update(this.RenderedSnapshot.EntityArray, this.CommandingEntityID);
 			}
 		}
 

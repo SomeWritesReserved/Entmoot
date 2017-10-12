@@ -44,14 +44,12 @@
     <Compile Include="Source\Core\ReaderWriter.cs" />
     <Compile Include="Source\Entity\ComponentArray.cs" />
     <Compile Include="Source\Entity\ComponentsDefinition.cs" />
-    <Compile Include="Source\Game\SystemCollection.cs" />
+    <Compile Include="Source\Game\SystemArray.cs" />
     <Compile Include="Source\Entity\Entity.cs" />
-    <Compile Include="Source\Game\ISystem.cs" />
     <Compile Include="Source\Entity\EntityArray.cs" />
     <Compile Include="Source\Game\EntitySnapshot.cs" />
     <Compile Include="Source\Game\INetworkConnection.cs" />
     <Compile Include="Source\Networking\MessageBuffer.cs" />
-    <Compile Include="Source\Networking\ListenServer.cs" />
     <Compile Include="Source\Networking\Messages.cs" />
     <Compile Include="Source\Networking\LocalNetworkConnection.cs" />
     <Compile Include="Source\Game\UpdateSerializers.cs" />

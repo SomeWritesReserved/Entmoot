@@ -64,7 +64,7 @@ namespace Entmoot.TestGame3D
 			if (this.hasServer)
 			{
 				this.networkServer = new NetworkServer("1", MainGame.maxClients, 4000, 19876);
-				this.gameServer = new GameServer<CommandData>(this.networkServer.ClientNetworkConnections, 20, 30, componentsDefinition, new ISystem[] { new SpinnerSystem() });
+				this.gameServer = new GameServer<CommandData>(this.networkServer.ClientNetworkConnections, 20, 30, componentsDefinition, new IServerSystem[] { new SpinnerSystem() });
 
 				// Reserve the first entities for all potential clients
 				for (int clientID = 0; clientID < MainGame.maxClients; clientID++)
@@ -103,7 +103,7 @@ namespace Entmoot.TestGame3D
 			}
 
 			this.networkClient = new NetworkClient("1", 4000);
-			this.gameClient = new GameClient<CommandData>(this.networkClient, 20, 30, componentsDefinition, new ISystem[] { this.renderSystem });
+			this.gameClient = new GameClient<CommandData>(this.networkClient, 20, 30, componentsDefinition, new IClientSystem[] { this.renderSystem });
 		}
 
 		#endregion Constructors
@@ -237,10 +237,8 @@ namespace Entmoot.TestGame3D
 					this.networkClient.Update();
 					this.gameClient.Update(this.commandData);
 				}
-				else
-				{
-					this.renderSystem.Update(this.gameClient.RenderedSnapshot.EntityArray);
-				}
+				
+				this.gameClient.SystemArray.Render(this.gameClient.RenderedSnapshot.EntityArray, this.gameClient.CommandingEntityID);
 			}
 
 			this.drawDebugUI();

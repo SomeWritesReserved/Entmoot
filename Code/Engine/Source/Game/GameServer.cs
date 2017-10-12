@@ -29,10 +29,10 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		public GameServer(IList<INetworkConnection> clientNetworkConnections, int maxEntityHistory, int entityCapacity, ComponentsDefinition componentsDefinition, IEnumerable<ISystem> systems)
+		public GameServer(IList<INetworkConnection> clientNetworkConnections, int maxEntityHistory, int entityCapacity, ComponentsDefinition componentsDefinition, IEnumerable<IServerSystem> systems)
 		{
 			this.EntityArray = new EntityArray(entityCapacity, componentsDefinition);
-			this.SystemCollection = new SystemCollection(systems);
+			this.SystemArray = new ServerSystemArray(systems);
 
 			// Populate the entire history buffer with data that will be overwritten as needed
 			this.entitySnapshotHistory = new Queue<EntitySnapshot>();
@@ -61,8 +61,8 @@ namespace Entmoot.Engine
 		public int FrameTick { get; private set; }
 		/// <summary>Gets the array of entities that are controlled and updated by this server.</summary>
 		public EntityArray EntityArray { get; }
-		/// <summary>Gets the collection of systems that will update entities.</summary>
-		public SystemCollection SystemCollection { get; }
+		/// <summary>Gets the collection of systems that will update server entities.</summary>
+		public ServerSystemArray SystemArray { get; }
 
 		#endregion Properties
 
@@ -87,7 +87,7 @@ namespace Entmoot.Engine
 				}
 			}
 
-			this.SystemCollection.Update(this.EntityArray);
+			this.SystemArray.Update(this.EntityArray);
 
 			// Take a snapshot of the latest entity state and add it to the snapshot history buffer (overwriting an old snapshot)
 			EntitySnapshot newEntitySnapshot = this.entitySnapshotHistory.Dequeue();
