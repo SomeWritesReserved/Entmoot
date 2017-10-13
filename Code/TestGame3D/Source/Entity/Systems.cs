@@ -30,36 +30,37 @@ namespace Entmoot.TestGame3D
 
 		#region Methods
 
-		public void Update(EntityArray entityArray, int commandingEntityID)
+		public void Update(EntityArray entityArray, Entity commandingEntity)
 		{
 		}
 
-		public void Render(EntityArray entityArray, int commandingEntityID)
+		public void UpdatePrediction(EntityArray entityArray, Entity commandingEntity)
 		{
-			if (entityArray.TryGetEntity(commandingEntityID, out Entity clientEntity))
+		}
+
+		public void Render(EntityArray entityArray, Entity commandingEntity)
+		{
+			if (commandingEntity.IsValid && commandingEntity.HasComponent<SpatialComponent>())
 			{
-				if (clientEntity.HasComponent<SpatialComponent>())
+				ref SpatialComponent commandingSpatialComponent = ref commandingEntity.GetComponent<SpatialComponent>();
+				this.BasicEffect.View = Matrix.CreateLookAt(commandingSpatialComponent.Position, commandingSpatialComponent.Position + Vector3.Transform(Vector3.Forward, commandingSpatialComponent.Rotation), Vector3.Up);
+
+				foreach (Entity entity in entityArray)
 				{
-					ref SpatialComponent spatialComponent = ref clientEntity.GetComponent<SpatialComponent>();
-					this.BasicEffect.View = Matrix.CreateLookAt(spatialComponent.Position, spatialComponent.Position + Vector3.Transform(Vector3.Forward, spatialComponent.Rotation), Vector3.Up);
+					if (!entity.HasComponent<SpatialComponent>()) { continue; }
+
+					ref SpatialComponent spatialComponent = ref entity.GetComponent<SpatialComponent>();
+					ref ColorComponent colorComponent = ref entity.GetComponent<ColorComponent>();
+
+					this.BasicEffect.AmbientLightColor = Vector3.One * 0.25f;
+					this.BasicEffect.DiffuseColor = Color.White.ToVector3();
+					if (entity.HasComponent<ColorComponent>())
+					{
+						this.BasicEffect.DiffuseColor = colorComponent.Color.ToVector3();
+					}
+
+					ShapeRenderHelper.RenderBox(this.GraphicsDeviceManager.GraphicsDevice, this.BasicEffect, spatialComponent.Position, spatialComponent.Rotation);
 				}
-			}
-
-			foreach (Entity entity in entityArray)
-			{
-				if (!entity.HasComponent<SpatialComponent>()) { continue; }
-
-				ref SpatialComponent spatialComponent = ref entity.GetComponent<SpatialComponent>();
-				ref ColorComponent colorComponent = ref entity.GetComponent<ColorComponent>();
-
-				this.BasicEffect.AmbientLightColor = Vector3.One * 0.25f;
-				this.BasicEffect.DiffuseColor = Color.White.ToVector3();
-				if (entity.HasComponent<ColorComponent>())
-				{
-					this.BasicEffect.DiffuseColor = colorComponent.Color.ToVector3();
-				}
-
-				ShapeRenderHelper.RenderBox(this.GraphicsDeviceManager.GraphicsDevice, this.BasicEffect, spatialComponent.Position, spatialComponent.Rotation);
 			}
 		}
 

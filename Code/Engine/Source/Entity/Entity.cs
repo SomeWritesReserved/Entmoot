@@ -17,6 +17,7 @@ namespace Entmoot.Engine
 		/// <summary>Represents a reference to an entity that does not actually exist.</summary>
 		public static readonly Entity NoEntity = new Entity(null, -1);
 
+		/// <summary>The parent array that actually handles all of the logic for this and all other child entities.</summary>
 		private readonly EntityArray parentEntityArray;
 
 		#endregion Fields
@@ -40,6 +41,14 @@ namespace Entmoot.Engine
 		/// Gets the unique identifier for the entity.
 		/// </summary>
 		public int ID { get; }
+
+		/// <summary>
+		/// Gets whether or not this entity is a valid reference to an entity in an entity array.
+		/// </summary>
+		public bool IsValid
+		{
+			get { return this.ID >= 0 && this.parentEntityArray != null; }
+		}
 
 		#endregion Properties
 

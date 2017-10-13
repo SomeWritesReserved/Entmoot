@@ -78,7 +78,7 @@ namespace Entmoot.Engine
 		public EntitySnapshot InterpolationEndSnapshot { get; }
 		/// <summary>Gets the collection of systems that will update and render client entities.</summary>
 		public ClientSystemArray SystemArray { get; }
-		/// <summary>Gets the entity that is currently owned by this client (and might take part in client-side prediction).</summary>
+		/// <summary>Gets the ID of the entity that is currently commanded by this client (and might take part in client-side prediction).</summary>
 		public int CommandingEntityID { get; private set; } = -1;
 
 		/// <summary>Gets the most recent server tick that we got from the server.</summary>
@@ -135,7 +135,7 @@ namespace Entmoot.Engine
 
 			if (this.HasRenderingStarted)
 			{
-				this.SystemArray.Update(this.RenderedSnapshot.EntityArray, this.CommandingEntityID);
+				this.SystemArray.Update(this.RenderedSnapshot.EntityArray, this.GetCommandingEntity());
 			}
 		}
 
@@ -263,6 +263,7 @@ namespace Entmoot.Engine
 
 						// Reapply all the commands we've sent that the server hasn't processed yet to get us to where we predict we should be
 						clientCommand.CommandData.ApplyToEntity(predictedEntity);
+						this.SystemArray.UpdatePrediction(this.RenderedSnapshot.EntityArray, predictedEntity);
 					}
 				}
 			}
@@ -271,6 +272,17 @@ namespace Entmoot.Engine
 		#endregion Update
 
 		#region Helpers
+
+		/// <summary>
+		/// Returns the actual entity that is currently commanded by this client (and might take part in client-side prediction),
+		/// or returns <see cref="Entity.NoEntity"/> if the client doesn't have a commanding entity.
+		/// </summary>
+		public Entity GetCommandingEntity()
+		{
+			if (this.CommandingEntityID < 0 || !this.HasRenderingStarted) { return Entity.NoEntity; }
+			this.RenderedSnapshot.EntityArray.TryGetEntity(this.CommandingEntityID, out Entity commandingEntity);
+			return commandingEntity;
+		}
 
 		/// <summary>
 		/// Returns the oldest entity snapshot that exists in the history buffer.

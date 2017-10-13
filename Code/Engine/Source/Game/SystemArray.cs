@@ -32,12 +32,17 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Runs this system over the given array of entities on the client.
 		/// </summary>
-		void Update(EntityArray entityArray, int commandingEntityID);
+		void Update(EntityArray entityArray, Entity commandingEntity);
+
+		/// <summary>
+		/// Runs this system over the given array of entities on the client but only updates the commanding entity (for client-side prediction).
+		/// </summary>
+		void UpdatePrediction(EntityArray entityArray, Entity commandingEntity);
 
 		/// <summary>
 		/// Allows this system to perform any rendering.
 		/// </summary>
-		void Render(EntityArray entityArray, int commandingEntityID);
+		void Render(EntityArray entityArray, Entity commandingEntity);
 
 		#endregion Methods
 	}
@@ -113,24 +118,35 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Updates the systems, allowing for each <see cref="IClientSystem"/> to run its logic on the given <see cref="EntityArray"/>.
 		/// </summary>
-		public void Update(EntityArray entityArray, int commandingEntityID)
+		public void Update(EntityArray entityArray, Entity commandingEntity)
 		{
 			entityArray.BeginUpdate();
 			foreach (IClientSystem system in this.systems)
 			{
-				system.Update(entityArray, commandingEntityID);
+				system.Update(entityArray, commandingEntity);
 			}
 			entityArray.EndUpdate();
 		}
 
 		/// <summary>
-		/// Allows for each <see cref="IClientSystem"/> to render the given <see cref="EntityArray"/>.
+		/// Updates the systems, allowing for each <see cref="IClientSystem"/> to run its logic to do client-side prediction on the commanding entity.
 		/// </summary>
-		public void Render(EntityArray entityArray, int commandingEntityID)
+		public void UpdatePrediction(EntityArray entityArray, Entity commandingEntity)
 		{
 			foreach (IClientSystem system in this.systems)
 			{
-				system.Render(entityArray, commandingEntityID);
+				system.UpdatePrediction(entityArray, commandingEntity);
+			}
+		}
+
+		/// <summary>
+		/// Allows for each <see cref="IClientSystem"/> to render the given <see cref="EntityArray"/>.
+		/// </summary>
+		public void Render(EntityArray entityArray, Entity commandingEntity)
+		{
+			foreach (IClientSystem system in this.systems)
+			{
+				system.Render(entityArray, commandingEntity);
 			}
 		}
 
