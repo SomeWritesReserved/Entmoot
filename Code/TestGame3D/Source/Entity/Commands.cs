@@ -25,7 +25,7 @@ namespace Entmoot.TestGame3D
 	{
 		#region Fields
 
-		public const float MoveSpeed = 0.2f;
+		public const float MoveImpulse = 75.0f;
 
 		public Commands Commands;
 		public Vector2 LookAngles;
@@ -51,6 +51,7 @@ namespace Entmoot.TestGame3D
 		public void ApplyToEntity(Entity entity)
 		{
 			if (!entity.HasComponent<SpatialComponent>()) { return; }
+			if (!entity.HasComponent<PhysicsComponent>()) { return; }
 
 			Vector3 movement = Vector3.Zero;
 			if ((this.Commands & Commands.MoveForward) != 0) { movement += Vector3.Forward; }
@@ -66,7 +67,8 @@ namespace Entmoot.TestGame3D
 			}
 
 			ref SpatialComponent spatialComponent = ref entity.GetComponent<SpatialComponent>();
-			spatialComponent.Position += movement * CommandData.MoveSpeed;
+			ref PhysicsComponent physicsComponent = ref entity.GetComponent<PhysicsComponent>();
+			physicsComponent.Acceleration += movement * CommandData.MoveImpulse;
 			spatialComponent.Rotation = Quaternion.CreateFromYawPitchRoll(this.LookAngles.X, this.LookAngles.Y, 0.0f);
 		}
 

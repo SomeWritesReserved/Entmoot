@@ -58,19 +58,21 @@ namespace Entmoot.TestGame3D
 
 			ComponentsDefinition componentsDefinition = new ComponentsDefinition();
 			componentsDefinition.RegisterComponentType<SpatialComponent>();
+			componentsDefinition.RegisterComponentType<PhysicsComponent>();
 			componentsDefinition.RegisterComponentType<ColorComponent>();
 
 			this.hasServer = Environment.GetCommandLineArgs().Any((arg) => arg.Equals("-s", StringComparison.OrdinalIgnoreCase));
 			if (this.hasServer)
 			{
 				this.networkServer = new NetworkServer("1", MainGame.maxClients, 4000, 19876);
-				this.gameServer = new GameServer<CommandData>(this.networkServer.ClientNetworkConnections, 20, 30, componentsDefinition, new IServerSystem[] { new SpinnerSystem() });
+				this.gameServer = new GameServer<CommandData>(this.networkServer.ClientNetworkConnections, 20, 30, componentsDefinition, new IServerSystem[] { new SpinnerSystem(), new PhysicsSystem() });
 
 				// Reserve the first entities for all potential clients
 				for (int clientID = 0; clientID < MainGame.maxClients; clientID++)
 				{
 					this.gameServer.EntityArray.TryCreateEntity(out Entity clientEntity);
 					clientEntity.AddComponent<SpatialComponent>();
+					clientEntity.AddComponent<PhysicsComponent>();
 					clientEntity.AddComponent<ColorComponent>().Color = new Color(0.5f, 0.5f, 1.0f);
 				}
 
@@ -103,7 +105,7 @@ namespace Entmoot.TestGame3D
 			}
 
 			this.networkClient = new NetworkClient("1", 4000);
-			this.gameClient = new GameClient<CommandData>(this.networkClient, 20, 30, componentsDefinition, new IClientSystem[] { this.renderSystem });
+			this.gameClient = new GameClient<CommandData>(this.networkClient, 20, 30, componentsDefinition, new IClientSystem[] { new PhysicsSystem(), this.renderSystem });
 		}
 
 		#endregion Constructors
