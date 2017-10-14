@@ -178,36 +178,152 @@ namespace Entmoot.TestGame3D
 				this.gameClient.SystemArray.Render(this.gameClient.RenderedSnapshot.EntityArray, this.gameClient.GetCommandingEntity());
 				this.drawCharacter();
 			}
-
-			ShapeRenderHelper.RenderBox(this.GraphicsDevice, this.basicEffect, new Vector3(0, 0.5f, 0), Vector3.One * 10, Vector3.Zero, Quaternion.Identity);
+			ShapeRenderHelper.RenderOriginBox(this.GraphicsDevice, this.basicEffect, Vector3.One * 10, Matrix.CreateTranslation(0, -10, 0));
 
 			this.drawDebugUI();
 		}
 
+		private Bone rootBone;
 		private void drawCharacter()
 		{
-			// LowerTorso (root)
-			ShapeRenderHelper.RenderBox(this.GraphicsDevice, this.basicEffect, new Vector3(0, -0.5f, 0), new Vector3(0.48f, 0.3125f, 0.23f), new Vector3(0, 1, 0), Quaternion.Identity);
-			// UpperTorso
-			ShapeRenderHelper.RenderBox(this.GraphicsDevice, this.basicEffect, new Vector3(0, -0.5f, 0), new Vector3(0.5f, 0.375f, 0.25f), new Vector3(0, 1.3125f, 0), Quaternion.Identity);
-			// Neck
-			ShapeRenderHelper.RenderBox(this.GraphicsDevice, this.basicEffect, new Vector3(0, -0.5f, 0), new Vector3(0.125f, 0.0625f, 0.125f), new Vector3(0, 1.6875f, 0), Quaternion.Identity);
-			// Head
-			ShapeRenderHelper.RenderBox(this.GraphicsDevice, this.basicEffect, new Vector3(0, -0.5f, 0), new Vector3(0.1875f, 0.25f, 0.2375f), new Vector3(0, 1.75f, -0.02f), Quaternion.Identity);
+			if (this.rootBone == null)
+			{
+				this.rootBone = new Bone("Lower Torso (root)")
+				{
+					OffsetFromParent = new Vector3(0.0f, 8.0f, 0.0f),
+					Size = new Vector3(4.0f, 2.5f, 2.0f),
+					Children = new Bone[] {
+						new Bone("Upper Torso")
+						{
+							OffsetFromParent = new Vector3(0.0f, 2.5f, 0.0f),
+							Size = new Vector3(4.0f, 3.25f, 2.0f),
+							Children = new Bone[] {
+								new Bone("Neck")
+								{
+									OffsetFromParent = new Vector3(0.0f, 3.25f, 0.0f),
+									Size = new Vector3(1.0f, 0.25f, 1.0f),
+									Children = new Bone[] {
+										new Bone("Head")
+										{
+											OffsetFromParent = new Vector3(0.0f, 0.25f, 0.0f),
+											Size = new Vector3(1.5f, 2.0f, 1.75f),
+										},
+									},
+								},
+								new Bone("Upper Arm - Right")
+								{
+									OffsetFromParent = new Vector3(2.75f, 3.0f, 0.0f),
+									Size = new Vector3(1.5f, 3.5f, 1.5f),
+									Rotation = Quaternion.CreateFromYawPitchRoll(0, MathHelper.ToRadians(180), 0),
+									Children = new Bone[] {
+										new Bone("Lower Arm - Right")
+										{
+											OffsetFromParent = new Vector3(0.0f, 3.5f, 0.0f),
+											Size = new Vector3(1.2f, 2.25f, 1.5f),
+											Children = new Bone[] {
+												new Bone("Hand - Right")
+												{
+													OffsetFromParent = new Vector3(0.0f, 2.25f, 0.0f),
+													Size = new Vector3(0.5f, 1.5f, 1.5f),
+												},
+											},
+										},
+									},
+								},
+								new Bone("Upper Arm - Left")
+								{
+									OffsetFromParent = new Vector3(-2.75f, 3.0f, 0.0f),
+									Size = new Vector3(1.5f, 3.5f, 1.5f),
+									Rotation = Quaternion.CreateFromYawPitchRoll(0, MathHelper.ToRadians(180), 0),
+									Children = new Bone[] {
+										new Bone("Lower Arm - Left")
+										{
+											OffsetFromParent = new Vector3(0.0f, 3.5f, 0.0f),
+											Size = new Vector3(1.2f, 2.25f, 1.5f),
+											Children = new Bone[] {
+												new Bone("Hand - Left")
+												{
+													OffsetFromParent = new Vector3(0.0f, 2.25f, 0.0f),
+													Size = new Vector3(0.5f, 1.5f, 1.5f),
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+						new Bone("Upper Leg - Right")
+						{
+							OffsetFromParent = new Vector3(1.0f, 0.0f, 0.0f),
+							Size = new Vector3(1.75f, 3.75f, 1.75f),
+							Rotation = Quaternion.CreateFromYawPitchRoll(0, MathHelper.ToRadians(180), 0),
+							Children = new Bone[] {
+								new Bone("Lower Leg - Right")
+								{
+									OffsetFromParent = new Vector3(0.0f, 3.75f, 0.0f),
+									Size = new Vector3(1.6f, 3.25f, 1.65f),
+									Children = new Bone[] {
+										new Bone("Foot - Right")
+										{
+											OffsetFromParent = new Vector3(0.0f, 3.25f, 0.0f),
+											Size = new Vector3(1.5f, 1.0f, 1.7f),
+											Children = new Bone[] {
+												new Bone("Toes - Right")
+												{
+													OffsetFromParent = new Vector3(0.0f, 0.4f, 1.2f),
+													Size = new Vector3(1.4f, 0.6f, 0.85f),
+												}
+											},
+										},
+									},
+								},
+							},
+						},
+						new Bone("Upper Leg - Left")
+						{
+							OffsetFromParent = new Vector3(-1.0f, 0.0f, 0.0f),
+							Size = new Vector3(1.75f, 3.75f, 1.75f),
+							Rotation = Quaternion.CreateFromYawPitchRoll(0, MathHelper.ToRadians(180), 0),
+							Children = new Bone[] {
+								new Bone("Lower Leg - Left")
+								{
+									OffsetFromParent = new Vector3(0.0f, 3.75f, 0.0f),
+									Size = new Vector3(1.6f, 3.25f, 1.65f),
+									Children = new Bone[] {
+										new Bone("Foot - Left")
+										{
+											OffsetFromParent = new Vector3(0.0f, 3.25f, 0.0f),
+											Size = new Vector3(1.5f, 1.0f, 1.7f),
+											Children = new Bone[] {
+												new Bone("Toes - Left")
+												{
+													OffsetFromParent = new Vector3(0.0f, 0.4f, 1.2f),
+													Size = new Vector3(1.4f, 0.6f, 0.85f),
+												}
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				};
+			}
+			this.drawBone(this.rootBone, Matrix.Identity);
+		}
 
-			// 2 upper leg
-			ShapeRenderHelper.RenderBox(this.GraphicsDevice, this.basicEffect, new Vector3(0, 0.5f, 0), new Vector3(0.21f, 0.46875f, 0.21f), new Vector3(0.125f, 1, 0), Quaternion.Identity);
-			ShapeRenderHelper.RenderBox(this.GraphicsDevice, this.basicEffect, new Vector3(0, 0.5f, 0), new Vector3(0.21f, 0.46875f, 0.21f), new Vector3(-0.125f, 1, 0), Quaternion.Identity);
-			// 2 lower leg
-			ShapeRenderHelper.RenderBox(this.GraphicsDevice, this.basicEffect, new Vector3(0, 0.5f, 0), new Vector3(0.20f, 0.40625f, 0.20f), new Vector3(0.125f, 0.53125f, 0), Quaternion.Identity);
-			ShapeRenderHelper.RenderBox(this.GraphicsDevice, this.basicEffect, new Vector3(0, 0.5f, 0), new Vector3(0.20f, 0.40625f, 0.20f), new Vector3(-0.125f, 0.53125f, 0), Quaternion.Identity);
-			// 2 feet
-			ShapeRenderHelper.RenderBox(this.GraphicsDevice, this.basicEffect, new Vector3(0, 0.5f, 0), new Vector3(0.19f, 0.125f, 0.32f), new Vector3(0.125f, 0.125f, -0.05f), Quaternion.Identity);
-			ShapeRenderHelper.RenderBox(this.GraphicsDevice, this.basicEffect, new Vector3(0, 0.5f, 0), new Vector3(0.19f, 0.125f, 0.32f), new Vector3(-0.125f, 0.125f, -0.05f), Quaternion.Identity);
+		private void drawBone(Bone bone, Matrix transform)
+		{
+			transform = Matrix.CreateFromQuaternion(bone.Rotation) * Matrix.CreateTranslation(bone.OffsetFromParent) * transform;
+			ShapeRenderHelper.RenderOriginBox(this.GraphicsDevice, this.basicEffect, bone.Size, transform);
 
-			// 2 upper arm
-			// 2 lower arm
-			// 2 hands
+			if (bone.Children != null)
+			{
+				foreach (Bone childBond in bone.Children)
+				{
+					this.drawBone(childBond, transform);
+				}
+			}
 		}
 
 		private void updateClientAndServer()

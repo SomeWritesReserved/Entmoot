@@ -59,7 +59,7 @@ namespace Entmoot.TestGame3D
 						this.BasicEffect.DiffuseColor = colorComponent.Color.ToVector3();
 					}
 
-					ShapeRenderHelper.RenderBox(this.GraphicsDeviceManager.GraphicsDevice, this.BasicEffect, spatialComponent.Position, spatialComponent.Rotation);
+					ShapeRenderHelper.RenderUnitBox(this.GraphicsDeviceManager.GraphicsDevice, this.BasicEffect, spatialComponent.Position, spatialComponent.Rotation);
 				}
 			}
 		}

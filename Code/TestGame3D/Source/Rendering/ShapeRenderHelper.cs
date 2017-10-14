@@ -12,6 +12,7 @@ namespace Entmoot.TestGame3D
 	{
 		#region Fields
 
+		private static readonly VertexPositionNormalTexture[] unitBoxRenderVertices;
 		private static readonly VertexPositionNormalTexture[] boxRenderVertices;
 
 		#endregion Fields
@@ -32,7 +33,7 @@ namespace Entmoot.TestGame3D
 			//   2
 			// 1 3 5 6
 			//   4
-			ShapeRenderHelper.boxRenderVertices = new VertexPositionNormalTexture[]
+			ShapeRenderHelper.unitBoxRenderVertices = new VertexPositionNormalTexture[]
 			{
 				new VertexPositionNormalTexture(new Vector3(1, 1, -1), Vector3.Right, new Vector2(x1, y1)),
 				new VertexPositionNormalTexture(new Vector3(1, -1, -1), Vector3.Right, new Vector2(x1, y2)),
@@ -76,28 +77,30 @@ namespace Entmoot.TestGame3D
 				new VertexPositionNormalTexture(new Vector3(-1, 1, 1), Vector3.Backward, new Vector2(x3, y1)),
 				new VertexPositionNormalTexture(new Vector3(1, -1, 1), Vector3.Backward, new Vector2(x4, y2)),
 			};
+
+			ShapeRenderHelper.boxRenderVertices = ShapeRenderHelper.unitBoxRenderVertices
+				.Select((vertex) => new VertexPositionNormalTexture(vertex.Position * 0.5f + Vector3.Up * 0.5f, vertex.Normal, vertex.TextureCoordinate))
+				.ToArray();
 		}
 
 		#endregion Constructors
 
 		#region Methods
 
-		public static void RenderBox<TEffect>(GraphicsDevice graphicsDevice, TEffect effect, Vector3 position, Quaternion rotation)
+		public static void RenderUnitBox<TEffect>(GraphicsDevice graphicsDevice, TEffect effect, Vector3 position, Quaternion rotation)
 			where TEffect : Effect, IEffectMatrices
 		{
 			effect.World = Matrix.CreateFromQuaternion(rotation) * Matrix.CreateTranslation(position);
 			effect.CurrentTechnique.Passes[0].Apply();
-			graphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList, ShapeRenderHelper.boxRenderVertices, 0, ShapeRenderHelper.boxRenderVertices.Length / 3);
-
+			graphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList, ShapeRenderHelper.unitBoxRenderVertices, 0, ShapeRenderHelper.unitBoxRenderVertices.Length / 3);
 		}
 
-		public static void RenderBox<TEffect>(GraphicsDevice graphicsDevice, TEffect effect, Vector3 boxOrigin, Vector3 boxScale, Vector3 worldPosition, Quaternion worldRotation)
+		public static void RenderOriginBox<TEffect>(GraphicsDevice graphicsDevice, TEffect effect, Vector3 boxScale, Matrix transform)
 			where TEffect : Effect, IEffectMatrices
 		{
-			effect.World = Matrix.CreateScale(0.5f) * Matrix.CreateTranslation(-boxOrigin) * Matrix.CreateScale(boxScale) * Matrix.CreateFromQuaternion(worldRotation) * Matrix.CreateTranslation(worldPosition);
+			effect.World = Matrix.CreateScale(boxScale) * transform;
 			effect.CurrentTechnique.Passes[0].Apply();
 			graphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList, ShapeRenderHelper.boxRenderVertices, 0, ShapeRenderHelper.boxRenderVertices.Length / 3);
-
 		}
 
 		#endregion Methods

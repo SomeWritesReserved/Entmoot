@@ -25,7 +25,7 @@ namespace Entmoot.TestGame3D
 	{
 		#region Fields
 
-		public const float MoveImpulse = 25;
+		public const float MoveImpulse = 100;
 
 		public Commands Commands;
 		public Vector2 LookAngles;
