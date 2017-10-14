@@ -72,6 +72,16 @@ namespace Entmoot.Engine
 		#region Properties
 
 		/// <summary>
+		/// Gets or sets the number of network ticks to wait before timing out a client that hasn't responded.
+		/// </summary>
+		public int ClientTimeoutTicks { get; set; } = 300;
+
+		/// <summary>
+		/// Gets the current network tick of this networked server.
+		/// </summary>
+		public int NetworkTick { get; private set; }
+
+		/// <summary>
 		/// Gets the application ID for this networked server (used to verify the clients are using the same application).
 		/// </summary>
 		public string ApplicationID { get; }
@@ -122,6 +132,7 @@ namespace Entmoot.Engine
 		/// </summary>
 		public void Update()
 		{
+			this.NetworkTick++;
 			Log<LogNetworkServer>.StartNew();
 
 			while (this.socket.Available > 0)
@@ -135,6 +146,7 @@ namespace Entmoot.Engine
 
 			foreach (ClientNetworkConnection client in this.clients)
 			{
+				if ((this.NetworkTick - client.LastTickReceived) >= this.ClientTimeoutTicks) { client.SetStateDisconnected(); }
 				if (client.ClientState == ClientState.AwaitingConnectFinalize) { Log<LogNetworkServer>.Data.ConnectingClients++; }
 				if (client.ClientState == ClientState.Connected) { Log<LogNetworkServer>.Data.ConnectedClients++; }
 			}
@@ -154,11 +166,11 @@ namespace Entmoot.Engine
 				ClientNetworkConnection client = this.clients[clientID];
 				if (packetType == PacketType.ClientConnectFinalize)
 				{
-					client.SetStateConnected(endPoint);
+					client.SetStateConnected(endPoint, this.NetworkTick);
 				}
 				else if (packetType == PacketType.GameUpdate && packetTypeDetail == PacketTypeDetail.GameUpdateFromClient)
 				{
-					client.EnqueueGameUpdateIncomingMessage(incomingMessage);
+					client.EnqueueGameUpdateIncomingMessage(incomingMessage, this.NetworkTick);
 				}
 			}
 			else
@@ -195,7 +207,7 @@ namespace Entmoot.Engine
 			}
 			else
 			{
-				this.clients[nextClientID].SetStateAwaitingConnectFinalize(endPoint);
+				this.clients[nextClientID].SetStateAwaitingConnectFinalize(endPoint, this.NetworkTick);
 				this.endPointToClientID[endPoint] = nextClientID;
 				this.sendConnectResponse(endPoint, (byte)nextClientID, PacketTypeDetail.ConnectResponseAccept);
 			}
@@ -246,8 +258,6 @@ namespace Entmoot.Engine
 			private readonly MessageBuffer messageBuffer;
 			/// <summary>The end point of this client to send messages to and to expect messages from.</summary>
 			private readonly IPEndPoint clientEndPoint;
-			/// <summary>The last time a message or packet was received from this client.</summary>
-			private double lastReceivedTime;
 
 			#endregion Fields
 
@@ -277,6 +287,11 @@ namespace Entmoot.Engine
 			/// </summary>
 			public bool IsConnected { get { return this.ClientState != ClientState.Disconnected; } }
 
+			/// <summary>
+			/// Gets the last time a message or packet was received from this client.
+			/// </summary>
+			public int LastTickReceived { get; private set; }
+
 			#endregion Properties
 
 			#region Methods
@@ -289,36 +304,40 @@ namespace Entmoot.Engine
 				this.ClientState = ClientState.Disconnected;
 				this.clientEndPoint.Address = IPAddress.None;
 				this.clientEndPoint.Port = 0;
+				this.LastTickReceived = -1;
 				this.messageBuffer.Clear();
 			}
 
 			/// <summary>
 			/// Sets the state of this client to the <see cref="ClientState.AwaitingConnectFinalize"/> state.
 			/// </summary>
-			public void SetStateAwaitingConnectFinalize(IPEndPoint endPoint)
+			public void SetStateAwaitingConnectFinalize(IPEndPoint endPoint, int networkTick)
 			{
 				this.ClientState = ClientState.AwaitingConnectFinalize;
 				this.clientEndPoint.Address = endPoint.Address;
 				this.clientEndPoint.Port = endPoint.Port;
+				this.LastTickReceived = networkTick;
 			}
 
 			/// <summary>
 			/// Sets the state of this client to the <see cref="ClientState.Connected"/> state.
 			/// </summary>
-			public void SetStateConnected(IPEndPoint endPoint)
+			public void SetStateConnected(IPEndPoint endPoint, int networkTick)
 			{
 				this.ClientState = ClientState.Connected;
 				this.clientEndPoint.Address = endPoint.Address;
 				this.clientEndPoint.Port = endPoint.Port;
+				this.LastTickReceived = networkTick;
 			}
 
 			/// <summary>
 			/// Copies the given incoming message into the servers's next incoming message queue for game updates.
 			/// </summary>
-			public void EnqueueGameUpdateIncomingMessage(IncomingMessage incomingMessage)
+			public void EnqueueGameUpdateIncomingMessage(IncomingMessage incomingMessage, int networkTick)
 			{
 				IncomingMessage clientIncomingMessage = this.messageBuffer.GetMessageToAddToIncomingQueue();
 				clientIncomingMessage.CopyFrom(incomingMessage);
+				this.LastTickReceived = networkTick;
 			}
 
 			/// <summary>

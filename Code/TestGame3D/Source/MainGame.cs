@@ -257,9 +257,9 @@ namespace Entmoot.TestGame3D
 				this.stringBuilder.Append(Log<LogNetworkServer>.History.Sum((d) => d.ReceivedBytes) / 2);
 				this.stringBuilder.Append("\n SentBytes/s ");
 				this.stringBuilder.Append(Log<LogNetworkServer>.History.Sum((d) => d.SentBytes) / 2);
-				this.stringBuilder.Append("\n NumClients  ");
+				this.stringBuilder.Append("\n Clients     ");
 				this.stringBuilder.Append(Log<LogNetworkServer>.Data.ConnectedClients);
-				this.stringBuilder.Append("\n ClientsWait ");
+				this.stringBuilder.Append("\n Connecting  ");
 				this.stringBuilder.Append(Log<LogNetworkServer>.Data.ConnectingClients);
 			}
 
