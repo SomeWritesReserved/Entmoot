@@ -36,24 +36,26 @@ namespace Entmoot.TestGame
 
 			this.clientServerNetworkConnection = new TestNetworkConnection()
 			{
-				SimulatedLatency = 4,
+				SimulatedLatency = 10,
 				SimulatedJitter = 0,
 				SimulatedPacketLoss = 0,
 			};
 
 			ComponentsDefinition componentsDefinition = new ComponentsDefinition();
 			componentsDefinition.RegisterComponentType<PositionComponent>();
+			componentsDefinition.RegisterComponentType<SpinComponent>();
 
-			this.gameClient = new GameClient<TestCommandData>(this.clientServerNetworkConnection, 10, 5, componentsDefinition, new IClientSystem[0]);
-			this.gameServer = new GameServer<TestCommandData>(new[] { this.clientServerNetworkConnection }, 10, 5, componentsDefinition, new IServerSystem[] { new TestSystem(1) });
+			this.gameClient = new GameClient<TestCommandData>(this.clientServerNetworkConnection, 10, 5, componentsDefinition, new IClientSystem[] { new MovementSystem() });
+			this.gameServer = new GameServer<TestCommandData>(new[] { this.clientServerNetworkConnection }, 10, 5, componentsDefinition, new IServerSystem[] { new SpinSystem(), new MovementSystem() });
 			{
 				this.gameServer.EntityArray.TryCreateEntity(out Entity entity1);
 				entity1.AddComponent<PositionComponent>().Position = new Vector3(100, 50, 0);
 				this.gameServer.EntityArray.TryCreateEntity(out Entity entity2);
 				entity2.AddComponent<PositionComponent>().Position = new Vector3(0, 0, 0);
+				entity2.AddComponent<SpinComponent>();
 				this.gameServer.EntityArray.TryCreateEntity(out Entity entity3);
-				this.gameServer.EntityArray.RemoveEntity(entity3);
 				this.gameServer.EntityArray.TryCreateEntity(out Entity entity4);
+				this.gameServer.EntityArray.RemoveEntity(entity3);
 				entity4.AddComponent<PositionComponent>().Position = new Vector3(200, 350, 0);
 			}
 
@@ -464,6 +466,7 @@ namespace Entmoot.TestGame
 		#region Fields
 
 		public Vector3 Position;
+		public Vector3 Velocity;
 
 		#endregion Fields
 
@@ -471,12 +474,14 @@ namespace Entmoot.TestGame
 
 		public bool Equals(PositionComponent other)
 		{
-			return this.Position == other.Position;
+			return this.Position == other.Position &&
+				this.Velocity == other.Velocity;
 		}
 
 		public void Interpolate(PositionComponent otherA, PositionComponent otherB, float amount)
 		{
 			this.Position = Vector3.Lerp(otherA.Position, otherB.Position, amount);
+			this.Velocity = Vector3.Lerp(otherA.Velocity, otherB.Velocity, amount);
 		}
 
 		public void Serialize(IWriter writer)
@@ -484,6 +489,9 @@ namespace Entmoot.TestGame
 			writer.Write(this.Position.X);
 			writer.Write(this.Position.Y);
 			writer.Write(this.Position.Z);
+			writer.Write(this.Velocity.X);
+			writer.Write(this.Velocity.Y);
+			writer.Write(this.Velocity.Z);
 		}
 
 		public void Deserialize(IReader reader)
@@ -491,6 +499,9 @@ namespace Entmoot.TestGame
 			this.Position.X = reader.ReadSingle();
 			this.Position.Y = reader.ReadSingle();
 			this.Position.Z = reader.ReadSingle();
+			this.Velocity.X = reader.ReadSingle();
+			this.Velocity.Y = reader.ReadSingle();
+			this.Velocity.Z = reader.ReadSingle();
 		}
 
 		public void ResetToDefaults()
@@ -501,20 +512,37 @@ namespace Entmoot.TestGame
 		#endregion Methods
 	}
 
-	public class TestSystem : IServerSystem
+	public struct SpinComponent : IComponent<SpinComponent>
 	{
-		#region Constructors
+		#region Methods
 
-		public TestSystem(int entityToMoveID)
+		public bool Equals(SpinComponent other)
 		{
-			this.EntityToMoveID = entityToMoveID;
+			return true;
 		}
 
-		#endregion Constructors
+		public void Interpolate(SpinComponent otherA, SpinComponent otherB, float amount)
+		{
+		}
 
+		public void Serialize(IWriter writer)
+		{
+		}
+
+		public void Deserialize(IReader reader)
+		{
+		}
+
+		public void ResetToDefaults()
+		{
+		}
+
+		#endregion Methods
+	}
+
+	public class SpinSystem : IServerSystem
+	{
 		#region Properties
-
-		public int EntityToMoveID { get; set; }
 
 		public int Tick { get; set; }
 
@@ -524,13 +552,53 @@ namespace Entmoot.TestGame
 
 		public void Update(EntityArray entityArray)
 		{
-			if (!entityArray.TryGetEntity(this.EntityToMoveID, out Entity entity)) { return; }
+			foreach (Entity entity in entityArray)
+			{
+				if (!entity.HasComponent<PositionComponent>()) { continue; }
+				if (!entity.HasComponent<SpinComponent>()) { continue; }
+
+				ref PositionComponent component = ref entity.GetComponent<PositionComponent>();
+				component.Position.X = (float)Math.Cos(this.Tick * 0.15) * 50 + 100;
+				component.Position.Y = (float)Math.Sin(this.Tick * 0.15) * 50 + 100;
+			}
+			this.Tick++;
+		}
+
+		#endregion Methods
+	}
+
+	public class MovementSystem : IServerSystem, IClientSystem
+	{
+		#region Methods
+
+		public void Update(EntityArray entityArray)
+		{
+			foreach (Entity entity in entityArray)
+			{
+				this.updateEntity(entity);
+			}
+		}
+
+		public void Update(EntityArray entityArray, Entity commandingEntity)
+		{
+		}
+
+		public void UpdatePrediction(EntityArray entityArray, Entity commandingEntity)
+		{
+			this.updateEntity(commandingEntity);
+		}
+
+		public void Render(EntityArray entityArray, Entity commandingEntity)
+		{
+		}
+
+		private void updateEntity(Entity entity)
+		{
 			if (!entity.HasComponent<PositionComponent>()) { return; }
 
 			ref PositionComponent component = ref entity.GetComponent<PositionComponent>();
-			component.Position.X = (float)Math.Cos(this.Tick * 0.15) * 50 + 100;
-			component.Position.Y = (float)Math.Sin(this.Tick * 0.15) * 50 + 100;
-			this.Tick++;
+			component.Position += component.Velocity;
+			component.Velocity *= 0.65f;
 		}
 
 		#endregion Methods
@@ -561,10 +629,10 @@ namespace Entmoot.TestGame
 			if (!entity.HasComponent<PositionComponent>()) { return; }
 
 			ref PositionComponent component = ref entity.GetComponent<PositionComponent>();
-			if ((this.CommandKeys & TestCommandKeys.MoveForward) != 0) { component.Position.Y -= 5; }
-			if ((this.CommandKeys & TestCommandKeys.MoveBackward) != 0) { component.Position.Y += 5; }
-			if ((this.CommandKeys & TestCommandKeys.MoveLeft) != 0) { component.Position.X -= 5; }
-			if ((this.CommandKeys & TestCommandKeys.MoveRight) != 0) { component.Position.X += 5; }
+			if ((this.CommandKeys & TestCommandKeys.MoveForward) != 0) { component.Velocity.Y = -5; }
+			if ((this.CommandKeys & TestCommandKeys.MoveBackward) != 0) { component.Velocity.Y = 5; }
+			if ((this.CommandKeys & TestCommandKeys.MoveLeft) != 0) { component.Velocity.X = -5; }
+			if ((this.CommandKeys & TestCommandKeys.MoveRight) != 0) { component.Velocity.X = 5; }
 		}
 
 		#endregion Methods
