@@ -25,7 +25,7 @@ namespace Entmoot.TestGame3D
 	{
 		#region Fields
 
-		public const float MoveImpulse = 75.0f;
+		public const float MoveImpulse = 25;
 
 		public Commands Commands;
 		public Vector2 LookAngles;
@@ -62,7 +62,7 @@ namespace Entmoot.TestGame3D
 			if (movement != Vector3.Zero)
 			{
 				movement.Normalize();
-				Quaternion lookMoveRotation = Quaternion.CreateFromAxisAngle(Vector3.Up, this.LookAngles.X);
+				Quaternion lookMoveRotation = Quaternion.CreateFromYawPitchRoll(this.LookAngles.X, this.LookAngles.Y, 0); //Quaternion.CreateFromAxisAngle(Vector3.Up, this.LookAngles.X);
 				Vector3.Transform(ref movement, ref lookMoveRotation, out movement);
 			}
 

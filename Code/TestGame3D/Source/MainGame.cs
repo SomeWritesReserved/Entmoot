@@ -15,7 +15,7 @@ namespace Entmoot.TestGame3D
 	{
 		#region Fields
 
-		private const int maxClients = 4;
+		private const int maxClients = 1;
 
 		private readonly GraphicsDeviceManager graphicsDeviceManager;
 		private BasicEffect basicEffect;
@@ -71,37 +71,9 @@ namespace Entmoot.TestGame3D
 				for (int clientID = 0; clientID < MainGame.maxClients; clientID++)
 				{
 					this.gameServer.EntityArray.TryCreateEntity(out Entity clientEntity);
-					clientEntity.AddComponent<SpatialComponent>();
+					clientEntity.AddComponent<SpatialComponent>().Position.Y = 1.875f;
 					clientEntity.AddComponent<PhysicsComponent>();
-					clientEntity.AddComponent<ColorComponent>().Color = new Color(0.5f, 0.5f, 1.0f);
 				}
-
-				// Make some dummy entities that we'll remove to have a gap in entity IDs
-				this.gameServer.EntityArray.TryCreateEntity(out Entity dummy1);
-				this.gameServer.EntityArray.TryCreateEntity(out Entity dummy2);
-
-				// Add some stuff to the world
-				for (int x = -1; x <= 1; x++)
-				{
-					for (int z = -1; z <= 1; z++)
-					{
-						this.gameServer.EntityArray.TryCreateEntity(out Entity entity);
-						entity.AddComponent<SpatialComponent>().Position = new Vector3(x * 5, 0, z * 5);
-						if (entity.ID == 11)
-						{
-							entity.AddComponent<ColorComponent>().Color = new Color(1.0f, 0.5f, 0.5f);
-						}
-						else if (entity.ID == 12)
-						{
-							entity.AddComponent<ColorComponent>().Color = new Color(0.0f, 1.0f, 0.5f);
-						}
-					}
-				}
-
-				// Remove those dummy entities to have a gap in entity IDs
-				this.gameServer.EntityArray.RemoveEntity(dummy1);
-				this.gameServer.EntityArray.RemoveEntity(dummy2);
-				this.gameServer.EntityArray.EndUpdate();
 			}
 
 			this.networkClient = new NetworkClient("1", 4000);
@@ -135,7 +107,7 @@ namespace Entmoot.TestGame3D
 			this.basicEffect.Projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(90.0f), this.GraphicsDevice.Viewport.AspectRatio, 0.1f, 1000.0f);
 			this.basicEffect.EnableDefaultLighting();
 
-			using (FileStream fileStream = new FileStream(@"Assets\dev_cubeface.png", FileMode.Open, FileAccess.Read))
+			using (FileStream fileStream = new FileStream(@"Assets\dev_cube.png", FileMode.Open, FileAccess.Read))
 			{
 				this.basicEffect.Texture = Texture2D.FromStream(this.GraphicsDevice, fileStream);
 			}
@@ -204,9 +176,38 @@ namespace Entmoot.TestGame3D
 			{
 				this.renderSystem.BasicEffect = this.basicEffect;
 				this.gameClient.SystemArray.Render(this.gameClient.RenderedSnapshot.EntityArray, this.gameClient.GetCommandingEntity());
+				this.drawCharacter();
 			}
 
+			ShapeRenderHelper.RenderBox(this.GraphicsDevice, this.basicEffect, new Vector3(0, 0.5f, 0), Vector3.One * 10, Vector3.Zero, Quaternion.Identity);
+
 			this.drawDebugUI();
+		}
+
+		private void drawCharacter()
+		{
+			// LowerTorso (root)
+			ShapeRenderHelper.RenderBox(this.GraphicsDevice, this.basicEffect, new Vector3(0, -0.5f, 0), new Vector3(0.48f, 0.3125f, 0.23f), new Vector3(0, 1, 0), Quaternion.Identity);
+			// UpperTorso
+			ShapeRenderHelper.RenderBox(this.GraphicsDevice, this.basicEffect, new Vector3(0, -0.5f, 0), new Vector3(0.5f, 0.375f, 0.25f), new Vector3(0, 1.3125f, 0), Quaternion.Identity);
+			// Neck
+			ShapeRenderHelper.RenderBox(this.GraphicsDevice, this.basicEffect, new Vector3(0, -0.5f, 0), new Vector3(0.125f, 0.0625f, 0.125f), new Vector3(0, 1.6875f, 0), Quaternion.Identity);
+			// Head
+			ShapeRenderHelper.RenderBox(this.GraphicsDevice, this.basicEffect, new Vector3(0, -0.5f, 0), new Vector3(0.1875f, 0.25f, 0.2375f), new Vector3(0, 1.75f, -0.02f), Quaternion.Identity);
+
+			// 2 upper leg
+			ShapeRenderHelper.RenderBox(this.GraphicsDevice, this.basicEffect, new Vector3(0, 0.5f, 0), new Vector3(0.21f, 0.46875f, 0.21f), new Vector3(0.125f, 1, 0), Quaternion.Identity);
+			ShapeRenderHelper.RenderBox(this.GraphicsDevice, this.basicEffect, new Vector3(0, 0.5f, 0), new Vector3(0.21f, 0.46875f, 0.21f), new Vector3(-0.125f, 1, 0), Quaternion.Identity);
+			// 2 lower leg
+			ShapeRenderHelper.RenderBox(this.GraphicsDevice, this.basicEffect, new Vector3(0, 0.5f, 0), new Vector3(0.20f, 0.40625f, 0.20f), new Vector3(0.125f, 0.53125f, 0), Quaternion.Identity);
+			ShapeRenderHelper.RenderBox(this.GraphicsDevice, this.basicEffect, new Vector3(0, 0.5f, 0), new Vector3(0.20f, 0.40625f, 0.20f), new Vector3(-0.125f, 0.53125f, 0), Quaternion.Identity);
+			// 2 feet
+			ShapeRenderHelper.RenderBox(this.GraphicsDevice, this.basicEffect, new Vector3(0, 0.5f, 0), new Vector3(0.19f, 0.125f, 0.32f), new Vector3(0.125f, 0.125f, -0.05f), Quaternion.Identity);
+			ShapeRenderHelper.RenderBox(this.GraphicsDevice, this.basicEffect, new Vector3(0, 0.5f, 0), new Vector3(0.19f, 0.125f, 0.32f), new Vector3(-0.125f, 0.125f, -0.05f), Quaternion.Identity);
+
+			// 2 upper arm
+			// 2 lower arm
+			// 2 hands
 		}
 
 		private void updateClientAndServer()

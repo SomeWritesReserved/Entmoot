@@ -91,6 +91,15 @@ namespace Entmoot.TestGame3D
 
 		}
 
+		public static void RenderBox<TEffect>(GraphicsDevice graphicsDevice, TEffect effect, Vector3 boxOrigin, Vector3 boxScale, Vector3 worldPosition, Quaternion worldRotation)
+			where TEffect : Effect, IEffectMatrices
+		{
+			effect.World = Matrix.CreateScale(0.5f) * Matrix.CreateTranslation(-boxOrigin) * Matrix.CreateScale(boxScale) * Matrix.CreateFromQuaternion(worldRotation) * Matrix.CreateTranslation(worldPosition);
+			effect.CurrentTechnique.Passes[0].Apply();
+			graphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList, ShapeRenderHelper.boxRenderVertices, 0, ShapeRenderHelper.boxRenderVertices.Length / 3);
+
+		}
+
 		#endregion Methods
 	}
 }
