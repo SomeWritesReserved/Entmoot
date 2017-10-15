@@ -53,6 +53,7 @@ namespace Entmoot.TestGame3D
 			this.IsMouseVisible = true;
 			this.graphicsDeviceManager = new GraphicsDeviceManager(this);
 			this.graphicsDeviceManager.GraphicsProfile = GraphicsProfile.HiDef;
+			this.graphicsDeviceManager.PreferMultiSampling = true;
 			this.renderSystem = new RenderSystem(this.graphicsDeviceManager);
 			this.Content.RootDirectory = "Assets";
 
@@ -410,39 +411,64 @@ namespace Entmoot.TestGame3D
 				}
 			}
 
+			BoneAnimation pre;
 			BoneAnimation startBoneAnimation;
 			BoneAnimation endBoneAnimation;
+			BoneAnimation post;
 			int counts = (this.gameClient.FrameTick % 60);
 			if (counts < 15)
 			{
+				pre = this.walk2BoneAnimation;
 				startBoneAnimation = this.walk1BoneAnimation;
 				endBoneAnimation = this.walk4BoneAnimation;
+				post = this.walk3BoneAnimation;
 			}
 			else if (counts < 30)
 			{
+				pre = this.walk1BoneAnimation;
 				startBoneAnimation = this.walk4BoneAnimation;
 				endBoneAnimation = this.walk3BoneAnimation;
+				post = this.walk2BoneAnimation;
 			}
 			else if (counts < 45)
 			{
+				pre = this.walk4BoneAnimation;
 				startBoneAnimation = this.walk3BoneAnimation;
 				endBoneAnimation = this.walk2BoneAnimation;
+				post = this.walk1BoneAnimation;
 			}
 			else
 			{
+				pre = this.walk3BoneAnimation;
 				startBoneAnimation = this.walk2BoneAnimation;
 				endBoneAnimation = this.walk1BoneAnimation;
+				post = this.walk4BoneAnimation;
 			}
 
 			float amount = ((this.gameClient.FrameTick % 15) / 15.0f);
-			this.drawBone(this.rootBone, Matrix.Identity, startBoneAnimation, endBoneAnimation, amount);
+			this.drawBone(this.rootBone, Matrix.Identity, pre, startBoneAnimation, endBoneAnimation, post, amount, InterpolationType.CatmullRom);
 		}
 
-		private void drawBone(Bone bone, Matrix transform, BoneAnimation boneAnimationA, BoneAnimation boneAnimationB, float amount)
+		private void drawBone(Bone bone, Matrix transform, BoneAnimation pre, BoneAnimation boneAnimationA, BoneAnimation boneAnimationB, BoneAnimation post, float amount, InterpolationType interpolationType)
 		{
+			if (!pre.TryGetValue(bone.Name, out Quaternion rotationPre)) { rotationPre = Quaternion.Identity; }
 			if (!boneAnimationA.TryGetValue(bone.Name, out Quaternion rotationA)) { rotationA = Quaternion.Identity; }
 			if (!boneAnimationB.TryGetValue(bone.Name, out Quaternion rotationB)) { rotationB = Quaternion.Identity; }
-			Quaternion finalRotation = Quaternion.Lerp(rotationA, rotationB, amount);
+			if (!post.TryGetValue(bone.Name, out Quaternion rotationPost)) { rotationPost = Quaternion.Identity; }
+
+			Quaternion finalRotation = rotationA;
+			switch (interpolationType)
+			{
+				case InterpolationType.Linear:
+					finalRotation = Quaternion.Lerp(rotationA, rotationB, amount);
+					break;
+				case InterpolationType.Slerp:
+					finalRotation = Quaternion.Slerp(rotationA, rotationB, amount);
+					break;
+				case InterpolationType.CatmullRom:
+					finalRotation = MainGame.CatmullRom(rotationPre, rotationA, rotationB, rotationPost, amount);
+					break;
+			}
 
 			this.basicEffect.DiffuseColor = (bone == this.selectedBone) ? Vector3.Right : Vector3.One;
 
@@ -453,7 +479,7 @@ namespace Entmoot.TestGame3D
 			{
 				foreach (Bone childBond in bone.Children)
 				{
-					this.drawBone(childBond, transform, boneAnimationA, boneAnimationB, amount);
+					this.drawBone(childBond, transform, pre, boneAnimationA, boneAnimationB, post, amount, interpolationType);
 				}
 			}
 		}
@@ -568,6 +594,25 @@ namespace Entmoot.TestGame3D
 		private bool isRightMousePressed()
 		{
 			return (this.currentMouseState.RightButton == ButtonState.Pressed && this.previousMouseState.RightButton == ButtonState.Released);
+		}
+
+		private static Quaternion CatmullRom(Quaternion before, Quaternion a, Quaternion b, Quaternion after, float amount)
+		{
+			Quaternion result = Quaternion.Identity;
+			result.X = MathHelper.CatmullRom(before.X, a.X, b.X, after.X, amount);
+			result.Y = MathHelper.CatmullRom(before.Y, a.Y, b.Y, after.Y, amount);
+			result.Z = MathHelper.CatmullRom(before.Z, a.Z, b.Z, after.Z, amount);
+			result.W = MathHelper.CatmullRom(before.W, a.W, b.W, after.W, amount);
+			result.Normalize();
+			return result;
+		}
+
+		private enum InterpolationType
+		{
+			None,
+			Linear,
+			Slerp,
+			CatmullRom,
 		}
 
 		#endregion Methods
