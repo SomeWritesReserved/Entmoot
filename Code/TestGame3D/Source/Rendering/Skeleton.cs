@@ -15,8 +15,21 @@ namespace Entmoot.TestGame3D
 		public Quaternion Rotation;
 		public Vector3 OffsetFromParent;
 		public Vector3 Size;
+		public Bone Parent { get; private set; }
 
-		public Bone[] Children;
+		private Bone[] children;
+		public Bone[] Children
+		{
+			get { return this.children; }
+			set
+			{
+				this.children = value;
+				foreach (Bone child in this.children)
+				{
+					child.Parent = this;
+				}
+			}
+		}
 	}
 
 	public class BoneAnimation : Dictionary<string, Quaternion>
