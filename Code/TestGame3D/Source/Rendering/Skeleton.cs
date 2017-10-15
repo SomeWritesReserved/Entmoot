@@ -50,7 +50,7 @@ namespace Entmoot.TestGame3D
 			keyframePrevious = this.SkeletonKeyframes[this.getBoundedIndex(index - 1)];
 			keyframeStart = this.SkeletonKeyframes[index];
 			keyframeEnd = this.SkeletonKeyframes[this.getBoundedIndex(index + 1)];
-			keyframeNext = this.SkeletonKeyframes[this.getBoundedIndex(index + 2) ];
+			keyframeNext = this.SkeletonKeyframes[this.getBoundedIndex(index + 2)];
 		}
 
 		private int getBoundedIndex(int index)
@@ -154,7 +154,7 @@ namespace Entmoot.TestGame3D
 					}
 					runAnimation = new SkeletonAnimation()
 					{
-						TicksBetweenKeyframes = 15,
+						TicksBetweenKeyframes = 12,
 						SkeletonKeyframes = new SkeletonKeyframe[]
 						{
 							runKeyframe1,
@@ -165,6 +165,81 @@ namespace Entmoot.TestGame3D
 					};
 				}
 				return runAnimation;
+			}
+		}
+
+		private static SkeletonAnimation walkAnimation;
+		public static SkeletonAnimation WalkAnimation
+		{
+			get
+			{
+				if (walkAnimation == null)
+				{
+					SkeletonKeyframe runKeyframe1 = new SkeletonKeyframe();
+					SkeletonKeyframe runKeyframe2 = new SkeletonKeyframe();
+					SkeletonKeyframe runKeyframe3 = new SkeletonKeyframe();
+					SkeletonKeyframe runKeyframe4 = new SkeletonKeyframe();
+
+					runKeyframe1["Upper Arm - Right"] = new Quaternion(0.999712f, 0f, 0f, 0.02399765f);
+					runKeyframe1["Upper Arm - Left"] = new Quaternion(0.99955f, 0f, 0f, 0.02999546f);
+					runKeyframe1["Upper Leg - Right"] = new Quaternion(0.9935089f, 0f, 0f, -0.1137533f);
+					runKeyframe1["Upper Leg - Left"] = new Quaternion(0.999928f, 0f, 0f, -0.01199976f);
+					runKeyframe1["Lower Leg - Right"] = new Quaternion(-0.2955202f, 0f, 0f, 0.9553363f);
+					runKeyframe1["Lower Leg - Left"] = new Quaternion(-0.0299955f, 0f, 0f, 0.99955f);
+					runKeyframe1["Foot - Left"] = new Quaternion(0.01799903f, 0f, 0f, 0.999838f);
+					runKeyframe1["Lower Torso"] = new Quaternion(-0.005999964f, 0f, 0f, 0.999982f);
+					runKeyframe1["Head"] = new Quaternion(-0.01199971f, 0f, 0f, 0.999928f);
+					runKeyframe1["Lower Arm - Right"] = new Quaternion(0.01799903f, 0f, 0f, 0.999838f);
+					runKeyframe1["Hand - Right"] = new Quaternion(0.01799903f, 0f, 0f, 0.999838f);
+					runKeyframe1["Lower Arm - Left"] = new Quaternion(0.0299955f, 0f, 0f, 0.99955f);
+					runKeyframe1["Hand - Left"] = new Quaternion(0f, 0f, 0f, 1f);
+					runKeyframe1["Foot - Right"] = new Quaternion(-0.03599223f, 0f, 0f, 0.999352f);
+
+					runKeyframe2["Upper Arm - Right"] = new Quaternion(0.9974091f, 0f, 0f, 0.07193777f);
+					runKeyframe2["Upper Arm - Left"] = new Quaternion(0.9982005f, 0f, 0f, -0.05996405f);
+					runKeyframe2["Upper Leg - Right"] = new Quaternion(0.9928086f, 0f, 0f, -0.1197123f);
+					runKeyframe2["Upper Leg - Left"] = new Quaternion(0.990493f, 0f, 0f, 0.1375624f);
+					runKeyframe2["Lower Torso"] = new Quaternion(-0.005999964f, 0f, 0f, 0.999982f);
+					runKeyframe2["Upper Torso"] = new Quaternion(-0.005999964f, 0f, 0f, 0.999982f);
+					runKeyframe2["Lower Leg - Right"] = new Quaternion(-0.01199971f, 0f, 0f, 0.999928f);
+					runKeyframe2["Foot - Right"] = new Quaternion(-0.1375624f, 0f, 0f, 0.9904929f);
+					runKeyframe2["Lower Leg - Left"] = new Quaternion(-0.04798157f, 0f, 0f, 0.9988482f);
+					runKeyframe2["Foot - Left"] = new Quaternion(0.04798158f, 0f, 0f, 0.9988482f);
+					runKeyframe2["Toes - Left"] = new Quaternion(0.131617f, 0f, 0f, 0.9913006f);
+					runKeyframe2["Head"] = new Quaternion(0.005999964f, 0f, 0f, 0.999982f);
+					runKeyframe2["Lower Arm - Right"] = new Quaternion(0.0239977f, 0f, 0f, 0.999712f);
+					runKeyframe2["Hand - Right"] = new Quaternion(0.01799903f, 0f, 0f, 0.999838f);
+					runKeyframe2["Lower Arm - Left"] = new Quaternion(0.0239977f, 0f, 0f, 0.999712f);
+					runKeyframe2["Hand - Left"] = new Quaternion(0.005999964f, 0f, 0f, 0.999982f);
+
+					foreach (var walk1 in runKeyframe1)
+					{
+						string name = walk1.Key.Contains("Left") ? walk1.Key.Replace("Left", "Right") :
+							walk1.Key.Contains("Right") ? walk1.Key.Replace("Right", "Left") :
+							walk1.Key;
+						runKeyframe3[name] = walk1.Value;
+					}
+
+					foreach (var walk2 in runKeyframe2)
+					{
+						string name = walk2.Key.Contains("Left") ? walk2.Key.Replace("Left", "Right") :
+							walk2.Key.Contains("Right") ? walk2.Key.Replace("Right", "Left") :
+							walk2.Key;
+						runKeyframe4[name] = walk2.Value;
+					}
+					walkAnimation = new SkeletonAnimation()
+					{
+						TicksBetweenKeyframes = 16,
+						SkeletonKeyframes = new SkeletonKeyframe[]
+						{
+							runKeyframe1,
+							runKeyframe2,
+							runKeyframe3,
+							runKeyframe4,
+						},
+					};
+				}
+				return walkAnimation;
 			}
 		}
 	}

@@ -152,7 +152,7 @@ namespace Entmoot.TestGame3D
 			}
 			else if (this.isKeyPressed(Keys.K) && (this.currentKeyboardState.IsKeyDown(Keys.LeftControl) || this.currentKeyboardState.IsKeyDown(Keys.RightControl)))
 			{
-				//File.WriteAllLines("animation.txt", this.walk1BoneAnimation.Select((kvp) => string.Format("this.walk1BoneAnimation[\"{0}\"] = new Quaternion({1}f, {2}f, {3}f, {4}f);", kvp.Key, kvp.Value.X, kvp.Value.Y, kvp.Value.Z, kvp.Value.W)));
+				File.WriteAllLines("animation.txt", this.currentAnimation.SkeletonKeyframes[0].Select((kvp) => string.Format("this.walk1BoneAnimation[\"{0}\"] = new Quaternion({1}f, {2}f, {3}f, {4}f);", kvp.Key, kvp.Value.X, kvp.Value.Y, kvp.Value.Z, kvp.Value.W)));
 			}
 			else if (this.isKeyPressed(Keys.Up))
 			{
@@ -183,9 +183,9 @@ namespace Entmoot.TestGame3D
 			int tickDifference = this.currentMouseState.ScrollWheelValue - this.previousMouseState.ScrollWheelValue;
 			if (tickDifference != 0)
 			{
-				//if (!this.walk1BoneAnimation.ContainsKey(this.selectedBone.Name)) { this.walk1BoneAnimation[this.selectedBone.Name] = this.selectedBone.Rotation; }
-				//float amount = tickDifference * 0.0001f;
-				//this.walk1BoneAnimation[this.selectedBone.Name] *= Quaternion.CreateFromYawPitchRoll(0, amount, 0);
+				if (!this.currentAnimation.SkeletonKeyframes[0].ContainsKey(this.selectedBone.Name)) { this.currentAnimation.SkeletonKeyframes[0][this.selectedBone.Name] = this.selectedBone.Rotation; }
+				float amount = tickDifference * 0.0001f;
+				this.currentAnimation.SkeletonKeyframes[0][this.selectedBone.Name] *= Quaternion.CreateFromYawPitchRoll(0, amount, 0);
 			}
 
 			if (this.isRightMousePressed())
@@ -223,7 +223,7 @@ namespace Entmoot.TestGame3D
 
 		private Bone rootBone;
 		private Bone selectedBone;
-		private SkeletonAnimation currentAnimation = DefinedAnimations.RunAnimation;
+		private SkeletonAnimation currentAnimation = DefinedAnimations.WalkAnimation;
 		private void drawCharacter()
 		{
 			if (this.rootBone == null)
