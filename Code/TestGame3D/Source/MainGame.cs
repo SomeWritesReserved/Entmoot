@@ -412,18 +412,18 @@ namespace Entmoot.TestGame3D
 
 			BoneAnimation startBoneAnimation;
 			BoneAnimation endBoneAnimation;
-			int counts = (this.gameClient.FrameTick % 80);
-			if (counts < 20)
+			int counts = (this.gameClient.FrameTick % 60);
+			if (counts < 15)
 			{
 				startBoneAnimation = this.walk1BoneAnimation;
 				endBoneAnimation = this.walk4BoneAnimation;
 			}
-			else if (counts < 40)
+			else if (counts < 30)
 			{
 				startBoneAnimation = this.walk4BoneAnimation;
 				endBoneAnimation = this.walk3BoneAnimation;
 			}
-			else if (counts < 60)
+			else if (counts < 45)
 			{
 				startBoneAnimation = this.walk3BoneAnimation;
 				endBoneAnimation = this.walk2BoneAnimation;
@@ -434,16 +434,14 @@ namespace Entmoot.TestGame3D
 				endBoneAnimation = this.walk1BoneAnimation;
 			}
 
-			float amount = ((this.gameClient.FrameTick % 20) / 20.0f);
+			float amount = ((this.gameClient.FrameTick % 15) / 15.0f);
 			this.drawBone(this.rootBone, Matrix.Identity, startBoneAnimation, endBoneAnimation, amount);
 		}
 
 		private void drawBone(Bone bone, Matrix transform, BoneAnimation boneAnimationA, BoneAnimation boneAnimationB, float amount)
 		{
-			Quaternion rotationA;
-			Quaternion rotationB;
-			if (!boneAnimationA.TryGetValue(bone.Name, out rotationA)) { rotationA = Quaternion.Identity; }
-			if (!boneAnimationB.TryGetValue(bone.Name, out rotationB)) { rotationB = Quaternion.Identity; }
+			if (!boneAnimationA.TryGetValue(bone.Name, out Quaternion rotationA)) { rotationA = Quaternion.Identity; }
+			if (!boneAnimationB.TryGetValue(bone.Name, out Quaternion rotationB)) { rotationB = Quaternion.Identity; }
 			Quaternion finalRotation = Quaternion.Lerp(rotationA, rotationB, amount);
 
 			this.basicEffect.DiffuseColor = (bone == this.selectedBone) ? Vector3.Right : Vector3.One;
