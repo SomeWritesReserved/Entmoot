@@ -150,9 +150,9 @@ namespace Entmoot.TestGame3D
 			{
 				this.Exit();
 			}
-			else if (this.isKeyPressed(Keys.K) && this.currentKeyboardState.IsKeyDown(Keys.LeftControl))
+			else if (this.isKeyPressed(Keys.K) && (this.currentKeyboardState.IsKeyDown(Keys.LeftControl) || this.currentKeyboardState.IsKeyDown(Keys.RightControl)))
 			{
-				File.WriteAllLines("animation.txt", this.walk1BoneAnimation.Select((kvp) => string.Format("this.walk1BoneAnimation[\"{0}\"] = new Quaternion({1}f, {2}f, {3}f, {4}f);", kvp.Key, kvp.Value.X, kvp.Value.Y, kvp.Value.Z, kvp.Value.W)));
+				//File.WriteAllLines("animation.txt", this.walk1BoneAnimation.Select((kvp) => string.Format("this.walk1BoneAnimation[\"{0}\"] = new Quaternion({1}f, {2}f, {3}f, {4}f);", kvp.Key, kvp.Value.X, kvp.Value.Y, kvp.Value.Z, kvp.Value.W)));
 			}
 			else if (this.isKeyPressed(Keys.Up))
 			{
@@ -183,9 +183,9 @@ namespace Entmoot.TestGame3D
 			int tickDifference = this.currentMouseState.ScrollWheelValue - this.previousMouseState.ScrollWheelValue;
 			if (tickDifference != 0)
 			{
-				if (!this.walk1BoneAnimation.ContainsKey(this.selectedBone.Name)) { this.walk1BoneAnimation[this.selectedBone.Name] = this.selectedBone.Rotation; }
-				float amount = tickDifference * 0.0001f;
-				this.walk1BoneAnimation[this.selectedBone.Name] *= Quaternion.CreateFromYawPitchRoll(0, amount, 0);
+				//if (!this.walk1BoneAnimation.ContainsKey(this.selectedBone.Name)) { this.walk1BoneAnimation[this.selectedBone.Name] = this.selectedBone.Rotation; }
+				//float amount = tickDifference * 0.0001f;
+				//this.walk1BoneAnimation[this.selectedBone.Name] *= Quaternion.CreateFromYawPitchRoll(0, amount, 0);
 			}
 
 			if (this.isRightMousePressed())
@@ -221,12 +221,9 @@ namespace Entmoot.TestGame3D
 			this.drawDebugUI();
 		}
 
-		private Bone selectedBone;
 		private Bone rootBone;
-		private BoneAnimation walk1BoneAnimation = new BoneAnimation();
-		private BoneAnimation walk2BoneAnimation = new BoneAnimation();
-		private BoneAnimation walk3BoneAnimation = new BoneAnimation();
-		private BoneAnimation walk4BoneAnimation = new BoneAnimation();
+		private Bone selectedBone;
+		private SkeletonAnimation currentAnimation = DefinedAnimations.RunAnimation;
 		private void drawCharacter()
 		{
 			if (this.rootBone == null)
@@ -355,118 +352,30 @@ namespace Entmoot.TestGame3D
 					},
 				};
 				this.selectedBone = this.rootBone;
-
-				this.walk1BoneAnimation["Upper Arm - Right"] = new Quaternion(0.9887707f, 0f, 0f, 0.1494382f);
-				this.walk1BoneAnimation["Upper Arm - Left"] = new Quaternion(0.9998378f, 0f, 0f, -0.01799901f);
-				this.walk1BoneAnimation["Upper Leg - Right"] = new Quaternion(0.9959527f, 0f, 0f, -0.08987861f);
-				this.walk1BoneAnimation["Upper Leg - Left"] = new Quaternion(0.9904928f, 0f, 0f, -0.1375626f);
-				this.walk1BoneAnimation["Lower Torso"] = new Quaternion(-0.02399769f, 0f, 0f, 0.999712f);
-				this.walk1BoneAnimation["Upper Torso"] = new Quaternion(0f, 0f, 0f, 1f);
-				this.walk1BoneAnimation["Neck"] = new Quaternion(-0.01199971f, 0f, 0f, 0.999928f);
-				this.walk1BoneAnimation["Head"] = new Quaternion(-0.0239977f, 0f, 0f, 0.999712f);
-				this.walk1BoneAnimation["Lower Arm - Right"] = new Quaternion(0.318361f, 0f, 0f, 0.9479695f);
-				this.walk1BoneAnimation["Hand - Right"] = new Quaternion(0.03599222f, 0f, 0f, 0.999352f);
-				this.walk1BoneAnimation["Lower Arm - Left"] = new Quaternion(0.6816384f, 0f, 0f, 0.7316884f);
-				this.walk1BoneAnimation["Hand - Left"] = new Quaternion(0.08390125f, 0f, 0f, 0.996474f);
-				this.walk1BoneAnimation["Lower Leg - Right"] = new Quaternion(-0.6457458f, 0f, 0f, 0.763552f);
-				this.walk1BoneAnimation["Foot - Right"] = new Quaternion(-0.1435028f, 0f, 0f, 0.9896498f);
-				this.walk1BoneAnimation["Toes - Right"] = new Quaternion(-0.07193781f, 0f, 0f, 0.9974091f);
-				this.walk1BoneAnimation["Lower Leg - Left"] = new Quaternion(-0.2318703f, 0f, 0f, 0.9727465f);
-				this.walk1BoneAnimation["Foot - Left"] = new Quaternion(0.07193785f, 0f, 0f, 0.997409f);
-				this.walk1BoneAnimation["Toes - Left"] = new Quaternion(0.059964f, 0f, 0f, 0.9982005f);
-
-				this.walk2BoneAnimation["Upper Arm - Right"] = new Quaternion(0.8756577f, 0f, 0f, 0.482932f);
-				this.walk2BoneAnimation["Upper Arm - Left"] = new Quaternion(0.9588137f, 0f, 0f, -0.2840351f);
-				this.walk2BoneAnimation["Upper Leg - Right"] = new Quaternion(0.9849001f, 0f, 0f, 0.1731233f);
-				this.walk2BoneAnimation["Upper Leg - Left"] = new Quaternion(0.8320514f, 0f, 0f, -0.554698f);
-				this.walk2BoneAnimation["Lower Torso"] = new Quaternion(-0.0299955f, 0f, 0f, 0.99955f);
-				this.walk2BoneAnimation["Upper Torso"] = new Quaternion(-0.005999964f, 0f, 0f, 0.999982f);
-				this.walk2BoneAnimation["Neck"] = new Quaternion(-0.01199971f, 0f, 0f, 0.999928f);
-				this.walk2BoneAnimation["Head"] = new Quaternion(-0.0239977f, 0f, 0f, 0.999712f);
-				this.walk2BoneAnimation["Lower Arm - Right"] = new Quaternion(0.4132316f, 0f, 0f, 0.910626f);
-				this.walk2BoneAnimation["Hand - Right"] = new Quaternion(0.03599222f, 0f, 0f, 0.999352f);
-				this.walk2BoneAnimation["Lower Arm - Left"] = new Quaternion(0.7870421f, 0f, 0f, 0.6168985f);
-				this.walk2BoneAnimation["Hand - Left"] = new Quaternion(0.08390125f, 0f, 0f, 0.996474f);
-				this.walk2BoneAnimation["Lower Leg - Right"] = new Quaternion(-0.5794061f, 0f, 0f, 0.8150386f);
-				this.walk2BoneAnimation["Foot - Right"] = new Quaternion(-0.07193781f, 0f, 0f, 0.997409f);
-				this.walk2BoneAnimation["Toes - Right"] = new Quaternion(-0.04198765f, 0f, 0f, 0.9991181f);
-				this.walk2BoneAnimation["Lower Leg - Left"] = new Quaternion(-0.4349655f, 0f, 0f, 0.900447f);
-				this.walk2BoneAnimation["Foot - Left"] = new Quaternion(-0.1137532f, 0f, 0f, 0.993509f);
-				this.walk2BoneAnimation["Toes - Left"] = new Quaternion(-0.0659521f, 0f, 0f, 0.9978227f);
-
-				foreach (var walk1 in this.walk1BoneAnimation)
-				{
-					string name = walk1.Key.Contains("Left") ? walk1.Key.Replace("Left", "Right") :
-						walk1.Key.Contains("Right") ? walk1.Key.Replace("Right", "Left") :
-						walk1.Key;
-					this.walk3BoneAnimation[name] = walk1.Value;
-				}
-
-				foreach (var walk2 in this.walk2BoneAnimation)
-				{
-					string name = walk2.Key.Contains("Left") ? walk2.Key.Replace("Left", "Right") :
-						walk2.Key.Contains("Right") ? walk2.Key.Replace("Right", "Left") :
-						walk2.Key;
-					this.walk4BoneAnimation[name] = walk2.Value;
-				}
 			}
 
-			BoneAnimation pre;
-			BoneAnimation startBoneAnimation;
-			BoneAnimation endBoneAnimation;
-			BoneAnimation post;
-			int counts = (this.gameClient.FrameTick % 60);
-			if (counts < 15)
-			{
-				pre = this.walk2BoneAnimation;
-				startBoneAnimation = this.walk1BoneAnimation;
-				endBoneAnimation = this.walk4BoneAnimation;
-				post = this.walk3BoneAnimation;
-			}
-			else if (counts < 30)
-			{
-				pre = this.walk1BoneAnimation;
-				startBoneAnimation = this.walk4BoneAnimation;
-				endBoneAnimation = this.walk3BoneAnimation;
-				post = this.walk2BoneAnimation;
-			}
-			else if (counts < 45)
-			{
-				pre = this.walk4BoneAnimation;
-				startBoneAnimation = this.walk3BoneAnimation;
-				endBoneAnimation = this.walk2BoneAnimation;
-				post = this.walk1BoneAnimation;
-			}
-			else
-			{
-				pre = this.walk3BoneAnimation;
-				startBoneAnimation = this.walk2BoneAnimation;
-				endBoneAnimation = this.walk1BoneAnimation;
-				post = this.walk4BoneAnimation;
-			}
-
-			float amount = ((this.gameClient.FrameTick % 15) / 15.0f);
-			this.drawBone(this.rootBone, Matrix.Identity, pre, startBoneAnimation, endBoneAnimation, post, amount, InterpolationType.CatmullRom);
+			this.currentAnimation.GetAnimation(this.gameClient.FrameTick, out SkeletonKeyframe keyframePrevious, out SkeletonKeyframe keyframeStart, out SkeletonKeyframe keyframeEnd, out SkeletonKeyframe keyframeNext, out float amount);
+			this.drawBone(this.rootBone, Matrix.Identity, keyframePrevious, keyframeStart, keyframeEnd, keyframeNext, amount, InterpolationType.CatmullRom);
 		}
 
-		private void drawBone(Bone bone, Matrix transform, BoneAnimation pre, BoneAnimation boneAnimationA, BoneAnimation boneAnimationB, BoneAnimation post, float amount, InterpolationType interpolationType)
+		private void drawBone(Bone bone, Matrix transform, SkeletonKeyframe keyframePrevious, SkeletonKeyframe keyframeStart, SkeletonKeyframe keyframeEnd, SkeletonKeyframe keyframeNext, float amount, InterpolationType interpolationType)
 		{
-			if (!pre.TryGetValue(bone.Name, out Quaternion rotationPre)) { rotationPre = Quaternion.Identity; }
-			if (!boneAnimationA.TryGetValue(bone.Name, out Quaternion rotationA)) { rotationA = Quaternion.Identity; }
-			if (!boneAnimationB.TryGetValue(bone.Name, out Quaternion rotationB)) { rotationB = Quaternion.Identity; }
-			if (!post.TryGetValue(bone.Name, out Quaternion rotationPost)) { rotationPost = Quaternion.Identity; }
+			if (!keyframePrevious.TryGetValue(bone.Name, out Quaternion rotationPrevioust)) { rotationPrevioust = Quaternion.Identity; }
+			if (!keyframeStart.TryGetValue(bone.Name, out Quaternion rotationStart)) { rotationStart = Quaternion.Identity; }
+			if (!keyframeEnd.TryGetValue(bone.Name, out Quaternion rotationEnd)) { rotationEnd = Quaternion.Identity; }
+			if (!keyframeNext.TryGetValue(bone.Name, out Quaternion rotationNext)) { rotationNext = Quaternion.Identity; }
 
-			Quaternion finalRotation = rotationA;
+			Quaternion finalRotation = rotationStart;
 			switch (interpolationType)
 			{
 				case InterpolationType.Linear:
-					finalRotation = Quaternion.Lerp(rotationA, rotationB, amount);
+					finalRotation = Quaternion.Lerp(rotationStart, rotationEnd, amount);
 					break;
 				case InterpolationType.Slerp:
-					finalRotation = Quaternion.Slerp(rotationA, rotationB, amount);
+					finalRotation = Quaternion.Slerp(rotationStart, rotationEnd, amount);
 					break;
 				case InterpolationType.CatmullRom:
-					finalRotation = MainGame.CatmullRom(rotationPre, rotationA, rotationB, rotationPost, amount);
+					finalRotation = MainGame.CatmullRom(rotationPrevioust, rotationStart, rotationEnd, rotationNext, amount);
 					break;
 			}
 
@@ -479,7 +388,7 @@ namespace Entmoot.TestGame3D
 			{
 				foreach (Bone childBond in bone.Children)
 				{
-					this.drawBone(childBond, transform, pre, boneAnimationA, boneAnimationB, post, amount, interpolationType);
+					this.drawBone(childBond, transform, keyframePrevious, keyframeStart, keyframeEnd, keyframeNext, amount, interpolationType);
 				}
 			}
 		}
@@ -596,13 +505,13 @@ namespace Entmoot.TestGame3D
 			return (this.currentMouseState.RightButton == ButtonState.Pressed && this.previousMouseState.RightButton == ButtonState.Released);
 		}
 
-		private static Quaternion CatmullRom(Quaternion before, Quaternion a, Quaternion b, Quaternion after, float amount)
+		private static Quaternion CatmullRom(Quaternion previous, Quaternion start, Quaternion end, Quaternion next, float amount)
 		{
 			Quaternion result = Quaternion.Identity;
-			result.X = MathHelper.CatmullRom(before.X, a.X, b.X, after.X, amount);
-			result.Y = MathHelper.CatmullRom(before.Y, a.Y, b.Y, after.Y, amount);
-			result.Z = MathHelper.CatmullRom(before.Z, a.Z, b.Z, after.Z, amount);
-			result.W = MathHelper.CatmullRom(before.W, a.W, b.W, after.W, amount);
+			result.X = MathHelper.CatmullRom(previous.X, start.X, end.X, next.X, amount);
+			result.Y = MathHelper.CatmullRom(previous.Y, start.Y, end.Y, next.Y, amount);
+			result.Z = MathHelper.CatmullRom(previous.Z, start.Z, end.Z, next.Z, amount);
+			result.W = MathHelper.CatmullRom(previous.W, start.W, end.W, next.W, amount);
 			result.Normalize();
 			return result;
 		}
