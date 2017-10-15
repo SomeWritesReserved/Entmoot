@@ -12,7 +12,7 @@ namespace Entmoot.TestGame3D
 		public Bone(string name) { this.Name = name; }
 
 		public string Name { get; }
-		public Quaternion Rotation;
+		public Quaternion Rotation = Quaternion.Identity;
 		public Vector3 OffsetFromParent;
 		public Vector3 Size;
 		public Bone Parent { get; private set; }
