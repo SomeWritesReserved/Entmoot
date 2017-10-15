@@ -41,22 +41,31 @@ namespace Entmoot.TestGame3D
 		public SkeletonKeyframe[] SkeletonKeyframes;
 		public int TicksBetweenKeyframes;
 
-		public void GetAnimation(int frameTick, out SkeletonKeyframe keyframePrevious, out SkeletonKeyframe keyframeStart, out SkeletonKeyframe keyframeEnd, out SkeletonKeyframe keyframeNext, out float amount)
+		public void GetAnimation(int frameTick, out SkeletonAnimationInterpolation skeletonAnimationInterpolation, out float amount)
 		{
 			int counts = (frameTick % (this.TicksBetweenKeyframes * this.SkeletonKeyframes.Length));
 			int index = counts / this.TicksBetweenKeyframes;
 
 			amount = ((frameTick % this.TicksBetweenKeyframes) / (float)this.TicksBetweenKeyframes);
-			keyframePrevious = this.SkeletonKeyframes[this.getBoundedIndex(index - 1)];
-			keyframeStart = this.SkeletonKeyframes[index];
-			keyframeEnd = this.SkeletonKeyframes[this.getBoundedIndex(index + 1)];
-			keyframeNext = this.SkeletonKeyframes[this.getBoundedIndex(index + 2)];
+			skeletonAnimationInterpolation.KeyframePrevious = this.SkeletonKeyframes[this.getBoundedIndex(index - 1)];
+			skeletonAnimationInterpolation.KeyframeStart = this.SkeletonKeyframes[index];
+			skeletonAnimationInterpolation.KeyframeEnd = this.SkeletonKeyframes[this.getBoundedIndex(index + 1)];
+			skeletonAnimationInterpolation.KeyframeNext = this.SkeletonKeyframes[this.getBoundedIndex(index + 2)];
 		}
 
 		private int getBoundedIndex(int index)
 		{
 			return (index % this.SkeletonKeyframes.Length + this.SkeletonKeyframes.Length) % this.SkeletonKeyframes.Length;
 		}
+	}
+
+	public struct SkeletonAnimationInterpolation
+	{
+		public SkeletonKeyframe KeyframePrevious;
+		public SkeletonKeyframe KeyframeStart;
+		public SkeletonKeyframe KeyframeEnd;
+		public SkeletonKeyframe KeyframeNext;
+
 	}
 
 	public static class DefinedAnimations

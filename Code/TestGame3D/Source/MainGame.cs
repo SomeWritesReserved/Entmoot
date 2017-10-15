@@ -354,33 +354,59 @@ namespace Entmoot.TestGame3D
 				this.selectedBone = this.rootBone;
 			}
 
-			this.currentAnimation.GetAnimation(this.gameClient.FrameTick, out SkeletonKeyframe keyframePrevious, out SkeletonKeyframe keyframeStart, out SkeletonKeyframe keyframeEnd, out SkeletonKeyframe keyframeNext, out float amount);
-			this.drawBone(this.rootBone, Matrix.Identity, keyframePrevious, keyframeStart, keyframeEnd, keyframeNext, amount, InterpolationType.CatmullRom);
+			DefinedAnimations.WalkAnimation.GetAnimation(this.gameClient.FrameTick, out SkeletonAnimationInterpolation animationInterpolationA, out float amountA);
+			DefinedAnimations.RunAnimation.GetAnimation(this.gameClient.FrameTick, out SkeletonAnimationInterpolation animationInterpolationB, out float amountB);
+			this.drawBone(this.rootBone, Matrix.Identity, animationInterpolationA, amountA, animationInterpolationB, amountB, 0.25f, InterpolationType.CatmullRom);
 		}
 
-		private void drawBone(Bone bone, Matrix transform, SkeletonKeyframe keyframePrevious, SkeletonKeyframe keyframeStart, SkeletonKeyframe keyframeEnd, SkeletonKeyframe keyframeNext, float amount, InterpolationType interpolationType)
+		private void drawBone(Bone bone, Matrix transform, SkeletonAnimationInterpolation animationInterpolationA, float amountA, SkeletonAnimationInterpolation animationInterpolationB, float amountB, float blendAmount, InterpolationType interpolationType)
 		{
-			if (!keyframePrevious.TryGetValue(bone.Name, out Quaternion rotationPrevioust)) { rotationPrevioust = Quaternion.Identity; }
-			if (!keyframeStart.TryGetValue(bone.Name, out Quaternion rotationStart)) { rotationStart = Quaternion.Identity; }
-			if (!keyframeEnd.TryGetValue(bone.Name, out Quaternion rotationEnd)) { rotationEnd = Quaternion.Identity; }
-			if (!keyframeNext.TryGetValue(bone.Name, out Quaternion rotationNext)) { rotationNext = Quaternion.Identity; }
-
-			Quaternion finalRotation = rotationStart;
-			switch (interpolationType)
+			Quaternion finalRotationA;
 			{
-				case InterpolationType.Linear:
-					finalRotation = Quaternion.Lerp(rotationStart, rotationEnd, amount);
-					break;
-				case InterpolationType.Slerp:
-					finalRotation = Quaternion.Slerp(rotationStart, rotationEnd, amount);
-					break;
-				case InterpolationType.CatmullRom:
-					finalRotation = MainGame.CatmullRom(rotationPrevioust, rotationStart, rotationEnd, rotationNext, amount);
-					break;
+				if (!animationInterpolationA.KeyframePrevious.TryGetValue(bone.Name, out Quaternion rotationPrevioust)) { rotationPrevioust = Quaternion.Identity; }
+				if (!animationInterpolationA.KeyframeStart.TryGetValue(bone.Name, out Quaternion rotationStart)) { rotationStart = Quaternion.Identity; }
+				if (!animationInterpolationA.KeyframeEnd.TryGetValue(bone.Name, out Quaternion rotationEnd)) { rotationEnd = Quaternion.Identity; }
+				if (!animationInterpolationA.KeyframeNext.TryGetValue(bone.Name, out Quaternion rotationNext)) { rotationNext = Quaternion.Identity; }
+
+				finalRotationA = rotationStart;
+				switch (interpolationType)
+				{
+					case InterpolationType.Linear:
+						finalRotationA = Quaternion.Lerp(rotationStart, rotationEnd, amountA);
+						break;
+					case InterpolationType.Slerp:
+						finalRotationA = Quaternion.Slerp(rotationStart, rotationEnd, amountA);
+						break;
+					case InterpolationType.CatmullRom:
+						finalRotationA = MainGame.CatmullRom(rotationPrevioust, rotationStart, rotationEnd, rotationNext, amountA);
+						break;
+				}
 			}
 
-			this.basicEffect.DiffuseColor = (bone == this.selectedBone) ? Vector3.Right : Vector3.One;
+			Quaternion finalRotationB;
+			{
+				if (!animationInterpolationB.KeyframePrevious.TryGetValue(bone.Name, out Quaternion rotationPrevioust)) { rotationPrevioust = Quaternion.Identity; }
+				if (!animationInterpolationB.KeyframeStart.TryGetValue(bone.Name, out Quaternion rotationStart)) { rotationStart = Quaternion.Identity; }
+				if (!animationInterpolationB.KeyframeEnd.TryGetValue(bone.Name, out Quaternion rotationEnd)) { rotationEnd = Quaternion.Identity; }
+				if (!animationInterpolationB.KeyframeNext.TryGetValue(bone.Name, out Quaternion rotationNext)) { rotationNext = Quaternion.Identity; }
 
+				finalRotationB = rotationStart;
+				switch (interpolationType)
+				{
+					case InterpolationType.Linear:
+						finalRotationB = Quaternion.Lerp(rotationStart, rotationEnd, amountB);
+						break;
+					case InterpolationType.Slerp:
+						finalRotationB = Quaternion.Slerp(rotationStart, rotationEnd, amountB);
+						break;
+					case InterpolationType.CatmullRom:
+						finalRotationB = MainGame.CatmullRom(rotationPrevioust, rotationStart, rotationEnd, rotationNext, amountB);
+						break;
+				}
+			}
+
+			Quaternion finalRotation = Quaternion.Slerp(finalRotationA, finalRotationB, blendAmount);
+			this.basicEffect.DiffuseColor = (bone == this.selectedBone) ? Vector3.Right : Vector3.One;
 			transform = Matrix.CreateFromQuaternion(finalRotation) * Matrix.CreateTranslation(bone.OffsetFromParent) * transform;
 			ShapeRenderHelper.RenderOriginBox(this.GraphicsDevice, this.basicEffect, bone.Size, transform);
 
@@ -388,7 +414,7 @@ namespace Entmoot.TestGame3D
 			{
 				foreach (Bone childBond in bone.Children)
 				{
-					this.drawBone(childBond, transform, keyframePrevious, keyframeStart, keyframeEnd, keyframeNext, amount, interpolationType);
+					this.drawBone(childBond, transform, animationInterpolationA, amountA, animationInterpolationB, amountB, blendAmount, interpolationType);
 				}
 			}
 		}
