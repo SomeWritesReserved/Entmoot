@@ -9,12 +9,17 @@ namespace Entmoot.TestGame3D
 {
 	public class Bone
 	{
-		public Bone(string name) { }
+		public Bone(string name) { this.Name = name; }
 
-		public Quaternion Rotation = Quaternion.Identity;
+		public string Name { get; }
+		public Quaternion Rotation;
 		public Vector3 OffsetFromParent;
 		public Vector3 Size;
 
 		public Bone[] Children;
+	}
+
+	public class BoneAnimation : Dictionary<string, Quaternion>
+	{
 	}
 }

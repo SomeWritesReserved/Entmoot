@@ -184,6 +184,8 @@ namespace Entmoot.TestGame3D
 		}
 
 		private Bone rootBone;
+		private BoneAnimation walk1BoneAnimation = new BoneAnimation();
+		private BoneAnimation walk2BoneAnimation = new BoneAnimation();
 		private void drawCharacter()
 		{
 			if (this.rootBone == null)
@@ -212,9 +214,8 @@ namespace Entmoot.TestGame3D
 								},
 								new Bone("Upper Arm - Right")
 								{
-									OffsetFromParent = new Vector3(2.75f, 3.0f, 0.0f),
+									OffsetFromParent = new Vector3(2.0f, 3.0f, 0.0f),
 									Size = new Vector3(1.5f, 3.5f, 1.5f),
-									Rotation = Quaternion.CreateFromYawPitchRoll(0, MathHelper.ToRadians(180), 0),
 									Children = new Bone[] {
 										new Bone("Lower Arm - Right")
 										{
@@ -232,9 +233,8 @@ namespace Entmoot.TestGame3D
 								},
 								new Bone("Upper Arm - Left")
 								{
-									OffsetFromParent = new Vector3(-2.75f, 3.0f, 0.0f),
+									OffsetFromParent = new Vector3(-2.0f, 3.0f, 0.0f),
 									Size = new Vector3(1.5f, 3.5f, 1.5f),
-									Rotation = Quaternion.CreateFromYawPitchRoll(0, MathHelper.ToRadians(180), 0),
 									Children = new Bone[] {
 										new Bone("Lower Arm - Left")
 										{
@@ -256,7 +256,6 @@ namespace Entmoot.TestGame3D
 						{
 							OffsetFromParent = new Vector3(1.0f, 0.0f, 0.0f),
 							Size = new Vector3(1.75f, 3.75f, 1.75f),
-							Rotation = Quaternion.CreateFromYawPitchRoll(0, MathHelper.ToRadians(180), 0),
 							Children = new Bone[] {
 								new Bone("Lower Leg - Right")
 								{
@@ -283,7 +282,6 @@ namespace Entmoot.TestGame3D
 						{
 							OffsetFromParent = new Vector3(-1.0f, 0.0f, 0.0f),
 							Size = new Vector3(1.75f, 3.75f, 1.75f),
-							Rotation = Quaternion.CreateFromYawPitchRoll(0, MathHelper.ToRadians(180), 0),
 							Children = new Bone[] {
 								new Bone("Lower Leg - Left")
 								{
@@ -308,20 +306,30 @@ namespace Entmoot.TestGame3D
 						},
 					},
 				};
+				this.walk1BoneAnimation["Upper Leg - Right"] = Quaternion.CreateFromYawPitchRoll(0, MathHelper.ToRadians(180), 0);
+				this.walk1BoneAnimation["Upper Leg - Left"] = Quaternion.CreateFromYawPitchRoll(0, MathHelper.ToRadians(180), 0);
+				this.walk1BoneAnimation["Upper Arm - Right"] = Quaternion.CreateFromYawPitchRoll(0, 0, MathHelper.ToRadians(-90));
+				this.walk1BoneAnimation["Upper Arm - Left"] = Quaternion.CreateFromYawPitchRoll(0, 0, MathHelper.ToRadians(90));
 			}
-			this.drawBone(this.rootBone, Matrix.Identity);
+			this.drawBone(this.rootBone, Matrix.Identity, this.walk1BoneAnimation, this.walk2BoneAnimation, 0.5f);
 		}
 
-		private void drawBone(Bone bone, Matrix transform)
+		private void drawBone(Bone bone, Matrix transform, BoneAnimation boneAnimationA, BoneAnimation boneAnimationB, float amount)
 		{
-			transform = Matrix.CreateFromQuaternion(bone.Rotation) * Matrix.CreateTranslation(bone.OffsetFromParent) * transform;
+			Quaternion rotationA;
+			Quaternion rotationB;
+			if (!boneAnimationA.TryGetValue(bone.Name, out rotationA)) { rotationA = Quaternion.Identity; }
+			if (!boneAnimationB.TryGetValue(bone.Name, out rotationB)) { rotationB = Quaternion.Identity; }
+			Quaternion finalRotation = Quaternion.Slerp(rotationA, rotationB, amount);
+
+			transform = Matrix.CreateFromQuaternion(finalRotation) * Matrix.CreateTranslation(bone.OffsetFromParent) * transform;
 			ShapeRenderHelper.RenderOriginBox(this.GraphicsDevice, this.basicEffect, bone.Size, transform);
 
 			if (bone.Children != null)
 			{
 				foreach (Bone childBond in bone.Children)
 				{
-					this.drawBone(childBond, transform);
+					this.drawBone(childBond, transform, boneAnimationA, boneAnimationB, amount);
 				}
 			}
 		}
