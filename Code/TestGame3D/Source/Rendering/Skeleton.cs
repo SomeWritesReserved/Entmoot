@@ -34,19 +34,34 @@ namespace Entmoot.TestGame3D
 
 	public class SkeletonKeyframe : Dictionary<string, Quaternion>
 	{
+		public void Blend(SkeletonKeyframe otherA, SkeletonKeyframe otherB, float amount)
+		{
+			this.Clear();
+			foreach (var kvp in otherA)
+			{
+				if (!otherB.TryGetValue(kvp.Key, out Quaternion otherRotation)) { otherRotation = Quaternion.Identity; }
+				this[kvp.Key] = Quaternion.Slerp(kvp.Value, otherRotation, amount);
+			}
+			foreach (var kvp in otherB)
+			{
+				if (this.ContainsKey(kvp.Key)) { continue; }
+
+				if (!otherA.TryGetValue(kvp.Key, out Quaternion otherRotation)) { otherRotation = Quaternion.Identity; }
+				this[kvp.Key] = Quaternion.Slerp(otherRotation, kvp.Value, amount);
+			}
+		}
 	}
 
 	public class SkeletonAnimation
 	{
 		public SkeletonKeyframe[] SkeletonKeyframes;
-		public int TicksBetweenKeyframes;
 
-		public void GetAnimation(int frameTick, out SkeletonKeyframe keyframePrevious, out SkeletonKeyframe keyframeStart, out SkeletonKeyframe keyframeEnd, out SkeletonKeyframe keyframeNext, out float amount)
+		public void GetAnimation(int frameTick, int ticksBetweenKeyframes, out SkeletonKeyframe keyframePrevious, out SkeletonKeyframe keyframeStart, out SkeletonKeyframe keyframeEnd, out SkeletonKeyframe keyframeNext, out float amount)
 		{
-			int counts = (frameTick % (this.TicksBetweenKeyframes * this.SkeletonKeyframes.Length));
-			int index = counts / this.TicksBetweenKeyframes;
+			int counts = (frameTick % (ticksBetweenKeyframes * this.SkeletonKeyframes.Length));
+			int index = counts / ticksBetweenKeyframes;
 
-			amount = ((frameTick % this.TicksBetweenKeyframes) / (float)this.TicksBetweenKeyframes);
+			amount = ((frameTick % ticksBetweenKeyframes) / (float)ticksBetweenKeyframes);
 			keyframePrevious = this.SkeletonKeyframes[this.getBoundedIndex(index - 1)];
 			keyframeStart = this.SkeletonKeyframes[index];
 			keyframeEnd = this.SkeletonKeyframes[this.getBoundedIndex(index + 1)];
@@ -56,6 +71,14 @@ namespace Entmoot.TestGame3D
 		private int getBoundedIndex(int index)
 		{
 			return (index % this.SkeletonKeyframes.Length + this.SkeletonKeyframes.Length) % this.SkeletonKeyframes.Length;
+		}
+
+		public void Blend(SkeletonAnimation otherA, SkeletonAnimation otherB, float amount)
+		{
+			for (int i = 0; i < otherA.SkeletonKeyframes.Length; i++)
+			{
+				this.SkeletonKeyframes[i].Blend(otherA.SkeletonKeyframes[i], otherB.SkeletonKeyframes[i], amount);
+			}
 		}
 	}
 
@@ -76,7 +99,6 @@ namespace Entmoot.TestGame3D
 					bindKeyframe1["Upper Leg - Left"] = Quaternion.CreateFromYawPitchRoll(0, MathHelper.ToRadians(180), 0);
 					bindAnimation = new SkeletonAnimation()
 					{
-						TicksBetweenKeyframes = 1,
 						SkeletonKeyframes = new SkeletonKeyframe[]
 						{
 							bindKeyframe1,
@@ -154,7 +176,6 @@ namespace Entmoot.TestGame3D
 					}
 					runAnimation = new SkeletonAnimation()
 					{
-						TicksBetweenKeyframes = 12,
 						SkeletonKeyframes = new SkeletonKeyframe[]
 						{
 							runKeyframe1,
@@ -229,7 +250,6 @@ namespace Entmoot.TestGame3D
 					}
 					walkAnimation = new SkeletonAnimation()
 					{
-						TicksBetweenKeyframes = 16,
 						SkeletonKeyframes = new SkeletonKeyframe[]
 						{
 							runKeyframe1,

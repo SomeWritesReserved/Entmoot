@@ -14,6 +14,7 @@ namespace Entmoot.TestGame3D
 
 		public Vector3 Position;
 		public Quaternion Rotation;
+		public float Scale;
 
 		#endregion Fields
 
@@ -21,13 +22,14 @@ namespace Entmoot.TestGame3D
 
 		public bool Equals(SpatialComponent other)
 		{
-			return this.Position == other.Position && this.Rotation == other.Rotation;
+			return this.Position == other.Position && this.Rotation == other.Rotation && this.Scale == other.Scale;
 		}
 
 		public void Interpolate(SpatialComponent otherA, SpatialComponent otherB, float amount)
 		{
 			Vector3.Lerp(ref otherA.Position, ref otherB.Position, amount, out this.Position);
 			Quaternion.Slerp(ref otherA.Rotation, ref otherB.Rotation, amount, out this.Rotation);
+			this.Scale = MathHelper.Lerp(otherA.Scale, otherB.Scale, amount);
 		}
 
 		public void Serialize(IWriter writer)
@@ -39,6 +41,7 @@ namespace Entmoot.TestGame3D
 			writer.Write(this.Rotation.Y);
 			writer.Write(this.Rotation.Z);
 			writer.Write(this.Rotation.W);
+			writer.Write(this.Scale);
 		}
 
 		public void Deserialize(IReader reader)
@@ -50,12 +53,14 @@ namespace Entmoot.TestGame3D
 			this.Rotation.Y = reader.ReadSingle();
 			this.Rotation.Z = reader.ReadSingle();
 			this.Rotation.W = reader.ReadSingle();
+			this.Scale = reader.ReadSingle();
 		}
 
 		public void ResetToDefaults()
 		{
 			this.Position = Vector3.Zero;
 			this.Rotation = Quaternion.Identity;
+			this.Scale = 1;
 		}
 
 		#endregion Methods

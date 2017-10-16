@@ -66,7 +66,7 @@ namespace Entmoot.TestGame3D
 			if (this.hasServer)
 			{
 				this.networkServer = new NetworkServer("1", MainGame.maxClients, 4000, 19876);
-				this.gameServer = new GameServer<CommandData>(this.networkServer.ClientNetworkConnections, 20, 30, componentsDefinition, new IServerSystem[] { new SpinnerSystem(), new PhysicsSystem() });
+				this.gameServer = new GameServer<CommandData>(this.networkServer.ClientNetworkConnections, 20, 30, componentsDefinition, new IServerSystem[] { new PhysicsSystem() });
 
 				// Reserve the first entities for all potential clients
 				for (int clientID = 0; clientID < MainGame.maxClients; clientID++)
@@ -74,6 +74,16 @@ namespace Entmoot.TestGame3D
 					this.gameServer.EntityArray.TryCreateEntity(out Entity clientEntity);
 					clientEntity.AddComponent<SpatialComponent>().Position.Y = 1.875f;
 					clientEntity.AddComponent<PhysicsComponent>();
+				}
+
+				for (int x = -2; x <= 2; x++)
+				{
+					for (int y = -2; y <= 2; y++)
+					{
+						this.gameServer.EntityArray.TryCreateEntity(out Entity entity);
+						entity.AddComponent<SpatialComponent>().Position = new Vector3(x * 40, -20, y * 40);
+						entity.AddComponent<SpatialComponent>().Scale = 20;
+					}
 				}
 			}
 
@@ -107,6 +117,7 @@ namespace Entmoot.TestGame3D
 			this.basicEffect.TextureEnabled = true;
 			this.basicEffect.Projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(90.0f), this.GraphicsDevice.Viewport.AspectRatio, 0.1f, 1000.0f);
 			this.basicEffect.EnableDefaultLighting();
+			this.basicEffect.SpecularPower = 10000;
 
 			using (FileStream fileStream = new FileStream(@"Assets\dev_cube.png", FileMode.Open, FileAccess.Read))
 			{
@@ -183,9 +194,12 @@ namespace Entmoot.TestGame3D
 			int tickDifference = this.currentMouseState.ScrollWheelValue - this.previousMouseState.ScrollWheelValue;
 			if (tickDifference != 0)
 			{
-				if (!this.currentAnimation.SkeletonKeyframes[0].ContainsKey(this.selectedBone.Name)) { this.currentAnimation.SkeletonKeyframes[0][this.selectedBone.Name] = this.selectedBone.Rotation; }
-				float amount = tickDifference * 0.0001f;
-				this.currentAnimation.SkeletonKeyframes[0][this.selectedBone.Name] *= Quaternion.CreateFromYawPitchRoll(0, amount, 0);
+				//if (!this.currentAnimation.SkeletonKeyframes[0].ContainsKey(this.selectedBone.Name)) { this.currentAnimation.SkeletonKeyframes[0][this.selectedBone.Name] = this.selectedBone.Rotation; }
+				//float amount = tickDifference * 0.0001f;
+				//this.currentAnimation.SkeletonKeyframes[0][this.selectedBone.Name] *= Quaternion.CreateFromYawPitchRoll(0, amount, 0);
+
+				float amount = tickDifference * 0.0005f;
+				this.currentSpeed = MathHelper.Clamp(this.currentSpeed + amount, walkSpeed, runSpeed);
 			}
 
 			if (this.isRightMousePressed())
@@ -216,14 +230,20 @@ namespace Entmoot.TestGame3D
 				this.gameClient.SystemArray.Render(this.gameClient.RenderedSnapshot.EntityArray, this.gameClient.GetCommandingEntity());
 				this.drawCharacter();
 			}
-			ShapeRenderHelper.RenderOriginBox(this.GraphicsDevice, this.basicEffect, Vector3.One * 10, Matrix.CreateTranslation(0, -10, 0));
 
 			this.drawDebugUI();
 		}
 
 		private Bone rootBone;
 		private Bone selectedBone;
-		private SkeletonAnimation currentAnimation = DefinedAnimations.WalkAnimation;
+		private SkeletonAnimation currentAnimation = new SkeletonAnimation { SkeletonKeyframes = new[] { new SkeletonKeyframe(), new SkeletonKeyframe(), new SkeletonKeyframe(), new SkeletonKeyframe() } };
+		float x = 0;
+		const float runSpeed = 0.8f;
+		const float runFrameRate = 8;
+		const float walkSpeed = 0.175f;
+		const float walkFrameRate = 2.2f;
+		float currentSpeed = walkSpeed;
+
 		private void drawCharacter()
 		{
 			if (this.rootBone == null)
@@ -354,8 +374,16 @@ namespace Entmoot.TestGame3D
 				this.selectedBone = this.rootBone;
 			}
 
-			this.currentAnimation.GetAnimation(this.gameClient.FrameTick, out SkeletonKeyframe keyframePrevious, out SkeletonKeyframe keyframeStart, out SkeletonKeyframe keyframeEnd, out SkeletonKeyframe keyframeNext, out float amount);
-			this.drawBone(this.rootBone, Matrix.Identity, keyframePrevious, keyframeStart, keyframeEnd, keyframeNext, amount, InterpolationType.CatmullRom);
+			float blendAmount = (this.currentSpeed - walkSpeed) / (runSpeed - walkSpeed);
+			float frameRate = MathHelper.Lerp(walkFrameRate, runFrameRate, blendAmount);
+			this.currentAnimation.Blend(DefinedAnimations.WalkAnimation, DefinedAnimations.RunAnimation, blendAmount);
+
+			x -= this.currentSpeed;
+			if (x < 0) { x = 100; }
+			int ticksBetweenKeyframes = (int)Math.Round(frameRate / this.currentSpeed);
+
+			this.currentAnimation.GetAnimation(this.gameClient.FrameTick, ticksBetweenKeyframes, out SkeletonKeyframe keyframePrevious, out SkeletonKeyframe keyframeStart, out SkeletonKeyframe keyframeEnd, out SkeletonKeyframe keyframeNext, out float amount);
+			this.drawBone(this.rootBone, Matrix.CreateTranslation(0, 0, x), keyframePrevious, keyframeStart, keyframeEnd, keyframeNext, amount, InterpolationType.CatmullRom);
 		}
 
 		private void drawBone(Bone bone, Matrix transform, SkeletonKeyframe keyframePrevious, SkeletonKeyframe keyframeStart, SkeletonKeyframe keyframeEnd, SkeletonKeyframe keyframeNext, float amount, InterpolationType interpolationType)
