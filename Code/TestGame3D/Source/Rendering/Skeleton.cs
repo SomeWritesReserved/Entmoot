@@ -203,11 +203,11 @@ namespace Entmoot.TestGame3D
 
 					runKeyframe1["Upper Arm - Right"] = new Quaternion(0.999712f, 0f, 0f, 0.02399765f);
 					runKeyframe1["Upper Arm - Left"] = new Quaternion(0.99955f, 0f, 0f, 0.02999546f);
-					runKeyframe1["Upper Leg - Right"] = new Quaternion(0.9935089f, 0f, 0f, -0.1137533f);
-					runKeyframe1["Upper Leg - Left"] = new Quaternion(0.999928f, 0f, 0f, -0.01199976f);
-					runKeyframe1["Lower Leg - Right"] = new Quaternion(-0.2955202f, 0f, 0f, 0.9553363f);
+					runKeyframe1["Upper Leg - Right"] = new Quaternion(0.9941735f, 0f, 0f, -0.1077902f);
+					runKeyframe1["Upper Leg - Left"] = new Quaternion(0.999982f, 0f, 0f, 0.005999918f);
+					runKeyframe1["Lower Leg - Right"] = new Quaternion(-0.4723895f, 0f, 0f, 0.8813895f);
 					runKeyframe1["Lower Leg - Left"] = new Quaternion(-0.0299955f, 0f, 0f, 0.99955f);
-					runKeyframe1["Foot - Left"] = new Quaternion(0.01799903f, 0f, 0f, 0.999838f);
+					runKeyframe1["Foot - Left"] = new Quaternion(0.04198766f, 0f, 0f, 0.9991181f);
 					runKeyframe1["Lower Torso"] = new Quaternion(-0.005999964f, 0f, 0f, 0.999982f);
 					runKeyframe1["Head"] = new Quaternion(-0.01199971f, 0f, 0f, 0.999928f);
 					runKeyframe1["Lower Arm - Right"] = new Quaternion(0.01799903f, 0f, 0f, 0.999838f);
@@ -215,6 +215,7 @@ namespace Entmoot.TestGame3D
 					runKeyframe1["Lower Arm - Left"] = new Quaternion(0.0299955f, 0f, 0f, 0.99955f);
 					runKeyframe1["Hand - Left"] = new Quaternion(0f, 0f, 0f, 1f);
 					runKeyframe1["Foot - Right"] = new Quaternion(-0.03599223f, 0f, 0f, 0.999352f);
+					runKeyframe1["Toes - Left"] = new Quaternion(-0.005999964f, 0f, 0f, 0.999982f);
 
 					runKeyframe2["Upper Arm - Right"] = new Quaternion(0.9974091f, 0f, 0f, 0.07193777f);
 					runKeyframe2["Upper Arm - Left"] = new Quaternion(0.9982005f, 0f, 0f, -0.05996405f);
