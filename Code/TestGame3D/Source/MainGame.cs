@@ -167,28 +167,9 @@ namespace Entmoot.TestGame3D
 			}
 			else if (this.isKeyPressed(Keys.Up))
 			{
-				if (this.selectedBone.Parent != null)
-				{
-					this.selectedBone = this.selectedBone.Parent;
-				}
 			}
 			else if (this.isKeyPressed(Keys.Down))
 			{
-				if (this.selectedBone.Children != null && this.selectedBone.Children.Any())
-				{
-					if (this.selectedBone.Children.Length == 1 || this.currentKeyboardState.IsKeyDown(Keys.NumPad1))
-					{
-						this.selectedBone = this.selectedBone.Children[0];
-					}
-					else if (this.currentKeyboardState.IsKeyDown(Keys.NumPad2))
-					{
-						this.selectedBone = this.selectedBone.Children[1];
-					}
-					else if (this.currentKeyboardState.IsKeyDown(Keys.NumPad3))
-					{
-						this.selectedBone = this.selectedBone.Children[2];
-					}
-				}
 			}
 
 			int tickDifference = this.currentMouseState.ScrollWheelValue - this.previousMouseState.ScrollWheelValue;
@@ -234,7 +215,7 @@ namespace Entmoot.TestGame3D
 			this.drawDebugUI();
 		}
 
-		private Bone rootBone;
+		private Skeleton skeleton;
 		private Bone selectedBone;
 		private SkeletonAnimation currentAnimation = new SkeletonAnimation { SkeletonKeyframes = new[] { new SkeletonKeyframe(), new SkeletonKeyframe(), new SkeletonKeyframe(), new SkeletonKeyframe() } };
 		float x = 0;
@@ -246,132 +227,127 @@ namespace Entmoot.TestGame3D
 
 		private void drawCharacter()
 		{
-			if (this.rootBone == null)
+			if (this.skeleton == null)
 			{
-				this.rootBone = new Bone("Root")
+				this.skeleton = new Skeleton()
 				{
-					OffsetFromParent = new Vector3(0.0f, 7.5f, 0.0f),
-					Size = new Vector3(0.1f, 0.1f, 0.1f),
-					Children = new Bone[] {
+					Bones = new Bone[]
+					{
+						new Bone("Root")
+						{
+							OffsetFromParent = new Vector3(0.0f, 7.5f, 0.0f),
+							Size = new Vector3(0.1f, 0.1f, 0.1f),
+						},
 						new Bone("Lower Torso")
 						{
 							OffsetFromParent = new Vector3(0.0f, 0.0f, 0.0f),
 							Size = new Vector3(4.0f, 2.5f, 2.0f),
-							Children = new Bone[] {
-								new Bone("Upper Torso")
-								{
-									OffsetFromParent = new Vector3(0.0f, 2.5f, 0.0f),
-									Size = new Vector3(4.0f, 3.25f, 2.0f),
-									Children = new Bone[] {
-										new Bone("Neck")
-										{
-											OffsetFromParent = new Vector3(0.0f, 3.25f, 0.0f),
-											Size = new Vector3(1.0f, 0.25f, 1.0f),
-											Children = new Bone[] {
-												new Bone("Head")
-												{
-													OffsetFromParent = new Vector3(0.0f, 0.25f, 0.0f),
-													Size = new Vector3(1.5f, 2.0f, 1.75f),
-												},
-											},
-										},
-										new Bone("Upper Arm - Right")
-										{
-											OffsetFromParent = new Vector3(2.0f, 3.0f, 0.0f),
-											Size = new Vector3(1.5f, 3.5f, 1.5f),
-											Children = new Bone[] {
-												new Bone("Lower Arm - Right")
-												{
-													OffsetFromParent = new Vector3(0.0f, 3.5f, 0.0f),
-													Size = new Vector3(1.2f, 2.25f, 1.5f),
-													Children = new Bone[] {
-														new Bone("Hand - Right")
-														{
-															OffsetFromParent = new Vector3(0.0f, 2.25f, 0.0f),
-															Size = new Vector3(0.5f, 1.5f, 1.5f),
-														},
-													},
-												},
-											},
-										},
-										new Bone("Upper Arm - Left")
-										{
-											OffsetFromParent = new Vector3(-2.0f, 3.0f, 0.0f),
-											Size = new Vector3(1.5f, 3.5f, 1.5f),
-											Children = new Bone[] {
-												new Bone("Lower Arm - Left")
-												{
-													OffsetFromParent = new Vector3(0.0f, 3.5f, 0.0f),
-													Size = new Vector3(1.2f, 2.25f, 1.5f),
-													Children = new Bone[] {
-														new Bone("Hand - Left")
-														{
-															OffsetFromParent = new Vector3(0.0f, 2.25f, 0.0f),
-															Size = new Vector3(0.5f, 1.5f, 1.5f),
-														},
-													},
-												},
-											},
-										},
-									},
-								},
-							},
+							ParentIndex = 0,
+						},
+						new Bone("Upper Torso")
+						{
+							OffsetFromParent = new Vector3(0.0f, 2.5f, 0.0f),
+							Size = new Vector3(4.0f, 3.25f, 2.0f),
+							ParentIndex = 1,
+						},
+						new Bone("Neck")
+						{
+							OffsetFromParent = new Vector3(0.0f, 3.25f, 0.0f),
+							Size = new Vector3(1.0f, 0.25f, 1.0f),
+							ParentIndex = 2,
+						},
+						new Bone("Head")
+						{
+							OffsetFromParent = new Vector3(0.0f, 0.25f, 0.0f),
+							Size = new Vector3(1.5f, 2.0f, 1.75f),
+							ParentIndex = 3,
+						},
+						new Bone("Upper Arm - Right")
+						{
+							OffsetFromParent = new Vector3(2.0f, 3.0f, 0.0f),
+							Size = new Vector3(1.5f, 3.5f, 1.5f),
+							ParentIndex = 2,
+						},
+						new Bone("Lower Arm - Right")
+						{
+							OffsetFromParent = new Vector3(0.0f, 3.5f, 0.0f),
+							Size = new Vector3(1.2f, 2.25f, 1.5f),
+							ParentIndex = 5,
+						},
+						new Bone("Hand - Right")
+						{
+							OffsetFromParent = new Vector3(0.0f, 2.25f, 0.0f),
+							Size = new Vector3(0.5f, 1.5f, 1.5f),
+							ParentIndex = 6,
+						},
+						new Bone("Upper Arm - Left")
+						{
+							OffsetFromParent = new Vector3(-2.0f, 3.0f, 0.0f),
+							Size = new Vector3(1.5f, 3.5f, 1.5f),
+							ParentIndex = 2,
+						},
+						new Bone("Lower Arm - Left")
+						{
+							OffsetFromParent = new Vector3(0.0f, 3.5f, 0.0f),
+							Size = new Vector3(1.2f, 2.25f, 1.5f),
+							ParentIndex = 8,
+						},
+						new Bone("Hand - Left")
+						{
+							OffsetFromParent = new Vector3(0.0f, 2.25f, 0.0f),
+							Size = new Vector3(0.5f, 1.5f, 1.5f),
+							ParentIndex = 9,
 						},
 						new Bone("Upper Leg - Right")
 						{
 							OffsetFromParent = new Vector3(1.0f, 0.0f, 0.0f),
 							Size = new Vector3(1.75f, 3.75f, 1.75f),
-							Children = new Bone[] {
-								new Bone("Lower Leg - Right")
-								{
-									OffsetFromParent = new Vector3(0.0f, 3.75f, 0.0f),
-									Size = new Vector3(1.6f, 3.25f, 1.65f),
-									Children = new Bone[] {
-										new Bone("Foot - Right")
-										{
-											OffsetFromParent = new Vector3(0.0f, 3.25f, 0.0f),
-											Size = new Vector3(1.5f, 1.0f, 1.7f),
-											Children = new Bone[] {
-												new Bone("Toes - Right")
-												{
-													OffsetFromParent = new Vector3(0.0f, 0.4f, 1.2f),
-													Size = new Vector3(1.4f, 0.6f, 0.85f),
-												}
-											},
-										},
-									},
-								},
-							},
+							ParentIndex = 0,
+						},
+						new Bone("Lower Leg - Right")
+						{
+							OffsetFromParent = new Vector3(0.0f, 3.75f, 0.0f),
+							Size = new Vector3(1.6f, 3.25f, 1.65f),
+							ParentIndex = 11,
+						},
+						new Bone("Foot - Right")
+						{
+							OffsetFromParent = new Vector3(0.0f, 3.25f, 0.0f),
+							Size = new Vector3(1.5f, 1.0f, 1.7f),
+							ParentIndex = 12,
+						},
+						new Bone("Toes - Right")
+						{
+							OffsetFromParent = new Vector3(0.0f, 0.4f, 1.2f),
+							Size = new Vector3(1.4f, 0.6f, 0.85f),
+							ParentIndex = 13,
 						},
 						new Bone("Upper Leg - Left")
 						{
 							OffsetFromParent = new Vector3(-1.0f, 0.0f, 0.0f),
 							Size = new Vector3(1.75f, 3.75f, 1.75f),
-							Children = new Bone[] {
-								new Bone("Lower Leg - Left")
-								{
-									OffsetFromParent = new Vector3(0.0f, 3.75f, 0.0f),
-									Size = new Vector3(1.6f, 3.25f, 1.65f),
-									Children = new Bone[] {
-										new Bone("Foot - Left")
-										{
-											OffsetFromParent = new Vector3(0.0f, 3.25f, 0.0f),
-											Size = new Vector3(1.5f, 1.0f, 1.7f),
-											Children = new Bone[] {
-												new Bone("Toes - Left")
-												{
-													OffsetFromParent = new Vector3(0.0f, 0.4f, 1.2f),
-													Size = new Vector3(1.4f, 0.6f, 0.85f),
-												}
-											},
-										},
-									},
-								},
-							},
+							ParentIndex = 0,
+						},
+						new Bone("Lower Leg - Left")
+						{
+							OffsetFromParent = new Vector3(0.0f, 3.75f, 0.0f),
+							Size = new Vector3(1.6f, 3.25f, 1.65f),
+							ParentIndex = 15,
+						},
+						new Bone("Foot - Left")
+						{
+							OffsetFromParent = new Vector3(0.0f, 3.25f, 0.0f),
+							Size = new Vector3(1.5f, 1.0f, 1.7f),
+							ParentIndex = 16,
+						},
+						new Bone("Toes - Left")
+						{
+							OffsetFromParent = new Vector3(0.0f, 0.4f, 1.2f),
+							Size = new Vector3(1.4f, 0.6f, 0.85f),
+							ParentIndex = 17,
 						},
 					},
 				};
-				this.selectedBone = this.rootBone;
 			}
 
 			float blendAmount = (this.currentSpeed - walkSpeed) / (runSpeed - walkSpeed);
@@ -383,41 +359,44 @@ namespace Entmoot.TestGame3D
 			int ticksBetweenKeyframes = (int)Math.Round(frameRate / this.currentSpeed);
 
 			this.currentAnimation.GetAnimation(this.gameClient.FrameTick, ticksBetweenKeyframes, out SkeletonKeyframe keyframePrevious, out SkeletonKeyframe keyframeStart, out SkeletonKeyframe keyframeEnd, out SkeletonKeyframe keyframeNext, out float amount);
-			this.drawBone(this.rootBone, Matrix.CreateTranslation(0, 0, x), keyframePrevious, keyframeStart, keyframeEnd, keyframeNext, amount, InterpolationType.CatmullRom);
+			this.drawBone(this.skeleton, Matrix.CreateTranslation(0, 0, x), keyframePrevious, keyframeStart, keyframeEnd, keyframeNext, amount, InterpolationType.CatmullRom);
 		}
 
-		private void drawBone(Bone bone, Matrix transform, SkeletonKeyframe keyframePrevious, SkeletonKeyframe keyframeStart, SkeletonKeyframe keyframeEnd, SkeletonKeyframe keyframeNext, float amount, InterpolationType interpolationType)
+		private void drawBone(Skeleton skeleton, Matrix transform, SkeletonKeyframe keyframePrevious, SkeletonKeyframe keyframeStart, SkeletonKeyframe keyframeEnd, SkeletonKeyframe keyframeNext, float amount, InterpolationType interpolationType)
 		{
-			if (!keyframePrevious.TryGetValue(bone.Name, out Quaternion rotationPrevioust)) { rotationPrevioust = Quaternion.Identity; }
-			if (!keyframeStart.TryGetValue(bone.Name, out Quaternion rotationStart)) { rotationStart = Quaternion.Identity; }
-			if (!keyframeEnd.TryGetValue(bone.Name, out Quaternion rotationEnd)) { rotationEnd = Quaternion.Identity; }
-			if (!keyframeNext.TryGetValue(bone.Name, out Quaternion rotationNext)) { rotationNext = Quaternion.Identity; }
-
-			Quaternion finalRotation = rotationStart;
-			switch (interpolationType)
+			foreach (Bone bone in skeleton.Bones)
 			{
-				case InterpolationType.Linear:
-					finalRotation = Quaternion.Lerp(rotationStart, rotationEnd, amount);
-					break;
-				case InterpolationType.Slerp:
-					finalRotation = Quaternion.Slerp(rotationStart, rotationEnd, amount);
-					break;
-				case InterpolationType.CatmullRom:
-					finalRotation = MainGame.CatmullRom(rotationPrevioust, rotationStart, rotationEnd, rotationNext, amount);
-					break;
+				if (!keyframePrevious.TryGetValue(bone.Name, out Quaternion rotationPrevioust)) { rotationPrevioust = Quaternion.Identity; }
+				if (!keyframeStart.TryGetValue(bone.Name, out Quaternion rotationStart)) { rotationStart = Quaternion.Identity; }
+				if (!keyframeEnd.TryGetValue(bone.Name, out Quaternion rotationEnd)) { rotationEnd = Quaternion.Identity; }
+				if (!keyframeNext.TryGetValue(bone.Name, out Quaternion rotationNext)) { rotationNext = Quaternion.Identity; }
+
+				Quaternion finalRotation = rotationStart;
+				switch (interpolationType)
+				{
+					case InterpolationType.Linear:
+						finalRotation = Quaternion.Lerp(rotationStart, rotationEnd, amount);
+						break;
+					case InterpolationType.Slerp:
+						finalRotation = Quaternion.Slerp(rotationStart, rotationEnd, amount);
+						break;
+					case InterpolationType.CatmullRom:
+						finalRotation = MainGame.CatmullRom(rotationPrevioust, rotationStart, rotationEnd, rotationNext, amount);
+						break;
+				}
+				bone.Rotation = finalRotation;
 			}
 
-			this.basicEffect.DiffuseColor = (bone == this.selectedBone) ? Vector3.Right : Vector3.One;
-
-			transform = Matrix.CreateFromQuaternion(finalRotation) * Matrix.CreateTranslation(bone.OffsetFromParent) * transform;
-			ShapeRenderHelper.RenderOriginBox(this.GraphicsDevice, this.basicEffect, bone.Size, transform);
-
-			if (bone.Children != null)
+			foreach (Bone bone in skeleton.Bones)
 			{
-				foreach (Bone childBond in bone.Children)
+				Bone currentBone = bone;
+				Matrix boneTransform = Matrix.CreateFromQuaternion(bone.Rotation) * Matrix.CreateTranslation(currentBone.OffsetFromParent);
+				while (currentBone.ParentIndex != -1)
 				{
-					this.drawBone(childBond, transform, keyframePrevious, keyframeStart, keyframeEnd, keyframeNext, amount, interpolationType);
+					currentBone = skeleton.Bones[currentBone.ParentIndex];
+					boneTransform = boneTransform * Matrix.CreateFromQuaternion(currentBone.Rotation) * Matrix.CreateTranslation(currentBone.OffsetFromParent);
 				}
+				ShapeRenderHelper.RenderOriginBox(this.GraphicsDevice, this.basicEffect, bone.Size, boneTransform * transform);
 			}
 		}
 

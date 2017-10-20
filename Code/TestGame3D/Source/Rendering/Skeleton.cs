@@ -7,6 +7,11 @@ using Microsoft.Xna.Framework;
 
 namespace Entmoot.TestGame3D
 {
+	public class Skeleton
+	{
+		public Bone[] Bones;
+	}
+
 	public class Bone
 	{
 		public Bone(string name) { this.Name = name; }
@@ -15,21 +20,7 @@ namespace Entmoot.TestGame3D
 		public Quaternion Rotation = Quaternion.Identity;
 		public Vector3 OffsetFromParent;
 		public Vector3 Size;
-		public Bone Parent { get; private set; }
-
-		private Bone[] children;
-		public Bone[] Children
-		{
-			get { return this.children; }
-			set
-			{
-				this.children = value;
-				foreach (Bone child in this.children)
-				{
-					child.Parent = this;
-				}
-			}
-		}
+		public int ParentIndex = -1;
 	}
 
 	public class SkeletonKeyframe : Dictionary<string, Quaternion>
