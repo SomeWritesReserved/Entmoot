@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 using Entmoot.Engine;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -123,6 +124,7 @@ namespace Entmoot.TestGame3D
 			{
 				this.basicEffect.Texture = Texture2D.FromStream(this.GraphicsDevice, fileStream);
 			}
+			this.colladaSkeleton = this.loadColladaSkeleton(@"K:\Dexter\Desktop\collada\tpos.dae", 0.1f);
 		}
 
 		protected override void OnExiting(object sender, EventArgs args)
@@ -209,12 +211,14 @@ namespace Entmoot.TestGame3D
 			{
 				this.renderSystem.BasicEffect = this.basicEffect;
 				this.gameClient.SystemArray.Render(this.gameClient.RenderedSnapshot.EntityArray, this.gameClient.GetCommandingEntity());
-				this.drawCharacter();
+				//this.drawCharacter();
+				this.drawBone(this.colladaSkeleton, Matrix.Identity, new SkeletonKeyframe(), new SkeletonKeyframe(), new SkeletonKeyframe(), new SkeletonKeyframe(), 0, InterpolationType.None);
 			}
 
 			this.drawDebugUI();
 		}
 
+		private Skeleton colladaSkeleton;
 		private Skeleton skeleton;
 		private Bone selectedBone;
 		private SkeletonAnimation currentAnimation = new SkeletonAnimation { SkeletonKeyframes = new[] { new SkeletonKeyframe(), new SkeletonKeyframe(), new SkeletonKeyframe(), new SkeletonKeyframe() } };
@@ -412,19 +416,63 @@ namespace Entmoot.TestGame3D
 			this.GraphicsDevice.DepthStencilState = DepthStencilState.Default;
 		}
 
-		private void loadCollada()
+		private Skeleton loadColladaSkeleton(string path, float skeletonScale)
 		{
+			XmlDocument xmlDocument = new XmlDocument();
+			xmlDocument.Load(path);
+
 			Skeleton skeleton = new Skeleton()
 			{
 				Bones = new Bone[]
 				{
-					new Bone("")
-					{
-						OffsetFromParent = new Vector3(0, 0, 0),
-						ParentIndex = -1,
-					},
+					new Bone("Hips") { ParentIndex = -1, },
+					new Bone("Spine") { ParentIndex = 0, },
+					new Bone("Spine1") { ParentIndex = 1, },
+					new Bone("Spine2") { ParentIndex = 2, },
+					new Bone("Neck") { ParentIndex = 3, },
+					new Bone("Head") { ParentIndex = 4, },
+					new Bone("LeftShoulder") { ParentIndex = 3, },
+					new Bone("LeftArm") { ParentIndex = 6, },
+					new Bone("LeftForeArm") { ParentIndex = 7, },
+					new Bone("LeftHand") { ParentIndex = 8, },
+					new Bone("RightShoulder") { ParentIndex = 3, },
+					new Bone("RightArm") { ParentIndex = 10, },
+					new Bone("RightForeArm") { ParentIndex = 11, },
+					new Bone("RightHand") { ParentIndex = 12, },
+					new Bone("LeftUpLeg") { ParentIndex = 0, },
+					new Bone("LeftLeg") { ParentIndex = 14, },
+					new Bone("LeftFoot") { ParentIndex = 15, },
+					new Bone("RightUpLeg") { ParentIndex = 0, },
+					new Bone("RightLeg") { ParentIndex = 17, },
+					new Bone("RightFoot") { ParentIndex = 18 },
 				},
 			};
+
+			foreach (Bone bone in skeleton.Bones)
+			{
+				var animationNode = xmlDocument.SelectNodes(string.Format("COLLADA/library_animations/animation/source[@id='mixamorig_{0}-Matrix-animation-output-transform']/float_array", bone.Name))
+					.OfType<XmlNode>()
+					.Single();
+
+				string[] animationTransforms = animationNode.InnerText.Replace("\t", "")
+					.Split(Environment.NewLine.ToArray(), StringSplitOptions.RemoveEmptyEntries);
+
+				Matrix boneTransform = this.parseMatrix(animationTransforms[0]);
+				if (!boneTransform.Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 translation)) { throw new Exception("Bad matrix for bone"); }
+				bone.OffsetFromParent = translation * skeletonScale;
+				bone.Rotation = rotation;
+			}
+			return skeleton;
+		}
+
+		private Matrix parseMatrix(string strvalue)
+		{
+			float[] values = strvalue.Trim().Split(' ').Select((str) => float.Parse(str)).ToArray();
+			if (values.Length != 16) { throw new Exception("Wrong number of matrix elements."); }
+			return new Matrix(values[0], values[4], values[8], values[12],
+				values[1], values[5], values[9], values[13],
+				values[2], values[6], values[10], values[14],
+				values[3], values[7], values[11], values[15]);
 		}
 
 		private void updateClientAndServer()
