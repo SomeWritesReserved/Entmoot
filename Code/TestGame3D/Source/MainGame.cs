@@ -124,7 +124,9 @@ namespace Entmoot.TestGame3D
 			{
 				this.basicEffect.Texture = Texture2D.FromStream(this.GraphicsDevice, fileStream);
 			}
-			this.colladaSkeleton = this.loadColladaSkeleton(@"K:\Dexter\Desktop\collada\tpos.dae", 0.1f);
+			this.colladaSkeleton = this.loadColladaSkeleton(@"K:\Dexter\Desktop\collada\tpose.dae", 0.1f);
+			this.colladaAnimationWalk = this.loadColladaAnimation(@"K:\Dexter\Desktop\collada\walk.dae", this.colladaSkeleton, new[] { 0, 4, 9, 14, 18, 22, 27, 32 });
+			this.colladaAnimationRun = this.loadColladaAnimation(@"K:\Dexter\Desktop\collada\run.dae", this.colladaSkeleton, new[] { 0, 3, 6, 8, 10, 13, 16, 18 });
 		}
 
 		protected override void OnExiting(object sender, EventArgs args)
@@ -183,6 +185,8 @@ namespace Entmoot.TestGame3D
 
 				float amount = tickDifference * 0.0005f;
 				this.currentSpeed = MathHelper.Clamp(this.currentSpeed + amount, walkSpeed, runSpeed);
+				this.currentFrame += Math.Sign(tickDifference);
+				this.currentBlendAmount = MathHelper.Clamp(this.currentBlendAmount + Math.Sign(tickDifference) * 0.07f, 0, 1);
 			}
 
 			if (this.isRightMousePressed())
@@ -212,22 +216,36 @@ namespace Entmoot.TestGame3D
 				this.renderSystem.BasicEffect = this.basicEffect;
 				this.gameClient.SystemArray.Render(this.gameClient.RenderedSnapshot.EntityArray, this.gameClient.GetCommandingEntity());
 				//this.drawCharacter();
-				this.drawBone(this.colladaSkeleton, Matrix.Identity, new SkeletonKeyframe(), new SkeletonKeyframe(), new SkeletonKeyframe(), new SkeletonKeyframe(), 0, InterpolationType.None);
+				{
+					float speed = MathHelper.Lerp(0.21f, 0.7f, this.currentBlendAmount);
+
+					this.x += speed;
+					if (x > 100) { x = -100; }
+
+					this.currentAnimation.Blend(this.colladaAnimationWalk, this.colladaAnimationRun, this.currentBlendAmount);
+					int ticksBetweenKeyframes = (int)Math.Round(MathHelper.Lerp(9, 5, this.currentBlendAmount));
+					this.currentAnimation.GetAnimation(this.gameClient.FrameTick, ticksBetweenKeyframes, out SkeletonKeyframe keyframePrevious, out SkeletonKeyframe keyframeStart, out SkeletonKeyframe keyframeEnd, out SkeletonKeyframe keyframeNext, out float amount);
+					this.drawBone(this.colladaSkeleton, Matrix.CreateTranslation(0, 0, this.x), keyframePrevious, keyframeStart, keyframeEnd, keyframeNext, amount, InterpolationType.Slerp);
+				}
 			}
 
 			this.drawDebugUI();
 		}
 
 		private Skeleton colladaSkeleton;
+		private SkeletonAnimation colladaAnimationWalk;
+		private SkeletonAnimation colladaAnimationRun;
 		private Skeleton skeleton;
 		private Bone selectedBone;
-		private SkeletonAnimation currentAnimation = new SkeletonAnimation { SkeletonKeyframes = new[] { new SkeletonKeyframe(), new SkeletonKeyframe(), new SkeletonKeyframe(), new SkeletonKeyframe() } };
+		private SkeletonAnimation currentAnimation = new SkeletonAnimation { SkeletonKeyframes = new[] { new SkeletonKeyframe(), new SkeletonKeyframe(), new SkeletonKeyframe(), new SkeletonKeyframe(), new SkeletonKeyframe(), new SkeletonKeyframe(), new SkeletonKeyframe(), new SkeletonKeyframe() } };
 		float x = 0;
 		const float runSpeed = 0.8f;
 		const float runFrameRate = 8;
 		const float walkSpeed = 0.175f;
 		const float walkFrameRate = 2.2f;
 		float currentSpeed = walkSpeed;
+		float currentBlendAmount = 1;
+		int currentFrame = 0;
 
 		private void drawCharacter()
 		{
@@ -388,23 +406,24 @@ namespace Entmoot.TestGame3D
 						finalRotation = MainGame.CatmullRom(rotationPrevioust, rotationStart, rotationEnd, rotationNext, amount);
 						break;
 				}
-				bone.Rotation = finalRotation;
+				bone.RenderRotation = bone.TPoseRotation * finalRotation;
 			}
 
 			foreach (Bone bone in skeleton.Bones)
 			{
 				Bone currentBone = bone;
-				Matrix boneTransform = Matrix.CreateFromQuaternion(bone.Rotation) * Matrix.CreateTranslation(currentBone.OffsetFromParent);
+				Matrix boneTransform = Matrix.CreateFromQuaternion(bone.RenderRotation) * Matrix.CreateTranslation(currentBone.OffsetFromParent);
 				while (currentBone.ParentIndex != -1)
 				{
 					currentBone = skeleton.Bones[currentBone.ParentIndex];
-					boneTransform = boneTransform * Matrix.CreateFromQuaternion(currentBone.Rotation) * Matrix.CreateTranslation(currentBone.OffsetFromParent);
+					boneTransform = boneTransform * Matrix.CreateFromQuaternion(currentBone.RenderRotation) * Matrix.CreateTranslation(currentBone.OffsetFromParent);
 				}
 				bone.RenderTransform = boneTransform * transform;
 				ShapeRenderHelper.RenderOriginBox(this.GraphicsDevice, this.basicEffect, bone.Size, boneTransform * transform);
 			}
 
-			this.GraphicsDevice.DepthStencilState = DepthStencilState.None;
+
+			//this.GraphicsDevice.DepthStencilState = DepthStencilState.None;
 			foreach (Bone bone in skeleton.Bones)
 			{
 				if (bone.ParentIndex >= 0)
@@ -413,7 +432,7 @@ namespace Entmoot.TestGame3D
 					ShapeRenderHelper.RenderLine(this.GraphicsDevice, this.basicEffect, parentTransform.Translation, bone.RenderTransform.Translation);
 				}
 			}
-			this.GraphicsDevice.DepthStencilState = DepthStencilState.Default;
+			//this.GraphicsDevice.DepthStencilState = DepthStencilState.Default;
 		}
 
 		private Skeleton loadColladaSkeleton(string path, float skeletonScale)
@@ -445,6 +464,8 @@ namespace Entmoot.TestGame3D
 					new Bone("RightUpLeg") { ParentIndex = 0, },
 					new Bone("RightLeg") { ParentIndex = 17, },
 					new Bone("RightFoot") { ParentIndex = 18 },
+					new Bone("RightToeBase") { ParentIndex = 19 },
+					new Bone("LeftToeBase") { ParentIndex = 16 },
 				},
 			};
 
@@ -460,9 +481,43 @@ namespace Entmoot.TestGame3D
 				Matrix boneTransform = this.parseMatrix(animationTransforms[0]);
 				if (!boneTransform.Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 translation)) { throw new Exception("Bad matrix for bone"); }
 				bone.OffsetFromParent = translation * skeletonScale;
-				bone.Rotation = rotation;
+				bone.TPoseRotation = rotation;
 			}
 			return skeleton;
+		}
+
+		private SkeletonAnimation loadColladaAnimation(string animationPath, Skeleton skeleton, int[] keyframes)
+		{
+			XmlDocument xmlDocument = new XmlDocument();
+			xmlDocument.Load(animationPath);
+
+			SkeletonAnimation skeletonAnimation = new SkeletonAnimation()
+			{
+				SkeletonKeyframes = Enumerable.Range(0, keyframes.Length).Select((i) => new SkeletonKeyframe()).ToArray(),
+			};
+
+			foreach (Bone bone in skeleton.Bones)
+			{
+				var animationNode = xmlDocument.SelectNodes(string.Format("COLLADA/library_animations/animation/source[@id='mixamorig_{0}-Matrix-animation-output-transform']/float_array", bone.Name))
+					.OfType<XmlNode>()
+					.Single();
+
+				string[] animationTransforms = animationNode.InnerText.Replace("\t", "")
+					.Split(Environment.NewLine.ToArray(), StringSplitOptions.RemoveEmptyEntries);
+
+				//if (animationTransforms.Length != keyframesCount) { throw new Exception("Keyframes don't match expected count."); }
+
+				int newIndex = 0;
+				foreach (int keyframeIndex in keyframes)
+				{
+					Matrix boneTransform = this.parseMatrix(animationTransforms[keyframeIndex]);
+					if (!boneTransform.Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 translation)) { throw new Exception("Bad matrix for bone"); }
+					skeletonAnimation.SkeletonKeyframes[newIndex][bone.Name] = rotation;
+					newIndex++;
+				}
+			}
+
+			return skeletonAnimation;
 		}
 
 		private Matrix parseMatrix(string strvalue)
@@ -512,8 +567,8 @@ namespace Entmoot.TestGame3D
 		{
 			this.stringBuilder.Clear();
 
-			this.stringBuilder.Append("SlowFrames   ");
-			this.stringBuilder.Append(this.slowFrames);
+			this.stringBuilder.Append("Tick #       ");
+			this.stringBuilder.Append(this.currentFrame);
 			if (this.hasServer)
 			{
 				this.stringBuilder.Append("\nSERVER");

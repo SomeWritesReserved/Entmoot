@@ -17,12 +17,14 @@ namespace Entmoot.TestGame3D
 		public Bone(string name) { this.Name = name; }
 
 		public string Name { get; }
-		public Quaternion Rotation = Quaternion.Identity;
+		public Quaternion TPoseRotation = Quaternion.Identity;
 		public Vector3 OffsetFromParent;
-		public Vector3 Size;
 		public int ParentIndex = -1;
 
 		public Matrix RenderTransform;
+		public Quaternion RenderRotation = Quaternion.Identity;
+
+		public Vector3 Size;
 	}
 
 	public class SkeletonKeyframe : Dictionary<string, Quaternion>
