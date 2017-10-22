@@ -14,6 +14,7 @@ namespace Entmoot.TestGame3D
 
 		private static readonly VertexPositionNormalTexture[] unitBoxRenderVertices;
 		private static readonly VertexPositionNormalTexture[] boxRenderVertices;
+		private static readonly VertexPositionNormalTexture[] lineVertices;
 
 		#endregion Fields
 
@@ -81,6 +82,14 @@ namespace Entmoot.TestGame3D
 			ShapeRenderHelper.boxRenderVertices = ShapeRenderHelper.unitBoxRenderVertices
 				.Select((vertex) => new VertexPositionNormalTexture(vertex.Position * 0.5f + Vector3.Up * 0.5f, vertex.Normal, vertex.TextureCoordinate))
 				.ToArray();
+
+			ShapeRenderHelper.lineVertices = new VertexPositionNormalTexture[]
+			{
+				//new VertexPositionColor(Vector3.Zero, Color.Blue),
+				//new VertexPositionColor(Vector3.Up, Color.LightBlue),
+				new VertexPositionNormalTexture(Vector3.Zero, Vector3.Left, Vector2.Zero),
+				new VertexPositionNormalTexture(Vector3.Up, Vector3.Left, Vector2.One),
+			};
 		}
 
 		#endregion Constructors
@@ -101,6 +110,16 @@ namespace Entmoot.TestGame3D
 			effect.World = Matrix.CreateScale(boxScale) * transform;
 			effect.CurrentTechnique.Passes[0].Apply();
 			graphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList, ShapeRenderHelper.boxRenderVertices, 0, ShapeRenderHelper.boxRenderVertices.Length / 3);
+		}
+
+		public static void RenderLine<TEffect>(GraphicsDevice graphicsDevice, TEffect effect, Vector3 start, Vector3 end)
+			where TEffect : Effect, IEffectMatrices
+		{
+			effect.World = Matrix.Identity;
+			ShapeRenderHelper.lineVertices[0].Position = start;
+			ShapeRenderHelper.lineVertices[1].Position = end;
+			effect.CurrentTechnique.Passes[0].Apply();
+			graphicsDevice.DrawUserPrimitives(PrimitiveType.LineList, ShapeRenderHelper.lineVertices, 0, 1);
 		}
 
 		#endregion Methods

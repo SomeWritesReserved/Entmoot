@@ -21,6 +21,8 @@ namespace Entmoot.TestGame3D
 		public Vector3 OffsetFromParent;
 		public Vector3 Size;
 		public int ParentIndex = -1;
+
+		public Matrix RenderTransform;
 	}
 
 	public class SkeletonKeyframe : Dictionary<string, Quaternion>

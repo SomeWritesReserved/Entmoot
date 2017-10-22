@@ -354,7 +354,7 @@ namespace Entmoot.TestGame3D
 			float frameRate = MathHelper.Lerp(walkFrameRate, runFrameRate, blendAmount);
 			this.currentAnimation.Blend(DefinedAnimations.WalkAnimation, DefinedAnimations.RunAnimation, blendAmount);
 
-			x -= this.currentSpeed;
+			//x -= this.currentSpeed;
 			if (x < 0) { x = 100; }
 			int ticksBetweenKeyframes = (int)Math.Round(frameRate / this.currentSpeed);
 
@@ -396,8 +396,35 @@ namespace Entmoot.TestGame3D
 					currentBone = skeleton.Bones[currentBone.ParentIndex];
 					boneTransform = boneTransform * Matrix.CreateFromQuaternion(currentBone.Rotation) * Matrix.CreateTranslation(currentBone.OffsetFromParent);
 				}
+				bone.RenderTransform = boneTransform * transform;
 				ShapeRenderHelper.RenderOriginBox(this.GraphicsDevice, this.basicEffect, bone.Size, boneTransform * transform);
 			}
+
+			this.GraphicsDevice.DepthStencilState = DepthStencilState.None;
+			foreach (Bone bone in skeleton.Bones)
+			{
+				if (bone.ParentIndex >= 0)
+				{
+					Matrix parentTransform = skeleton.Bones[bone.ParentIndex].RenderTransform;
+					ShapeRenderHelper.RenderLine(this.GraphicsDevice, this.basicEffect, parentTransform.Translation, bone.RenderTransform.Translation);
+				}
+			}
+			this.GraphicsDevice.DepthStencilState = DepthStencilState.Default;
+		}
+
+		private void loadCollada()
+		{
+			Skeleton skeleton = new Skeleton()
+			{
+				Bones = new Bone[]
+				{
+					new Bone("")
+					{
+						OffsetFromParent = new Vector3(0, 0, 0),
+						ParentIndex = -1,
+					},
+				},
+			};
 		}
 
 		private void updateClientAndServer()
