@@ -22,6 +22,7 @@
   * [Tim Sweeney, Unreal Netcode](https://docs.google.com/document/d/1KGLbEfHsWANTTgUqfK6rkpFYDGvnZYj-BN18sxq6LPY)
 * [Torque Game Engine](http://docs.garagegames.com/tgea/official/content/documentation/Engine%20Overview/Networking.html)
 * [Tribes Game Engine](http://gamedevs.org/uploads/tribes-networking-model.pdf)
+* [Riot Games Game Clock](https://engineering.riotgames.com/news/determinism-league-legends-unified-clock)
 
 ## Talks
 
