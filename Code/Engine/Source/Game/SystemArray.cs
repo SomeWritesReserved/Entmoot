@@ -17,7 +17,7 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Runs this system over the given array of entities on the server.
 		/// </summary>
-		void Update(EntityArray entityArray);
+		void ServerUpdate(EntityArray entityArray);
 
 		#endregion Methods
 	}
@@ -32,17 +32,17 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Runs this system over the given array of entities on the client.
 		/// </summary>
-		void Update(EntityArray entityArray, Entity commandingEntity);
+		void ClientUpdate(EntityArray entityArray, Entity commandingEntity);
 
 		/// <summary>
 		/// Runs this system over the given array of entities on the client but only updates the commanding entity (for client-side prediction).
 		/// </summary>
-		void UpdatePrediction(EntityArray entityArray, Entity commandingEntity);
+		void ClientPrediction(EntityArray entityArray, Entity commandingEntity);
 
 		/// <summary>
 		/// Allows this system to perform any rendering.
 		/// </summary>
-		void Render(EntityArray entityArray, Entity commandingEntity);
+		void ClientRender(EntityArray entityArray, Entity commandingEntity);
 
 		#endregion Methods
 	}
@@ -76,12 +76,12 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Updates the systems, allowing for each <see cref="IServerSystem"/> to run its logic on the given <see cref="EntityArray"/>.
 		/// </summary>
-		public void Update(EntityArray entityArray)
+		public void ServerUpdate(EntityArray entityArray)
 		{
 			entityArray.BeginUpdate();
 			foreach (IServerSystem system in this.systems)
 			{
-				system.Update(entityArray);
+				system.ServerUpdate(entityArray);
 			}
 			entityArray.EndUpdate();
 		}
@@ -118,12 +118,12 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Updates the systems, allowing for each <see cref="IClientSystem"/> to run its logic on the given <see cref="EntityArray"/>.
 		/// </summary>
-		public void Update(EntityArray entityArray, Entity commandingEntity)
+		public void ClientUpdate(EntityArray entityArray, Entity commandingEntity)
 		{
 			entityArray.BeginUpdate();
 			foreach (IClientSystem system in this.systems)
 			{
-				system.Update(entityArray, commandingEntity);
+				system.ClientUpdate(entityArray, commandingEntity);
 			}
 			entityArray.EndUpdate();
 		}
@@ -131,22 +131,22 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Updates the systems, allowing for each <see cref="IClientSystem"/> to run its logic to do client-side prediction on the commanding entity.
 		/// </summary>
-		public void UpdatePrediction(EntityArray entityArray, Entity commandingEntity)
+		public void ClientPrediction(EntityArray entityArray, Entity commandingEntity)
 		{
 			foreach (IClientSystem system in this.systems)
 			{
-				system.UpdatePrediction(entityArray, commandingEntity);
+				system.ClientPrediction(entityArray, commandingEntity);
 			}
 		}
 
 		/// <summary>
 		/// Allows for each <see cref="IClientSystem"/> to render the given <see cref="EntityArray"/>.
 		/// </summary>
-		public void Render(EntityArray entityArray, Entity commandingEntity)
+		public void ClientRender(EntityArray entityArray, Entity commandingEntity)
 		{
 			foreach (IClientSystem system in this.systems)
 			{
-				system.Render(entityArray, commandingEntity);
+				system.ClientRender(entityArray, commandingEntity);
 			}
 		}
 

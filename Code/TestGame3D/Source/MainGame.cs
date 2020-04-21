@@ -203,7 +203,7 @@ namespace Entmoot.TestGame3D
 			if (this.gameClient.HasRenderingStarted)
 			{
 				this.renderSystem.BasicEffect = this.basicEffect;
-				this.gameClient.SystemArray.Render(this.gameClient.RenderedSnapshot.EntityArray, this.gameClient.GetCommandingEntity());
+				this.gameClient.SystemArray.ClientRender(this.gameClient.RenderedSnapshot.EntityArray, this.gameClient.GetCommandingEntity());
 			}
 
 			this.drawDebugUI();

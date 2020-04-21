@@ -29,16 +29,25 @@ namespace Entmoot.TestGame3D
 		#endregion Properties
 
 		#region Methods
-
-		public void Update(EntityArray entityArray, Entity commandingEntity)
+		
+		/// <summary>
+		/// Runs this system over the given array of entities on the client.
+		/// </summary>
+		public void ClientUpdate(EntityArray entityArray, Entity commandingEntity)
 		{
 		}
-
-		public void UpdatePrediction(EntityArray entityArray, Entity commandingEntity)
+		
+		/// <summary>
+		/// Runs this system over the given array of entities on the client but only updates the commanding entity (for client-side prediction).
+		/// </summary>
+		public void ClientPrediction(EntityArray entityArray, Entity commandingEntity)
 		{
 		}
-
-		public void Render(EntityArray entityArray, Entity commandingEntity)
+		
+		/// <summary>
+		/// Allows this system to perform any rendering.
+		/// </summary>
+		public void ClientRender(EntityArray entityArray, Entity commandingEntity)
 		{
 			if (commandingEntity.IsValid && commandingEntity.HasComponent<SpatialComponent>())
 			{
@@ -69,11 +78,19 @@ namespace Entmoot.TestGame3D
 
 	public class SpinnerSystem : IServerSystem
 	{
-		#region Methods
+		#region Fields
 
 		private int tick;
 		private Entity newEntity;
-		public void Update(EntityArray entityArray)
+
+		#endregion Fields
+
+		#region Methods
+
+		/// <summary>
+		/// Runs this system over the given array of entities on the server.
+		/// </summary>
+		public void ServerUpdate(EntityArray entityArray)
 		{
 			this.tick++;
 			if (this.tick == 400)
@@ -110,29 +127,41 @@ namespace Entmoot.TestGame3D
 	public class PhysicsSystem : IServerSystem, IClientSystem
 	{
 		#region Methods
-
-		public void Update(EntityArray entityArray)
+		
+		/// <summary>
+		/// Runs this system over the given array of entities on the server.
+		/// </summary>
+		public void ServerUpdate(EntityArray entityArray)
 		{
 			foreach (Entity entity in entityArray)
 			{
-				this.updateEntity(entity);
+				this.runPhysicsOnEntity(entity);
 			}
 		}
-
-		public void Update(EntityArray entityArray, Entity commandingEntity)
+		
+		/// <summary>
+		/// Runs this system over the given array of entities on the client.
+		/// </summary>
+		public void ClientUpdate(EntityArray entityArray, Entity commandingEntity)
+		{
+		}
+		
+		/// <summary>
+		/// Runs this system over the given array of entities on the client but only updates the commanding entity (for client-side prediction).
+		/// </summary>
+		public void ClientPrediction(EntityArray entityArray, Entity commandingEntity)
+		{
+			this.runPhysicsOnEntity(commandingEntity);
+		}
+		
+		/// <summary>
+		/// Allows this system to perform any rendering.
+		/// </summary>
+		public void ClientRender(EntityArray entityArray, Entity commandingEntity)
 		{
 		}
 
-		public void UpdatePrediction(EntityArray entityArray, Entity commandingEntity)
-		{
-			this.updateEntity(commandingEntity);
-		}
-
-		public void Render(EntityArray entityArray, Entity commandingEntity)
-		{
-		}
-
-		private void updateEntity(Entity entity)
+		private void runPhysicsOnEntity(Entity entity)
 		{
 			if (!entity.HasComponent<SpatialComponent>()) { return; }
 			if (!entity.HasComponent<PhysicsComponent>()) { return; }

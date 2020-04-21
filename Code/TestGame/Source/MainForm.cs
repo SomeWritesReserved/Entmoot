@@ -550,7 +550,7 @@ namespace Entmoot.TestGame
 
 		#region Methods
 
-		public void Update(EntityArray entityArray)
+		public void ServerUpdate(EntityArray entityArray)
 		{
 			foreach (Entity entity in entityArray)
 			{
@@ -571,7 +571,7 @@ namespace Entmoot.TestGame
 	{
 		#region Methods
 
-		public void Update(EntityArray entityArray)
+		public void ServerUpdate(EntityArray entityArray)
 		{
 			foreach (Entity entity in entityArray)
 			{
@@ -579,16 +579,16 @@ namespace Entmoot.TestGame
 			}
 		}
 
-		public void Update(EntityArray entityArray, Entity commandingEntity)
+		public void ClientUpdate(EntityArray entityArray, Entity commandingEntity)
 		{
 		}
 
-		public void UpdatePrediction(EntityArray entityArray, Entity commandingEntity)
+		public void ClientPrediction(EntityArray entityArray, Entity commandingEntity)
 		{
 			this.updateEntity(commandingEntity);
 		}
 
-		public void Render(EntityArray entityArray, Entity commandingEntity)
+		public void ClientRender(EntityArray entityArray, Entity commandingEntity)
 		{
 		}
 

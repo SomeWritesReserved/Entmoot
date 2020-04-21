@@ -135,7 +135,7 @@ namespace Entmoot.Engine
 
 			if (this.HasRenderingStarted)
 			{
-				this.SystemArray.Update(this.RenderedSnapshot.EntityArray, this.GetCommandingEntity());
+				this.SystemArray.ClientUpdate(this.RenderedSnapshot.EntityArray, this.GetCommandingEntity());
 			}
 		}
 
@@ -263,7 +263,7 @@ namespace Entmoot.Engine
 
 						// Reapply all the commands we've sent that the server hasn't processed yet to get us to where we predict we should be
 						clientCommand.CommandData.ApplyToEntity(predictedEntity);
-						this.SystemArray.UpdatePrediction(this.RenderedSnapshot.EntityArray, predictedEntity);
+						this.SystemArray.ClientPrediction(this.RenderedSnapshot.EntityArray, predictedEntity);
 					}
 				}
 			}

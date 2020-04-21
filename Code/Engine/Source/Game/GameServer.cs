@@ -87,7 +87,7 @@ namespace Entmoot.Engine
 				}
 			}
 
-			this.SystemArray.Update(this.EntityArray);
+			this.SystemArray.ServerUpdate(this.EntityArray);
 
 			// Take a snapshot of the latest entity state and add it to the snapshot history buffer (overwriting an old snapshot)
 			EntitySnapshot newEntitySnapshot = this.entitySnapshotHistory.Dequeue();
