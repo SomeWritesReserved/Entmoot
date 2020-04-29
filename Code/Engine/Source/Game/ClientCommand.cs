@@ -26,6 +26,8 @@ namespace Entmoot.Engine
 
 		/// <summary>
 		/// Applies this command data to a given entity (whatever that may mean for the type of command).
+		/// Changes made to the entity should always be "additive" instead of overwriting values because 
+		/// multiple commands will have to be applied at once before an update or prediction.
 		/// </summary>
 		void ApplyToEntity(Entity entity);
 

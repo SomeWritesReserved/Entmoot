@@ -46,8 +46,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Source\Components\SpatialComponent.cs" />
     <Compile Include="Source\FpsGame.cs" />
-    <Compile Include="Source\Impl\FpsCommandData.cs" />
+    <Compile Include="Source\Player\PlayerCommandData.cs" />
+    <Compile Include="Source\Components\PlayerComponent.cs" />
+    <Compile Include="Source\Player\PlayerMovementSystem.cs" />
     <Compile Include="Source\Logging\LogGameRendering.cs" />
     <Compile Include="Source\Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

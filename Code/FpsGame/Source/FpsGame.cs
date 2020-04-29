@@ -18,8 +18,8 @@ namespace Entmoot.FpsGame
 
 		private NetworkServer networkServer;
 		private NetworkClient networkClient;
-		private GameServer<FpsCommandData> gameServer;
-		private GameClient<FpsCommandData> gameClient;
+		private GameServer<PlayerCommandData> gameServer;
+		private GameClient<PlayerCommandData> gameClient;
 
 		#endregion Fields
 
@@ -79,12 +79,12 @@ namespace Entmoot.FpsGame
 			ComponentsDefinition componentsDefinition = new ComponentsDefinition();
 			//componentsDefinition.RegisterComponentType<SomeComponent>();
 
-			IServerSystem[] serverSystems = new IServerSystem[] { };
+			IServerSystem[] serverSystems = new IServerSystem[] { new PlayerMovementSystem() };
 
-			IClientSystem[] clientSystems = new IClientSystem[] { };
+			IClientSystem[] clientSystems = new IClientSystem[] { new PlayerMovementSystem() };
 
 			this.networkServer = new NetworkServer("Entmoot.FpsGame", maxClients, maxMessageSize, port);
-			this.gameServer = new GameServer<FpsCommandData>(this.networkServer.ClientNetworkConnections, maxEntityHistory, entityCapacity, componentsDefinition, serverSystems);
+			this.gameServer = new GameServer<PlayerCommandData>(this.networkServer.ClientNetworkConnections, maxEntityHistory, entityCapacity, componentsDefinition, serverSystems);
 
 			// Reserve the first entities for all potential clients
 			for (int clientID = 0; clientID < maxClients; clientID++)
@@ -94,7 +94,7 @@ namespace Entmoot.FpsGame
 			}
 
 			this.networkClient = new NetworkClient("Entmoot.FpsGame", maxMessageSize);
-			this.gameClient = new GameClient<FpsCommandData>(this.networkClient, maxEntityHistory, entityCapacity, componentsDefinition, clientSystems);
+			this.gameClient = new GameClient<PlayerCommandData>(this.networkClient, maxEntityHistory, entityCapacity, componentsDefinition, clientSystems);
 
 			this.networkServer.Start();
 			this.networkClient.Connect(new System.Net.IPEndPoint(System.Net.IPAddress.Loopback, port));
@@ -133,7 +133,7 @@ namespace Entmoot.FpsGame
 			if (this.networkClient != null)
 			{
 				this.networkClient.Update();
-				this.gameClient.Update(new FpsCommandData());
+				this.gameClient.Update(new PlayerCommandData());
 			}
 
 			base.Update(gameTime);
