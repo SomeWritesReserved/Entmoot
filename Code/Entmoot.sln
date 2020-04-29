@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Entmoot.UnitTests", "UnitTe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Entmoot.TestGame3D", "TestGame3D\Entmoot.TestGame3D.csproj", "{F7DDE339-3418-4C59-88F1-BCF0DF1B04B3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Entmoot.FpsGame", "FpsGame\Entmoot.FpsGame.csproj", "{EC9D5D02-AC41-43D4-B5F3-0A7EF2510787}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{F7DDE339-3418-4C59-88F1-BCF0DF1B04B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F7DDE339-3418-4C59-88F1-BCF0DF1B04B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F7DDE339-3418-4C59-88F1-BCF0DF1B04B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC9D5D02-AC41-43D4-B5F3-0A7EF2510787}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC9D5D02-AC41-43D4-B5F3-0A7EF2510787}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC9D5D02-AC41-43D4-B5F3-0A7EF2510787}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC9D5D02-AC41-43D4-B5F3-0A7EF2510787}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
