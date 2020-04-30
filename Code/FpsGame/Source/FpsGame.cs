@@ -18,8 +18,11 @@ namespace Entmoot.FpsGame
 
 		private NetworkServer networkServer;
 		private NetworkClient networkClient;
-		private GameServer<FpsCommandData> gameServer;
-		private GameClient<FpsCommandData> gameClient;
+		private GameServer<PlayerCommandData> gameServer;
+		private GameClient<PlayerCommandData> gameClient;
+
+		private PlayerCommandData playerCommandData;
+		private Point centerScreen;
 
 		#endregion Fields
 
@@ -27,7 +30,7 @@ namespace Entmoot.FpsGame
 
 		public FpsGame()
 		{
-			this.IsMouseVisible = true;
+			this.IsMouseVisible = false;
 			this.graphicsDeviceManager = new GraphicsDeviceManager(this);
 			this.graphicsDeviceManager.GraphicsProfile = GraphicsProfile.HiDef;
 			this.graphicsDeviceManager.PreferredBackBufferWidth = 960;
@@ -59,6 +62,15 @@ namespace Entmoot.FpsGame
 			base.UnloadContent();
 		}
 
+		protected override void OnActivated(object sender, EventArgs args)
+		{
+			this.centerScreen.X = this.GraphicsDevice.Viewport.Width / 2;
+			this.centerScreen.Y = this.GraphicsDevice.Viewport.Height / 2;
+			Mouse.SetPosition(this.centerScreen.X, this.centerScreen.Y);
+
+			base.OnActivated(sender, args);
+		}
+
 		protected override void OnExiting(object sender, EventArgs args)
 		{
 			this.stopServer();
@@ -77,25 +89,28 @@ namespace Entmoot.FpsGame
 			this.stopServer();
 
 			ComponentsDefinition componentsDefinition = new ComponentsDefinition();
-			//componentsDefinition.RegisterComponentType<SomeComponent>();
+			componentsDefinition.RegisterComponentType<SpatialComponent>();
+			componentsDefinition.RegisterComponentType<PhysicsComponent>();
 
 			IServerSystem[] serverSystems = new IServerSystem[] { };
 
 			IClientSystem[] clientSystems = new IClientSystem[] { };
 
 			this.networkServer = new NetworkServer("Entmoot.FpsGame", maxClients, maxMessageSize, port);
-			this.gameServer = new GameServer<FpsCommandData>(this.networkServer.ClientNetworkConnections, maxEntityHistory, entityCapacity, componentsDefinition, serverSystems);
+			this.gameServer = new GameServer<PlayerCommandData>(this.networkServer.ClientNetworkConnections, maxEntityHistory, entityCapacity, componentsDefinition, serverSystems);
 
 			// Reserve the first entities for all potential clients
 			for (int clientID = 0; clientID < maxClients; clientID++)
 			{
 				this.gameServer.EntityArray.TryCreateEntity(out Entity clientEntity);
-				//clientEntity.AddComponent<SomeComponent>();
+				clientEntity.AddComponent<SpatialComponent>();
+				clientEntity.AddComponent<PhysicsComponent>();
 			}
 
 			this.networkClient = new NetworkClient("Entmoot.FpsGame", maxMessageSize);
-			this.gameClient = new GameClient<FpsCommandData>(this.networkClient, maxEntityHistory, entityCapacity, componentsDefinition, clientSystems);
+			this.gameClient = new GameClient<PlayerCommandData>(this.networkClient, maxEntityHistory, entityCapacity, componentsDefinition, clientSystems);
 
+			this.playerCommandData = new PlayerCommandData();
 			this.networkServer.Start();
 			this.networkClient.Connect(new System.Net.IPEndPoint(System.Net.IPAddress.Loopback, port));
 		}
@@ -132,8 +147,9 @@ namespace Entmoot.FpsGame
 
 			if (this.networkClient != null)
 			{
+				PlayerInput.GetPlayerInput(Mouse.GetState(), Keyboard.GetState(), this.centerScreen, new Vector2(0.004f), ref this.playerCommandData, shouldReadInput: this.IsActive);
 				this.networkClient.Update();
-				this.gameClient.Update(new FpsCommandData());
+				this.gameClient.Update(this.playerCommandData);
 			}
 
 			base.Update(gameTime);
