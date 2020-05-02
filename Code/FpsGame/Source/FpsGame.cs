@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,6 +24,7 @@ namespace Entmoot.FpsGame
 
 		private PlayerCommandData playerCommandData;
 		private Point centerScreen;
+		private RenderSystem renderSystem;
 
 		#endregion Fields
 
@@ -54,6 +56,14 @@ namespace Entmoot.FpsGame
 
 		protected override void LoadContent()
 		{
+			var model = ModelLoader.LoadFbx(@"C:\Users\dexter\Desktop\Models\B17\B17.FBX", 0.001f);
+			BasicEffect basicEffect = new BasicEffect(this.GraphicsDevice);
+			basicEffect.Projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(90.0f), this.GraphicsDevice.Viewport.AspectRatio, 0.1f, 10000.0f);
+			basicEffect.EnableDefaultLighting();
+			this.renderSystem.BasicEffect = basicEffect;
+			this.renderSystem.Models.Add("B17", model);
+			this.renderSystem.Models.Add("Box", ModelLoader.GetBoxModel());
+
 			base.LoadContent();
 		}
 
@@ -91,10 +101,11 @@ namespace Entmoot.FpsGame
 			ComponentsDefinition componentsDefinition = new ComponentsDefinition();
 			componentsDefinition.RegisterComponentType<SpatialComponent>();
 			componentsDefinition.RegisterComponentType<PhysicsComponent>();
+			componentsDefinition.RegisterComponentType<ModelComponent>();
 
-			IServerSystem[] serverSystems = new IServerSystem[] { };
+			IServerSystem[] serverSystems = new IServerSystem[] { new PhysicsSystem() };
 
-			IClientSystem[] clientSystems = new IClientSystem[] { };
+			IClientSystem[] clientSystems = new IClientSystem[] { new PhysicsSystem(), this.renderSystem = new RenderSystem(this.graphicsDeviceManager) };
 
 			this.networkServer = new NetworkServer("Entmoot.FpsGame", maxClients, maxMessageSize, port);
 			this.gameServer = new GameServer<PlayerCommandData>(this.networkServer.ClientNetworkConnections, maxEntityHistory, entityCapacity, componentsDefinition, serverSystems);
@@ -105,7 +116,12 @@ namespace Entmoot.FpsGame
 				this.gameServer.EntityArray.TryCreateEntity(out Entity clientEntity);
 				clientEntity.AddComponent<SpatialComponent>();
 				clientEntity.AddComponent<PhysicsComponent>();
+				clientEntity.AddComponent<ModelComponent>();
 			}
+
+			this.gameServer.EntityArray.TryCreateEntity(out Entity world);
+			world.AddComponent<SpatialComponent>();
+			world.AddComponent<ModelComponent>().ModelName = "B17";
 
 			this.networkClient = new NetworkClient("Entmoot.FpsGame", maxMessageSize);
 			this.gameClient = new GameClient<PlayerCommandData>(this.networkClient, maxEntityHistory, entityCapacity, componentsDefinition, clientSystems);

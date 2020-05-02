@@ -34,8 +34,8 @@ namespace Entmoot.FpsGame
 				if (keyboardState.IsKeyDown(Keys.D)) { playerInputFlags |= PlayerInputFlags.MoveRight; }
 				if (keyboardState.IsKeyDown(Keys.Space)) { playerInputFlags |= PlayerInputFlags.Jump; }
 
-				float lookDeltaX = (mouseState.X - mouseLookOrigin.X) * mouseSensitivity.X;
-				float lookDeltaY = (mouseState.Y - mouseLookOrigin.Y) * mouseSensitivity.Y;
+				float lookDeltaX = (mouseLookOrigin.X - mouseState.X) * mouseSensitivity.X;
+				float lookDeltaY = (mouseLookOrigin.Y - mouseState.Y) * mouseSensitivity.Y;
 				lookAngles.X = lookAngles.X + lookDeltaX;
 				lookAngles.Y = MathHelper.Clamp(lookAngles.Y + lookDeltaY, -MathHelper.Pi * 0.49f, MathHelper.Pi * 0.49f);
 				Mouse.SetPosition(mouseLookOrigin.X, mouseLookOrigin.Y);
