@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26730.16
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Entmoot.Engine", "Engine\Entmoot.Engine.csproj", "{554F936E-450D-4132-9104-AAAB2D34E3BB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Engine", "Engine\Engine.csproj", "{554F936E-450D-4132-9104-AAAB2D34E3BB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Entmoot.TestGame", "TestGame\Entmoot.TestGame.csproj", "{A08B499E-C0B3-4816-98B4-A7B8B1337C96}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Debug.NetTestWinForms", "Debug.NetTestWinForms\Debug.NetTestWinForms.csproj", "{A08B499E-C0B3-4816-98B4-A7B8B1337C96}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Entmoot.UnitTests", "UnitTests\Entmoot.UnitTests.csproj", "{6148217F-A331-4F7A-B9F8-B8609CB61770}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Engine.UnitTests", "Engine.UnitTests\Engine.UnitTests.csproj", "{6148217F-A331-4F7A-B9F8-B8609CB61770}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Entmoot.TestGame3D", "TestGame3D\Entmoot.TestGame3D.csproj", "{F7DDE339-3418-4C59-88F1-BCF0DF1B04B3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Debug.NetTest3D", "Debug.NetTest3D\Debug.NetTest3D.csproj", "{F7DDE339-3418-4C59-88F1-BCF0DF1B04B3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
