@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Engine.UnitTests", "Engine.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Debug.NetTest3D", "Debug.NetTest3D\Debug.NetTest3D.csproj", "{F7DDE339-3418-4C59-88F1-BCF0DF1B04B3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Game.Zombtown", "Game.Zombtown\Game.Zombtown.csproj", "{8B32F216-A669-4B25-A090-7EA53B407B5D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{F7DDE339-3418-4C59-88F1-BCF0DF1B04B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F7DDE339-3418-4C59-88F1-BCF0DF1B04B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F7DDE339-3418-4C59-88F1-BCF0DF1B04B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8B32F216-A669-4B25-A090-7EA53B407B5D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B32F216-A669-4B25-A090-7EA53B407B5D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B32F216-A669-4B25-A090-7EA53B407B5D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B32F216-A669-4B25-A090-7EA53B407B5D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
