@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,6 +22,8 @@ namespace Entmoot.Game.Zombtown
 		private GameServer<PlayerCommandData> gameServer;
 		private GameClient<PlayerCommandData> gameClient;
 
+		private Render2dSystem render2DSystem;
+
 		#endregion Fields
 
 		#region Constructors
@@ -29,8 +32,8 @@ namespace Entmoot.Game.Zombtown
 		{
 			this.graphicsDeviceManager = new GraphicsDeviceManager(this);
 			this.graphicsDeviceManager.GraphicsProfile = GraphicsProfile.HiDef;
-			this.graphicsDeviceManager.PreferredBackBufferWidth = 960;
-			this.graphicsDeviceManager.PreferredBackBufferHeight = 540;
+			this.graphicsDeviceManager.PreferredBackBufferWidth = 1024;
+			this.graphicsDeviceManager.PreferredBackBufferHeight = 768;
 			this.Content.RootDirectory = "Assets";
 		}
 
@@ -44,17 +47,18 @@ namespace Entmoot.Game.Zombtown
 		{
 			Log<LogGameRendering>.StartNew();
 
-			const int maxClients = 4;
+			const int maxClients = 1;
 			const int entityCapacity = 1000;
 			const int maxEntityHistory = 30;
 			const int port = 13460;
 			const int maxMessageSize = 4000;
 
 			ComponentsDefinition componentsDefinition = new ComponentsDefinition();
-
-			IServerSystem[] serverSystems = new IServerSystem[] { };
-
-			IClientSystem[] clientSystems = new IClientSystem[] { new Render2dSystem(this.graphicsDeviceManager) };
+			componentsDefinition.RegisterComponentType<SpatialComponent>();
+			componentsDefinition.RegisterComponentType<SpriteComponent>();
+			componentsDefinition.RegisterComponentType<CameraComponent>();
+			IServerSystem[] serverSystems = new IServerSystem[] { new CameraSystem() };
+			IClientSystem[] clientSystems = new IClientSystem[] { this.render2DSystem = new Render2dSystem(this.graphicsDeviceManager) };
 
 			this.networkServer = new NetworkServer("Entmoot.Game.Zombtown", maxClients, maxMessageSize, port);
 			this.gameServer = new GameServer<PlayerCommandData>(this.networkServer.ClientNetworkConnections, maxEntityHistory, entityCapacity, componentsDefinition, serverSystems, this.updateCommandingEntityID);
@@ -70,7 +74,19 @@ namespace Entmoot.Game.Zombtown
 
 		protected override void LoadContent()
 		{
+			this.render2DSystem.Clear();
+			this.render2DSystem.SpriteBatch = new SpriteBatch(this.GraphicsDevice);
+			foreach (string filename in Directory.GetFiles("Assets", "*.png", SearchOption.AllDirectories))
+			{
+				using (FileStream fileStream = File.OpenRead(filename))
+				{
+					Texture2D texture = Texture2D.FromStream(this.GraphicsDevice, fileStream);
+					this.render2DSystem.AddTexture(filename.Substring(7).Replace('\\', '/'), texture);
+				}
+			}
+
 			base.LoadContent();
+			GC.Collect();
 		}
 
 		protected override void UnloadContent()
@@ -115,6 +131,13 @@ namespace Entmoot.Game.Zombtown
 			{
 				if (this.gameServer.EntityArray.TryCreateEntity(out Entity clientEntity))
 				{
+					ref SpatialComponent spatialComponent = ref clientEntity.AddComponent<SpatialComponent>();
+					ref SpriteComponent spriteComponent = ref clientEntity.AddComponent<SpriteComponent>();
+					ref CameraComponent cameraComponent = ref clientEntity.AddComponent<CameraComponent>();
+					spatialComponent.Position = new Vector2(56, 23);
+					spatialComponent.Radius = 1;
+					spatialComponent.Rotation = 0.78f;
+					spriteComponent.SetSprite("Character.png");
 					return clientEntity.ID;
 				}
 			}
@@ -149,7 +172,7 @@ namespace Entmoot.Game.Zombtown
 		{
 			if (gameTime.IsRunningSlowly) { Log<LogGameRendering>.Data.NumberOfSlowDrawFrames++; }
 
-			this.GraphicsDevice.Clear(Color.Gray);
+			this.GraphicsDevice.Clear(Color.Black);
 
 			if (this.gameClient != null && this.gameClient.HasRenderingStarted)
 			{
