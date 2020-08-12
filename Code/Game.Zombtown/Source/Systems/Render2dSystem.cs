@@ -75,7 +75,7 @@ namespace Entmoot.Game.Zombtown
 				if (spatialComponent.Radius == 0) { continue; }
 				if (spriteComponent.SpriteId == 0 || !this.textures.TryGetValue(spriteComponent.SpriteId, out Texture2D spriteTexture)) { continue; }
 
-				this.renderSprite(spriteTexture, spatialComponent.Position, spatialComponent.Radius, spatialComponent.Rotation,
+				this.renderSprite(spriteTexture, spatialComponent.Position, spatialComponent.Radius, spatialComponent.Rotation, spriteComponent.SpriteDepth,
 					playerCameraComponent.Position, playerCameraComponent.Extents);
 			}
 			this.SpriteBatch.End();
@@ -88,7 +88,7 @@ namespace Entmoot.Game.Zombtown
 		/// The size or dimensions of the texture does not matter, it will be scaled to fit into the sprites world position and rotated.
 		/// Note: it is critical that the camera's aspect ratio match the render target's aspect ratios, otherwise the scaling and rotation will be wrong.
 		/// </remarks>
-		private void renderSprite(Texture2D texture, Vector2 spriteWorldPosition, float spriteWorldSize, float spriteWorldRotation, Vector2 cameraWorldPosition, Vector2 cameraWorldExtents)
+		private void renderSprite(Texture2D texture, Vector2 spriteWorldPosition, float spriteWorldSize, float spriteWorldRotation, byte spriteRenderDepth, Vector2 cameraWorldPosition, Vector2 cameraWorldExtents)
 		{
 			// Get the dimensions of the camera in both screen and world space so we can transform between them.
 			float cameraWorldWidth = cameraWorldExtents.X * 2.0f;
@@ -140,7 +140,7 @@ namespace Entmoot.Game.Zombtown
 			// After all this calculation it doesn't even work because rotations happen _after_ the scaling, so the scaled sprite is rotated causing the elongated
 			// axis to spin. This means the aspect ratio of the camera must match the screen.
 			Vector2 textureOrigin = new Vector2(texture.Width * 0.5f, texture.Height * 0.5f);
-			this.SpriteBatch.Draw(texture, spriteScreenRectangle, null, Color.White, spriteWorldRotation, textureOrigin, SpriteEffects.None, 0);
+			this.SpriteBatch.Draw(texture, spriteScreenRectangle, null, Color.White, spriteWorldRotation, textureOrigin, SpriteEffects.None, spriteRenderDepth / 255.0f);
 		}
 
 		#endregion Methods

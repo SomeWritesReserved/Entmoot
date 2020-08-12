@@ -64,7 +64,7 @@ namespace Entmoot.Game.Zombtown
 			this.gameServer = new GameServer<PlayerCommandData>(this.networkServer.ClientNetworkConnections, maxEntityHistory, entityCapacity, componentsDefinition, serverSystems);
 
 			// Reserve the first entities for all potential clients
-			for (int clientID = 0; clientID < maxClients; clientID++)
+			for (int clientIndex = 0; clientIndex < maxClients; clientIndex++)
 			{
 				this.gameServer.EntityArray.TryCreateEntity(out Entity clientEntity);
 				ref SpatialComponent spatialComponent = ref clientEntity.AddComponent<SpatialComponent>();
@@ -73,7 +73,24 @@ namespace Entmoot.Game.Zombtown
 				spatialComponent.Position = new Vector2(56, 23);
 				spatialComponent.Radius = 1;
 				spatialComponent.Rotation = 0.78f;
-				spriteComponent.SetSprite("Character.png");
+				spriteComponent.SetSprite("Character.png", 128);
+			}
+
+			// Create the city blocks
+			for (int roadIndex = 0; roadIndex < 100; roadIndex++)
+			{
+				this.gameServer.EntityArray.TryCreateEntity(out Entity roadEntity);
+				ref SpatialComponent spatialComponent = ref roadEntity.AddComponent<SpatialComponent>();
+				ref SpriteComponent spriteComponent = ref roadEntity.AddComponent<SpriteComponent>();
+				int x = roadIndex % 10;
+				int y = roadIndex / 10;
+				spatialComponent.Position = new Vector2(x, y) * 10;
+				spatialComponent.Radius = 5;
+				spriteComponent.SetSprite("RoadTurn.png", 255);
+				if (roadIndex % 2 == (y % 2 == 0 ? 0 : 1))
+				{
+					spatialComponent.Rotation = MathHelper.Pi;
+				}
 			}
 
 			this.networkClient = new NetworkClient("Entmoot.Game.Zombtown", maxMessageSize);
