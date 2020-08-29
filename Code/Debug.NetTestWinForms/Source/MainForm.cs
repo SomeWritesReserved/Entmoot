@@ -89,12 +89,12 @@ namespace Entmoot.Debug.NetTestWinForms
 			if (this.clientStepsRemaining == 0) { return; }
 
 			TestCommandKeys currentCommandKeys = TestCommandKeys.None;
-			if (Keyboard.IsKeyDown(Key.W)) { currentCommandKeys |= TestCommandKeys.MoveForward; }
+			/*if (Keyboard.IsKeyDown(Key.W)) { currentCommandKeys |= TestCommandKeys.MoveForward; }
 			if (Keyboard.IsKeyDown(Key.S)) { currentCommandKeys |= TestCommandKeys.MoveBackward; }
 			if (Keyboard.IsKeyDown(Key.A)) { currentCommandKeys |= TestCommandKeys.MoveLeft; }
 			if (Keyboard.IsKeyDown(Key.D)) { currentCommandKeys |= TestCommandKeys.MoveRight; }
 			if (Keyboard.IsKeyDown(Key.D1)) { currentCommandKeys |= TestCommandKeys.Seat1; }
-			else if (Keyboard.IsKeyDown(Key.D2)) { currentCommandKeys |= TestCommandKeys.Seat2; }
+			else if (Keyboard.IsKeyDown(Key.D2)) { currentCommandKeys |= TestCommandKeys.Seat2; }*/
 
 			this.clientServerNetworkConnection.CurrentContext = ClientServerContext.Client;
 			this.clientServerNetworkConnection.UpdateClient(currentCommandKeys);

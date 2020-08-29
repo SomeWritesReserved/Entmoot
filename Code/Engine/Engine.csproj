@@ -1,73 +1,22 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{554F936E-450D-4132-9104-AAAB2D34E3BB}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Entmoot.Engine</RootNamespace>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>Entmoot.Engine</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
+    <RootNamespace>Entmoot.Engine</RootNamespace>
+    <Authors>SomeWritesReserved</Authors>
+    <Company>SomeWritesReserved</Company>
+    <Product>Entmoot</Product>
+    <Copyright>2017</Copyright>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\</OutputPath>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-    <DocumentationFile>bin\Entmoot.Engine.xml</DocumentationFile>
+    <OutputPath>bin</OutputPath>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-    <DocumentationFile>bin\Entmoot.Engine.xml</DocumentationFile>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <OutputPath>bin</OutputPath>
   </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Source\Core\Log.cs" />
-    <Compile Include="Source\Core\ReaderWriter.cs" />
-    <Compile Include="Source\Entity\ComponentArray.cs" />
-    <Compile Include="Source\Entity\ComponentsDefinition.cs" />
-    <Compile Include="Source\Game\SystemArray.cs" />
-    <Compile Include="Source\Entity\Entity.cs" />
-    <Compile Include="Source\Entity\EntityArray.cs" />
-    <Compile Include="Source\Game\EntitySnapshot.cs" />
-    <Compile Include="Source\Game\INetworkConnection.cs" />
-    <Compile Include="Source\Networking\MessageBuffer.cs" />
-    <Compile Include="Source\Networking\Messages.cs" />
-    <Compile Include="Source\Networking\LocalNetworkConnection.cs" />
-    <Compile Include="Source\Game\UpdateSerializers.cs" />
-    <Compile Include="Source\Core\StateArray.cs" />
-    <Compile Include="Source\Game\GameClient.cs" />
-    <Compile Include="Source\Game\ClientCommand.cs" />
-    <Compile Include="Source\Game\GameServer.cs" />
-    <Compile Include="Source\Networking\NetworkClient.cs" />
-    <Compile Include="Source\Networking\NetworkServer.cs" />
-    <Compile Include="Source\Networking\PacketType.cs" />
-  </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
 </Project>

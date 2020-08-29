@@ -135,7 +135,7 @@ namespace Entmoot.Debug.NetTest3D
 			this.basicEffect.Projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(90.0f), this.GraphicsDevice.Viewport.AspectRatio, 0.1f, 1000.0f);
 			this.basicEffect.EnableDefaultLighting();
 
-			using (FileStream fileStream = new FileStream(@"Assets\dev_cubeface.png", FileMode.Open, FileAccess.Read))
+			using (FileStream fileStream = new FileStream(@"Assets/dev_cubeface.png", FileMode.Open, FileAccess.Read))
 			{
 				this.basicEffect.Texture = Texture2D.FromStream(this.GraphicsDevice, fileStream);
 			}

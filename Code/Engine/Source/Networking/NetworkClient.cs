@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -86,10 +87,13 @@ namespace Entmoot.Engine
 		{
 			this.serverEndPoint = serverEndPoint;
 			this.socket.Bind(this.boundEndPoint);
-			const uint IOC_IN = 0x80000000;
-			const uint IOC_VENDOR = 0x18000000;
-			uint SIO_UDP_CONNRESET = IOC_IN | IOC_VENDOR | 12;
-			this.socket.IOControl((int)SIO_UDP_CONNRESET, new byte[] { Convert.ToByte(false) }, null);
+			if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+			{
+				const uint IOC_IN = 0x80000000;
+				const uint IOC_VENDOR = 0x18000000;
+				uint SIO_UDP_CONNRESET = IOC_IN | IOC_VENDOR | 12;
+				this.socket.IOControl((int)SIO_UDP_CONNRESET, new byte[] { Convert.ToByte(false) }, null);
+			}
 
 			this.sendConnectRequest(PacketType.ClientConnectRequest, PacketTypeDetail.None);
 		}
