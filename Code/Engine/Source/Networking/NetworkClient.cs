@@ -156,7 +156,7 @@ namespace Entmoot.Engine
 			this.outgoingMessage.Reset();
 			this.outgoingMessage.Write((byte)packetType);
 			this.outgoingMessage.Write((byte)packetTypeInfo);
-			this.outgoingMessage.Write(this.ApplicationID.GetHashCode());
+			this.outgoingMessage.Write(ReaderWriterHelper.GetStringHash(this.ApplicationID));
 			this.outgoingMessage.Write(this.MaxMessageSize);
 			this.outgoingMessage.Write("znamez");
 			((INetworkConnection)this).SendMessage(this.outgoingMessage);

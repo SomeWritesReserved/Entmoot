@@ -199,7 +199,7 @@ namespace Entmoot.Engine
 			string clientName = incomingMessage.ReadString();
 
 			int nextClientID = this.getNextAvailableClientID();
-			if (clientAppIDHash != this.ApplicationID.GetHashCode() || clientMaxMessageSize != this.MaxMessageSize)
+			if (clientAppIDHash != ReaderWriterHelper.GetStringHash(this.ApplicationID) || clientMaxMessageSize != this.MaxMessageSize)
 			{
 				// Client is using a different app, reject
 				this.sendConnectResponse(endPoint, 0, PacketTypeDetail.ConnectResponseRejectAppMismatch);
@@ -226,7 +226,7 @@ namespace Entmoot.Engine
 			this.outgoingMessage.Write((byte)PacketType.ServerConnectResponse);
 			this.outgoingMessage.Write((byte)packetTypeInfo);
 			this.outgoingMessage.Write(clientID);
-			this.outgoingMessage.Write(this.ApplicationID.GetHashCode());
+			this.outgoingMessage.Write(ReaderWriterHelper.GetStringHash(this.ApplicationID));
 			this.outgoingMessage.Write(this.MaxMessageSize);
 			((INetworkConnection)this.clients[clientID]).SendMessage(this.outgoingMessage);
 		}

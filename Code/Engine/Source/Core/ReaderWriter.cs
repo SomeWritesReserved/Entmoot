@@ -138,4 +138,30 @@ namespace Entmoot.Engine
 
 		#endregion Methods
 	}
+
+	/// <summary>
+	/// A helper class for reading and writing data.
+	/// </summary>
+	public class ReaderWriterHelper
+	{
+		#region Methods
+
+		/// <summary>
+		/// Returns a deterministic 32-bit hash for a given string.
+		/// </summary>
+		public static int GetStringHash(string str)
+		{
+			unchecked
+			{
+				int hash = 23;
+				foreach (char c in str)
+				{
+					hash = hash * 31 + c;
+				}
+				return hash;
+			}
+		}
+
+		#endregion Methods
+	}
 }
