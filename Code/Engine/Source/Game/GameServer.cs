@@ -21,6 +21,8 @@ namespace Entmoot.Engine
 		private readonly Queue<EntitySnapshot> entitySnapshotHistory;
 		/// <summary>The collection of client proxies (all client proxies exist all the time even if no client is connected for that client ID).</summary>
 		private readonly ClientProxy[] clients;
+		/// <summary>The delegate to update a client's commanding entity ID every frame. The first bool is whether the client is connected. The second integer is the current commanding entity ID.</summary>
+		private readonly Func<bool, int, int> updateCommandingEntityID;
 
 		#endregion Fields
 
@@ -29,8 +31,19 @@ namespace Entmoot.Engine
 		/// <summary>
 		/// Constructor.
 		/// </summary>
-		public GameServer(IList<INetworkConnection> clientNetworkConnections, int maxEntityHistory, int entityCapacity, ComponentsDefinition componentsDefinition, IEnumerable<IServerSystem> systems)
+		/// <param name="clientNetworkConnections">The sequence of network connections that could be connected to clients (but probably aren't yet).
+		/// This defines the maximum number of clients. These clients can connect/disconnect on the fly and the server will monitor their state and update accordingly.</param>
+		/// <param name="maxEntityHistory">The maximum number of <see cref="EntitySnapshot"/> that will be remembered for the server's history.
+		/// One snapshot is taken each frame so this number is effectively "the last N frames" of history.</param>
+		/// <param name="entityCapacity">The maximum number of entities the world can have.</param>
+		/// <param name="componentsDefinition">The definition of components that are supported.</param>
+		/// <param name="systems">The collection of server systems used to update the world's state on the server.</param>
+		/// <param name="updateCommandingEntityID">The delegate to update a client's commanding entity ID every frame.
+		/// The first bool is whether the client is connected. The second integer is the current commanding entity ID.</param>
+		public GameServer(IList<INetworkConnection> clientNetworkConnections, int maxEntityHistory, int entityCapacity,
+			ComponentsDefinition componentsDefinition, IEnumerable<IServerSystem> systems, Func<bool, int, int> updateCommandingEntityID)
 		{
+			this.updateCommandingEntityID = updateCommandingEntityID;
 			this.EntityArray = new EntityArray(entityCapacity, componentsDefinition);
 			this.SystemArray = new ServerSystemArray(systems);
 
@@ -46,7 +59,6 @@ namespace Entmoot.Engine
 			for (int clientID = 0; clientID < clientNetworkConnections.Count; clientID++)
 			{
 				this.clients[clientID] = new ClientProxy(this, clientNetworkConnections[clientID]);
-				this.clients[clientID].CommandingEntityID = clientID;
 			}
 		}
 
@@ -77,8 +89,10 @@ namespace Entmoot.Engine
 
 			foreach (ClientProxy client in this.clients)
 			{
+				int newCommandingEntityID = this.updateCommandingEntityID.Invoke(client.IsConnected, client.CommandingEntityID);
 				if (client.IsConnected)
 				{
+					client.CommandingEntityID = newCommandingEntityID;
 					client.ReceiveClientCommands(this.EntityArray);
 				}
 				else
@@ -229,6 +243,7 @@ namespace Entmoot.Engine
 			{
 				this.LatestClientTickReceived = -1;
 				this.LatestFrameTickAcknowledgedByClient = -1;
+				this.CommandingEntityID = -1;
 			}
 
 			#endregion Methods

@@ -87,9 +87,17 @@ namespace Entmoot.Engine
 		/// </summary>
 		public void RemoveEntity(Entity entity)
 		{
-			if (this.entityStates[entity.ID] != EntityState.NoEntity)
+			this.RemoveEntity(entity.ID);
+		}
+
+		/// <summary>
+		/// Removes an entity from the system. The entity will not be fully removed until the end of the current update.
+		/// </summary>
+		public void RemoveEntity(int entityId)
+		{
+			if (this.entityStates[entityId] != EntityState.NoEntity)
 			{
-				this.entityStates[entity.ID] = EntityState.Removing;
+				this.entityStates[entityId] = EntityState.Removing;
 			}
 		}
 

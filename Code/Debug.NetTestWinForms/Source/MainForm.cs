@@ -45,18 +45,20 @@ namespace Entmoot.Debug.NetTestWinForms
 			componentsDefinition.RegisterComponentType<PositionComponent>();
 			componentsDefinition.RegisterComponentType<SpinComponent>();
 
-			this.gameClient = new GameClient<TestCommandData>(this.clientServerNetworkConnection, 10, 5, componentsDefinition, new IClientSystem[] { new MovementSystem() });
-			this.gameServer = new GameServer<TestCommandData>(new[] { this.clientServerNetworkConnection }, 10, 5, componentsDefinition, new IServerSystem[] { new SpinSystem(), new MovementSystem() });
+			this.gameClient = new GameClient<TestCommandData>(this.clientServerNetworkConnection, 10, 5,
+				componentsDefinition, new IClientSystem[] { new MovementSystem() });
+			this.gameServer = new GameServer<TestCommandData>(new[] { this.clientServerNetworkConnection }, 10, 5,
+				componentsDefinition, new IServerSystem[] { new SpinSystem(), new MovementSystem() }, this.updateCommandingEntityID);
 			{
 				this.gameServer.EntityArray.TryCreateEntity(out Entity entity1);
-				entity1.AddComponent<PositionComponent>().Position = new Vector3(100, 50, 0);
 				this.gameServer.EntityArray.TryCreateEntity(out Entity entity2);
 				entity2.AddComponent<PositionComponent>().Position = new Vector3(0, 0, 0);
 				entity2.AddComponent<SpinComponent>();
 				this.gameServer.EntityArray.TryCreateEntity(out Entity entity3);
 				this.gameServer.EntityArray.TryCreateEntity(out Entity entity4);
+				this.gameServer.EntityArray.RemoveEntity(entity1);
 				this.gameServer.EntityArray.RemoveEntity(entity3);
-				entity4.AddComponent<PositionComponent>().Position = new Vector3(200, 350, 0);
+				entity4.AddComponent<PositionComponent>().Position = new Vector3(99, 99, 0);
 			}
 
 			this.clientServerNetworkConnection.GameClient = this.gameClient;
@@ -209,6 +211,28 @@ namespace Entmoot.Debug.NetTestWinForms
 			this.serverTimer.Start();
 			Thread.Sleep(50);
 			this.clientTimer.Start();
+		}
+
+		/// <summary>
+		/// Handles updating the commanding entity ID of a client, either giving the client a new entity
+		/// when the client first connects or removing the commanding entity if the client disconnects.
+		/// </summary>
+		private int updateCommandingEntityID(bool isClientConnected, int currentCommandingEntityID)
+		{
+			if (isClientConnected && currentCommandingEntityID == -1)
+			{
+				if (this.gameServer.EntityArray.TryCreateEntity(out Entity clientEntity))
+				{
+					clientEntity.AddComponent<PositionComponent>().Position = new Vector3(100, 50, 0);
+					return clientEntity.ID;
+				}
+			}
+			else if (!isClientConnected && currentCommandingEntityID != -1)
+			{
+				this.gameServer.EntityArray.RemoveEntity(currentCommandingEntityID);
+				return -1;
+			}
+			return currentCommandingEntityID;
 		}
 
 		#endregion Methods

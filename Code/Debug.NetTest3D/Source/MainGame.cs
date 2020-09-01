@@ -61,20 +61,12 @@ namespace Entmoot.Debug.NetTest3D
 			componentsDefinition.RegisterComponentType<PhysicsComponent>();
 			componentsDefinition.RegisterComponentType<ColorComponent>();
 
-			this.hasServer = Environment.GetCommandLineArgs().Any((arg) => arg.Equals("-s", StringComparison.OrdinalIgnoreCase));
+			this.hasServer = !Environment.GetCommandLineArgs().Any((arg) => arg.Equals("-ns", StringComparison.OrdinalIgnoreCase));
 			if (this.hasServer)
 			{
 				this.networkServer = new NetworkServer("1", MainGame.maxClients, 4000, 19876);
-				this.gameServer = new GameServer<CommandData>(this.networkServer.ClientNetworkConnections, 20, 30, componentsDefinition, new IServerSystem[] { new SpinnerSystem(), new PhysicsSystem() });
-
-				// Reserve the first entities for all potential clients
-				for (int clientID = 0; clientID < MainGame.maxClients; clientID++)
-				{
-					this.gameServer.EntityArray.TryCreateEntity(out Entity clientEntity);
-					clientEntity.AddComponent<SpatialComponent>();
-					clientEntity.AddComponent<PhysicsComponent>();
-					clientEntity.AddComponent<ColorComponent>().Color = new Color(0.5f, 0.5f, 1.0f);
-				}
+				this.gameServer = new GameServer<CommandData>(this.networkServer.ClientNetworkConnections, 20, 30,
+					componentsDefinition, new IServerSystem[] { new SpinnerSystem(), new PhysicsSystem() }, this.updateCommandingEntityID);
 
 				// Make some dummy entities that we'll remove to have a gap in entity IDs
 				this.gameServer.EntityArray.TryCreateEntity(out Entity dummy1);
@@ -105,7 +97,8 @@ namespace Entmoot.Debug.NetTest3D
 			}
 
 			this.networkClient = new NetworkClient("1", 4000);
-			this.gameClient = new GameClient<CommandData>(this.networkClient, 20, 30, componentsDefinition, new IClientSystem[] { new PhysicsSystem(), this.renderSystem });
+			this.gameClient = new GameClient<CommandData>(this.networkClient, 20, 30,
+				componentsDefinition, new IClientSystem[] { new PhysicsSystem(), this.renderSystem });
 		}
 
 		#endregion Constructors
@@ -156,6 +149,30 @@ namespace Entmoot.Debug.NetTest3D
 		{
 			this.isDragging = false;
 			base.OnDeactivated(sender, args);
+		}
+
+		/// <summary>
+		/// Handles updating the commanding entity ID of a client, either giving the client a new entity
+		/// when the client first connects or removing the commanding entity if the client disconnects.
+		/// </summary>
+		private int updateCommandingEntityID(bool isClientConnected, int currentCommandingEntityID)
+		{
+			if (isClientConnected && currentCommandingEntityID == -1)
+			{
+				if (this.gameServer.EntityArray.TryCreateEntity(out Entity clientEntity))
+				{
+					clientEntity.AddComponent<SpatialComponent>();
+					clientEntity.AddComponent<PhysicsComponent>();
+					clientEntity.AddComponent<ColorComponent>().Color = new Color(0.5f, 0.5f, 1.0f);
+					return clientEntity.ID;
+				}
+			}
+			else if (!isClientConnected && currentCommandingEntityID != -1)
+			{
+				this.gameServer.EntityArray.RemoveEntity(currentCommandingEntityID);
+				return -1;
+			}
+			return currentCommandingEntityID;
 		}
 
 		protected override void Update(GameTime gameTime)
