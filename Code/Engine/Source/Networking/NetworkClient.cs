@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace Entmoot.Engine
 {
 	/// <summary>
-	/// Manages a client on a network that can connect to a server and recieve updates.
+	/// Manages a client on a network that can connect to a server and receive updates.
 	/// </summary>
 	/// <remarks>This class does not manage the game or update, it only manages the network connection and gives the game client incoming packets from the server.</remarks>
 	public class NetworkClient : INetworkConnection
@@ -24,13 +24,13 @@ namespace Entmoot.Engine
 		/// <summary>The actual socket that will be used for network communication between this client and the server.</summary>
 		private readonly Socket socket;
 
-		/// <summary>The message buffer for creating outgoing messages and queueing/reading incoming messages.</summary>
+		/// <summary>The message buffer for creating outgoing messages and queuing/reading incoming messages.</summary>
 		private readonly MessageBuffer messageBuffer;
 		/// <summary>The outgoing message used to send out-of-band packets to unconnected or not-yet-fully connected clients, directly from this object.</summary>
 		private readonly OutgoingMessage outgoingMessage;
 		/// <summary>A temporary storage for incoming networking data received from the socket (used only for Socket.ReceiveFrom).</summary>
 		private readonly IncomingMessage receivedIncomingMessage;
-		/// <summary>A temporary stroage for incoming networking end points on the socket (used only for Socket.ReceiveFrom).</summary>
+		/// <summary>A temporary storage for incoming networking end points on the socket (used only for Socket.ReceiveFrom).</summary>
 		private EndPoint receivedEndPoint;
 
 		#endregion Fields
@@ -158,7 +158,7 @@ namespace Entmoot.Engine
 			this.outgoingMessage.Write((byte)packetTypeInfo);
 			this.outgoingMessage.Write(ReaderWriterHelper.GetStringHash(this.ApplicationID));
 			this.outgoingMessage.Write(this.MaxMessageSize);
-			this.outgoingMessage.Write("znamez");
+			this.outgoingMessage.Write("No name");
 			((INetworkConnection)this).SendMessage(this.outgoingMessage);
 		}
 

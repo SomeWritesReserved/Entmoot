@@ -18,7 +18,7 @@ namespace Entmoot.Engine
 		/// <summary>The default initial size for the incoming message queue.</summary>
 		private const int initialMessageQueueCapacity = 2;
 
-		/// <summary>The message buffer for creating outgoing messages and queueing/reading incoming messages.</summary>
+		/// <summary>The message buffer for creating outgoing messages and queuing/reading incoming messages.</summary>
 		private readonly MessageBuffer messageBuffer;
 		/// <summary>The corresponding network connection that represents the opposite endpoint.</summary>
 		private LocalNetworkConnection pairedNetworkConnection;

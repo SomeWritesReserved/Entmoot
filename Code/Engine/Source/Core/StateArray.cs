@@ -15,7 +15,7 @@ namespace Entmoot.Engine
 	{
 		#region Fields
 
-		/// <summary>The array that the individual bits are stored in, as effeciently as possible.</summary>
+		/// <summary>The array that the individual bits are stored in, as efficiently as possible.</summary>
 		private int[] storageArray;
 
 		#endregion Fields

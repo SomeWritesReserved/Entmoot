@@ -203,7 +203,7 @@ namespace Entmoot.Engine
 					{
 						ClientCommand<TCommandData> clientCommand = this.deserializedClientCommandHistory[i];
 
-						// Make sure we don't process a command we've already receieved and processed in a previous tick
+						// Make sure we don't process a command we've already received and processed in a previous tick
 						if (!clientCommand.HasData || clientCommand.ClientFrameTick <= this.LatestClientTickReceived) { continue; }
 
 						this.parentServer.executeClientCommand(this, clientCommand);

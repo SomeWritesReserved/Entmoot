@@ -118,7 +118,7 @@ namespace Entmoot.Engine
 			if (this.HasRenderingStarted)
 			{
 				// Once we are rendering we can start taking user commands and sending them to the server
-				// Take the latest command and add it to the command history buffer (overwritting an old command)
+				// Take the latest command and add it to the command history buffer (overwriting an old command)
 				ClientCommand<TCommandData> newClientCommand = this.clientCommandHistory.Dequeue();
 				newClientCommand.Update(this.FrameTick, this.RenderedSnapshot.ServerFrameTick, this.InterpolationStartSnapshot.ServerFrameTick, this.InterpolationEndSnapshot.ServerFrameTick, this.ShouldInterpolate, this.CommandingEntityID, commandData);
 				this.clientCommandHistory.Enqueue(newClientCommand);
@@ -201,7 +201,7 @@ namespace Entmoot.Engine
 				}
 			}
 
-			// Check to see if we still can't interpolate after going through the latest receieved updates
+			// Check to see if we still can't interpolate after going through the latest received updates
 			if (!this.HasInterpolationStarted) { return; }
 
 			if (renderedFrameTick > this.InterpolationEndSnapshot.ServerFrameTick)

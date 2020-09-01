@@ -56,7 +56,7 @@ namespace Entmoot.Engine
 		}
 
 		/// <summary>
-		/// Copies all entity and metadata to another entity snapshot.
+		/// Copies all entity and meta-data to another entity snapshot.
 		/// </summary>
 		public void CopyTo(EntitySnapshot other)
 		{
@@ -93,7 +93,7 @@ namespace Entmoot.Engine
 
 		/// <summary>
 		/// Reads and overwrites this entity snapshot with data from a binary source, but only if the binary source represents a newer snapshot.
-		/// Returns true if this snapshot was actually updated from the deserialied binary source.
+		/// Returns true if this snapshot was actually updated from the deserialized binary source.
 		/// </summary>
 		public bool DeserializeIfNewer(EntitySnapshot previousEntitySnapshot, IReader reader)
 		{

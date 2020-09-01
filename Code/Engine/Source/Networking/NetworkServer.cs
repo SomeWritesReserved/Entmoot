@@ -32,7 +32,7 @@ namespace Entmoot.Engine
 		private readonly OutgoingMessage outgoingMessage;
 		/// <summary>A temporary storage for incoming networking data received from the socket (used only for Socket.ReceiveFrom).</summary>
 		private readonly IncomingMessage receivedIncomingMessage;
-		/// <summary>A temporary stroage for incoming networking end points on the socket (used only for Socket.ReceiveFrom).</summary>
+		/// <summary>A temporary storage for incoming networking end points on the socket (used only for Socket.ReceiveFrom).</summary>
 		private EndPoint receivedEndPoint;
 
 		#endregion Fields
@@ -88,7 +88,7 @@ namespace Entmoot.Engine
 		public string ApplicationID { get; }
 
 		/// <summary>
-		/// Gets tha maximum number of clients that can be connected to the server at one time.
+		/// Gets the maximum number of clients that can be connected to the server at one time.
 		/// </summary>
 		public byte MaxClients { get; }
 
@@ -258,7 +258,7 @@ namespace Entmoot.Engine
 
 			/// <summary>The parent server that owns this client network connection.</summary>
 			private readonly NetworkServer parentServer;
-			/// <summary>The message buffer for creating outgoing messages and queueing/reading incoming messages.</summary>
+			/// <summary>The message buffer for creating outgoing messages and queuing/reading incoming messages.</summary>
 			private readonly MessageBuffer messageBuffer;
 			/// <summary>The end point of this client to send messages to and to expect messages from.</summary>
 			private readonly IPEndPoint clientEndPoint;

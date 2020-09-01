@@ -291,7 +291,7 @@ namespace Entmoot.Engine
 				}
 				else if (previousComponentArray != null)
 				{
-					// Components not explicitly sent are assumed to be the same as previously (the case where the component does not exist is a dont-care)
+					// Components not explicitly sent are assumed to be the same as previously (the case where the component does not exist is a don't-care)
 					this.components[entityID] = previousComponentArray.components[entityID];
 				}
 			}

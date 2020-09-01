@@ -42,7 +42,7 @@ namespace Entmoot.Engine
 		#region Properties
 
 		/// <summary>
-		/// Gets the maximum number of clinet commands that will be sent to the server, per single update.
+		/// Gets the maximum number of client commands that will be sent to the server, per single update.
 		/// </summary>
 		public static int MaxClientCommandsPerUpdate { get { return 30; } }
 

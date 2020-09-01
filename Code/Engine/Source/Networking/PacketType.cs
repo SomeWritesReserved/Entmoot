@@ -19,7 +19,7 @@ namespace Entmoot.Engine
 		ClientConnectRequest,
 		/// <summary>A packet that is the server's response to a client's attempt to connect.</summary>
 		ServerConnectResponse,
-		/// <summary>A packet that is the client acknwoledging the server's response, confirming and finalizing the client's connection</summary>
+		/// <summary>A packet that is the client acknowledging the server's response, confirming and finalizing the client's connection</summary>
 		ClientConnectFinalize,
 	}
 
