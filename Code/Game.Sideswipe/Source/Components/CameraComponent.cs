@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework;
 namespace Entmoot.Game.Sideswipe
 {
 	/// <summary>
-	/// Represents an entity's camera view (meaning if you were to render the screen with respect to this entity's point of view,
+	/// Represents an entity's ability to have a camera view (meaning if you were to render the screen with respect to this entity's point of view,
 	/// you would use its <see cref="CameraComponent"/>).
 	/// </summary>
 	public struct CameraComponent : IComponent<CameraComponent>

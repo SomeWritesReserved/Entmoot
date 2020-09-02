@@ -49,27 +49,8 @@ namespace Entmoot.Game.Sideswipe
 		/// <summary>
 		/// This is where we create the level by creating entities and adding components to them as needed
 		/// </summary>
-		private void createLevelAndPlayers(int maxClients)
+		private void createLevel()
 		{
-			// Reserve the first entities for all potential clients that could connect
-			for (int clientIndex = 0; clientIndex < maxClients; clientIndex++)
-			{
-				this.gameServer.EntityArray.TryCreateEntity(out Entity clientEntity);
-				ref SpatialComponent spatialComponent = ref clientEntity.AddComponent<SpatialComponent>();
-				ref SpriteComponent spriteComponent = ref clientEntity.AddComponent<SpriteComponent>();
-				ref CameraComponent cameraComponent = ref clientEntity.AddComponent<CameraComponent>();
-
-				// This is where we define a player's starting position, size, and sprite
-				spatialComponent.Position = new Vector2(0, 31);
-				spatialComponent.Extents = new Vector2(32, 60);
-				spatialComponent.Rotation = 0;
-				spriteComponent.SpriteColor = Color.Aquamarine;
-				spriteComponent.ZOrder = 200;
-
-				cameraComponent.Position = new Vector2(0, 180);
-				cameraComponent.Extents = new Vector2(800, 480);
-			}
-
 			// Create the level by adding entities for platforms
 			{
 				// Ground
@@ -120,18 +101,20 @@ namespace Entmoot.Game.Sideswipe
 
 			ComponentsDefinition componentsDefinition = new ComponentsDefinition();
 			componentsDefinition.RegisterComponentType<SpatialComponent>();
+			componentsDefinition.RegisterComponentType<PhysicsComponent>();
 			componentsDefinition.RegisterComponentType<SpriteComponent>();
 			componentsDefinition.RegisterComponentType<CameraComponent>();
-			IServerSystem[] serverSystems = new IServerSystem[] { };
-			IClientSystem[] clientSystems = new IClientSystem[] { this.render2DSystem = new Render2dSystem(this.graphicsDeviceManager) };
+			IServerSystem[] serverSystems = new IServerSystem[] { new PlayerInputSystem(), new PhysicsSystem() };
+			IClientSystem[] clientSystems = new IClientSystem[] { new PlayerInputSystem(), new PhysicsSystem(), this.render2DSystem = new Render2dSystem(this.graphicsDeviceManager) };
 
 			// If we don't have an IP address to connect to, start our own server
 			if (this.ipAddressToConnectTo == null)
 			{
 				this.networkServer = new NetworkServer("Entmoot.Game.Sideswipe", maxClients, maxMessageSize, port);
-				this.gameServer = new GameServer<PlayerCommandData>(this.networkServer.ClientNetworkConnections, maxEntityHistory, entityCapacity, componentsDefinition, serverSystems);
+				this.gameServer = new GameServer<PlayerCommandData>(this.networkServer.ClientNetworkConnections, maxEntityHistory, entityCapacity,
+					componentsDefinition, serverSystems, this.updateCommandingEntityID);
 
-				this.createLevelAndPlayers(maxClients);
+				this.createLevel();
 
 				this.networkServer.Start();
 			}
@@ -198,6 +181,40 @@ namespace Entmoot.Game.Sideswipe
 		#region Update and Draw
 
 		/// <summary>
+		/// Handles updating the commanding entity ID of a client, either giving the client a new entity
+		/// when the client first connects or removing the commanding entity if the client disconnects.
+		/// </summary>
+		private int updateCommandingEntityID(bool isClientConnected, int currentCommandingEntityID)
+		{
+			if (isClientConnected && currentCommandingEntityID == -1)
+			{
+				if (this.gameServer.EntityArray.TryCreateEntity(out Entity clientEntity))
+				{
+					ref SpatialComponent spatialComponent = ref clientEntity.AddComponent<SpatialComponent>();
+					ref PhysicsComponent physicsComponent = ref clientEntity.AddComponent<PhysicsComponent>();
+					ref SpriteComponent spriteComponent = ref clientEntity.AddComponent<SpriteComponent>();
+					ref CameraComponent cameraComponent = ref clientEntity.AddComponent<CameraComponent>();
+
+					// This is where we define a player's starting position, size, and sprite
+					spatialComponent.Position = new Vector2(0, 31);
+					spatialComponent.Extents = new Vector2(32, 60);
+					spatialComponent.Rotation = 0;
+					spriteComponent.SpriteColor = Color.Aquamarine;
+
+					cameraComponent.Position = new Vector2(0, 180);
+					cameraComponent.Extents = new Vector2(800, 480);
+					return clientEntity.ID;
+				}
+			}
+			else if (!isClientConnected && currentCommandingEntityID != -1)
+			{
+				this.gameServer.EntityArray.RemoveEntity(currentCommandingEntityID);
+				return -1;
+			}
+			return currentCommandingEntityID;
+		}
+
+		/// <summary>
 		/// Updates the game, which takes input, updates entities, and resolves things like physics. Systems will get called here.
 		/// </summary>
 		protected override void Update(GameTime gameTime)
@@ -220,8 +237,10 @@ namespace Entmoot.Game.Sideswipe
 
 			if (this.networkClient != null)
 			{
+				PlayerCommandData playerCommandData = PlayerInput.GetPlayerInput(Mouse.GetState(), Keyboard.GetState(), this.IsActive);
+
 				this.networkClient.Update();
-				this.gameClient.Update(new PlayerCommandData());
+				this.gameClient.Update(playerCommandData);
 				windowTitle += $", connected={this.networkClient.IsConnected}";
 			}
 
