@@ -128,12 +128,13 @@ namespace Entmoot.Engine
 			// Make sure we have an entity to command, that the client thinks its commanding that same entity, and that the entity actually exists
 			if (client.CommandingEntityID != -1 && clientCommand.CommandingEntityID == client.CommandingEntityID && this.EntityArray.TryGetEntity(client.CommandingEntityID, out Entity commandingEntity))
 			{
-				clientCommand.CommandData.ApplyToEntity(commandingEntity);
+				EntitySnapshot lagCompensationSnapshot = this.getEntitySnapshotForServerFrameTick(clientCommand.RenderedTick);
+				this.SystemArray.ProcessClientCommand(this.EntityArray, commandingEntity, clientCommand.CommandData, lagCompensationSnapshot?.EntityArray);
 			}
 		}
 
 		/// <summary>
-		/// Returns the stored entity snapshot that was taken at a taken at a given frame tick. Returns null if no snapshot is found
+		/// Returns the stored entity snapshot that was taken at a given frame tick. Returns null if no snapshot is found
 		/// (either because a snapshot wasn't taken at that tick or the tick is too old and the entity snapshot was already removed).
 		/// </summary>
 		private EntitySnapshot getEntitySnapshotForServerFrameTick(int serverFrameTick)

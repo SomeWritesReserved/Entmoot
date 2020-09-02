@@ -66,7 +66,7 @@ namespace Entmoot.Debug.NetTest3D
 			{
 				this.networkServer = new NetworkServer("1", MainGame.maxClients, 4000, 19876);
 				this.gameServer = new GameServer<CommandData>(this.networkServer.ClientNetworkConnections, 20, 30,
-					componentsDefinition, new IServerSystem[] { new SpinnerSystem(), new PhysicsSystem() }, this.updateCommandingEntityID);
+					componentsDefinition, new IServerSystem[] { new ClientCommandSystem(), new SpinnerSystem(), new PhysicsSystem() }, this.updateCommandingEntityID);
 
 				// Make some dummy entities that we'll remove to have a gap in entity IDs
 				this.gameServer.EntityArray.TryCreateEntity(out Entity dummy1);
@@ -98,7 +98,7 @@ namespace Entmoot.Debug.NetTest3D
 
 			this.networkClient = new NetworkClient("1", 4000);
 			this.gameClient = new GameClient<CommandData>(this.networkClient, 20, 30,
-				componentsDefinition, new IClientSystem[] { new PhysicsSystem(), this.renderSystem });
+				componentsDefinition, new IClientSystem[] {new ClientCommandSystem(), new PhysicsSystem(), this.renderSystem });
 		}
 
 		#endregion Constructors

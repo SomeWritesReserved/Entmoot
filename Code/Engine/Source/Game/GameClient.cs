@@ -262,8 +262,7 @@ namespace Entmoot.Engine
 						if (!clientCommand.HasData || clientCommand.ClientFrameTick <= this.LatestFrameTickAcknowledgedByServer || clientCommand.CommandingEntityID != this.CommandingEntityID) { continue; }
 
 						// Reapply all the commands we've sent that the server hasn't processed yet to get us to where we predict we should be
-						clientCommand.CommandData.ApplyToEntity(predictedEntity);
-						this.SystemArray.ClientPrediction(this.RenderedSnapshot.EntityArray, predictedEntity);
+						this.SystemArray.PredictClientCommand(this.RenderedSnapshot.EntityArray, predictedEntity, clientCommand.CommandData);
 					}
 				}
 			}

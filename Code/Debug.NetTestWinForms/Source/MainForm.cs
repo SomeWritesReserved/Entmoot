@@ -591,38 +591,39 @@ namespace Entmoot.Debug.NetTestWinForms
 		#endregion Methods
 	}
 
-	public class MovementSystem : IServerSystem, IClientSystem
+	public class MovementSystem : IServerSystem, IServerCommandProcessorSystem<TestCommandData>, IClientSystem, IClientPredictedSystem<TestCommandData>
 	{
 		#region Methods
 
 		public void ServerUpdate(EntityArray entityArray)
 		{
-			foreach (Entity entity in entityArray)
-			{
-				this.updateEntity(entity);
-			}
+		}
+
+		public void ProcessClientCommand(EntityArray entityArray, Entity commandingEntity, TestCommandData commandData, EntityArray lagCompensatedEntityArray)
+		{
+			if (!commandingEntity.HasComponent<PositionComponent>()) { return; }
+
+			ref PositionComponent component = ref commandingEntity.GetComponent<PositionComponent>();
+			if ((commandData.CommandKeys & TestCommandKeys.MoveForward) != 0) { component.Velocity.Y = -5; }
+			if ((commandData.CommandKeys & TestCommandKeys.MoveBackward) != 0) { component.Velocity.Y = 5; }
+			if ((commandData.CommandKeys & TestCommandKeys.MoveLeft) != 0) { component.Velocity.X = -5; }
+			if ((commandData.CommandKeys & TestCommandKeys.MoveRight) != 0) { component.Velocity.X = 5; }
+
+			component.Position += component.Velocity;
+			component.Velocity *= 0.65f;
 		}
 
 		public void ClientUpdate(EntityArray entityArray, Entity commandingEntity)
 		{
 		}
 
-		public void ClientPrediction(EntityArray entityArray, Entity commandingEntity)
-		{
-			this.updateEntity(commandingEntity);
-		}
-
 		public void ClientRender(EntityArray entityArray, Entity commandingEntity)
 		{
 		}
 
-		private void updateEntity(Entity entity)
+		public void PredictClientCommand(EntityArray entityArray, Entity commandingEntity, TestCommandData commandData)
 		{
-			if (!entity.HasComponent<PositionComponent>()) { return; }
-
-			ref PositionComponent component = ref entity.GetComponent<PositionComponent>();
-			component.Position += component.Velocity;
-			component.Velocity *= 0.65f;
+			this.ProcessClientCommand(entityArray, commandingEntity, commandData, null);
 		}
 
 		#endregion Methods
@@ -646,17 +647,6 @@ namespace Entmoot.Debug.NetTestWinForms
 		public void Serialize(IWriter writer)
 		{
 			writer.Write((byte)this.CommandKeys);
-		}
-
-		public void ApplyToEntity(Entity entity)
-		{
-			if (!entity.HasComponent<PositionComponent>()) { return; }
-
-			ref PositionComponent component = ref entity.GetComponent<PositionComponent>();
-			if ((this.CommandKeys & TestCommandKeys.MoveForward) != 0) { component.Velocity.Y = -5; }
-			if ((this.CommandKeys & TestCommandKeys.MoveBackward) != 0) { component.Velocity.Y = 5; }
-			if ((this.CommandKeys & TestCommandKeys.MoveLeft) != 0) { component.Velocity.X = -5; }
-			if ((this.CommandKeys & TestCommandKeys.MoveRight) != 0) { component.Velocity.X = 5; }
 		}
 
 		#endregion Methods

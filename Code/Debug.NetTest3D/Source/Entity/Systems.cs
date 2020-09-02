@@ -38,13 +38,6 @@ namespace Entmoot.Debug.NetTest3D
 		}
 		
 		/// <summary>
-		/// Runs this system over the given array of entities on the client but only updates the commanding entity (for client-side prediction).
-		/// </summary>
-		public void ClientPrediction(EntityArray entityArray, Entity commandingEntity)
-		{
-		}
-		
-		/// <summary>
 		/// Allows this system to perform any rendering.
 		/// </summary>
 		public void ClientRender(EntityArray entityArray, Entity commandingEntity)
@@ -124,7 +117,55 @@ namespace Entmoot.Debug.NetTest3D
 		#endregion Methods
 	}
 
-	public class PhysicsSystem : IServerSystem, IClientSystem
+	public class ClientCommandSystem : IServerSystem, IServerCommandProcessorSystem<CommandData>, IClientSystem, IClientPredictedSystem<CommandData>
+	{
+		#region Methods
+
+		public void ServerUpdate(EntityArray entityArray)
+		{
+		}
+
+		public void ProcessClientCommand(EntityArray entityArray, Entity commandingEntity, CommandData commandData, EntityArray lagCompensatedEntityArray)
+		{
+			if (!commandingEntity.HasComponent<SpatialComponent>()) { return; }
+			if (!commandingEntity.HasComponent<PhysicsComponent>()) { return; }
+
+			Vector3 movement = Vector3.Zero;
+			if ((commandData.Commands & Commands.MoveForward) != 0) { movement += Vector3.Forward; }
+			if ((commandData.Commands & Commands.MoveBackward) != 0) { movement += Vector3.Backward; }
+			if ((commandData.Commands & Commands.MoveLeft) != 0) { movement += Vector3.Left; }
+			if ((commandData.Commands & Commands.MoveRight) != 0) { movement += Vector3.Right; }
+
+			if (movement != Vector3.Zero)
+			{
+				movement.Normalize();
+				Quaternion lookMoveRotation = Quaternion.CreateFromAxisAngle(Vector3.Up, commandData.LookAngles.X);
+				Vector3.Transform(ref movement, ref lookMoveRotation, out movement);
+			}
+
+			ref SpatialComponent spatialComponent = ref commandingEntity.GetComponent<SpatialComponent>();
+			ref PhysicsComponent physicsComponent = ref commandingEntity.GetComponent<PhysicsComponent>();
+			physicsComponent.Acceleration += movement * CommandData.MoveImpulse;
+			spatialComponent.Rotation = Quaternion.CreateFromYawPitchRoll(commandData.LookAngles.X, commandData.LookAngles.Y, 0.0f);
+		}
+
+		public void ClientUpdate(EntityArray entityArray, Entity commandingEntity)
+		{
+		}
+
+		public void ClientRender(EntityArray entityArray, Entity commandingEntity)
+		{
+		}
+
+		public void PredictClientCommand(EntityArray entityArray, Entity commandingEntity, CommandData commandData)
+		{
+			this.ProcessClientCommand(entityArray, commandingEntity, commandData, null);
+		}
+
+		#endregion Methods
+	}
+
+	public class PhysicsSystem : IServerSystem, IClientSystem, IClientPredictedSystem<CommandData>
 	{
 		#region Methods
 		
@@ -147,9 +188,9 @@ namespace Entmoot.Debug.NetTest3D
 		}
 		
 		/// <summary>
-		/// Runs this system over the given array of entities on the client but only updates the commanding entity (for client-side prediction).
+		/// Runs this system over the given array of entities on the client but only updates the commanding entity (for client-side prediction of a command).
 		/// </summary>
-		public void ClientPrediction(EntityArray entityArray, Entity commandingEntity)
+		public void PredictClientCommand(EntityArray entityArray, Entity commandingEntity, CommandData commandData)
 		{
 			this.runPhysicsOnEntity(commandingEntity);
 		}

@@ -965,7 +965,7 @@ namespace Entmoot.Engine.UnitTests
 				};
 				Assert.IsTrue(mockClient.serverEntitySnapshot.EntityArray.TryCreateEntity(out _));
 				mockClient.serverEntitySnapshot.EntityArray.EndUpdate();
-				GameClient<MockCommandData> gameClient = new GameClient<MockCommandData>(mockClient, 10, mockClient.serverEntitySnapshot.EntityArray.Capacity, componentsDefinition, new IClientSystem[0]);
+				GameClient<MockCommandData> gameClient = new GameClient<MockCommandData>(mockClient, 10, mockClient.serverEntitySnapshot.EntityArray.Capacity, componentsDefinition, new IClientSystem[] { new MockPlayerCommandSystem() });
 				mockClient.GameClient = gameClient;
 				return mockClient;
 			}
@@ -1051,6 +1051,32 @@ namespace Entmoot.Engine.UnitTests
 			#endregion Nested Types
 		}
 
+		private class MockPlayerCommandSystem : IClientSystem, IClientPredictedSystem<MockCommandData>
+		{
+			#region Methods
+
+			public void ClientRender(EntityArray entityArray, Entity commandingEntity)
+			{
+			}
+
+			public void ClientUpdate(EntityArray entityArray, Entity commandingEntity)
+			{
+			}
+
+			public void PredictClientCommand(EntityArray entityArray, Entity commandingEntity, MockCommandData commandData)
+			{
+				if (!commandingEntity.HasComponent<MockComponent>()) { return; }
+
+				ref MockComponent component = ref commandingEntity.GetComponent<MockComponent>();
+				if ((commandData.CommandKeys & MockCommandKeys.MoveForward) != 0) { component.Position -= 5; }
+				if ((commandData.CommandKeys & MockCommandKeys.MoveBackward) != 0) { component.Position += 5; }
+				if ((commandData.CommandKeys & MockCommandKeys.MoveLeft) != 0) { component.Position -= 5; }
+				if ((commandData.CommandKeys & MockCommandKeys.MoveRight) != 0) { component.Position += 5; }
+			}
+
+			#endregion Methods
+		}
+
 		private struct MockCommandData : ICommandData
 		{
 			#region Fields
@@ -1069,17 +1095,6 @@ namespace Entmoot.Engine.UnitTests
 			public void Deserialize(IReader reader)
 			{
 				this.CommandKeys = (MockCommandKeys)reader.ReadByte();
-			}
-
-			public void ApplyToEntity(Entity entity)
-			{
-				if (!entity.HasComponent<MockComponent>()) { return; }
-
-				ref MockComponent component = ref entity.GetComponent<MockComponent>();
-				if ((this.CommandKeys & MockCommandKeys.MoveForward) != 0) { component.Position -= 5; }
-				if ((this.CommandKeys & MockCommandKeys.MoveBackward) != 0) { component.Position += 5; }
-				if ((this.CommandKeys & MockCommandKeys.MoveLeft) != 0) { component.Position -= 5; }
-				if ((this.CommandKeys & MockCommandKeys.MoveRight) != 0) { component.Position += 5; }
 			}
 
 			#endregion Methods
