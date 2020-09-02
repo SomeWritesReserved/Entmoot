@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework;
 namespace Entmoot.Game.Sideswipe
 {
 	/// <summary>
-	/// Represents a renderable sprite. If an entity does not have this component it cannot be rendered.
+	/// Represents an entity's ability to be rendered with a sprite (a texture). If an entity does not have this component it cannot be rendered.
 	/// </summary>
 	public struct SpriteComponent : IComponent<SpriteComponent>
 	{
@@ -27,7 +27,7 @@ namespace Entmoot.Game.Sideswipe
 		public Color SpriteColor;
 
 		/// <summary>
-		/// The Z ordering depth of the sprite to layer on top of or underneith other sprites.
+		/// The Z ordering depth of the sprite to layer on top of or underneath other sprites.
 		/// </summary>
 		public byte ZOrder;
 

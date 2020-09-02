@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework;
 namespace Entmoot.Game.Sideswipe
 {
 	/// <summary>
-	/// Represents a entity that takes up space in the world.
+	/// Represents an entity's ability to take up space in the world.
 	/// </summary>
 	public struct SpatialComponent : IComponent<SpatialComponent>
 	{
