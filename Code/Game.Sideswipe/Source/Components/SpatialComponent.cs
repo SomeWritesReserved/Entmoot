@@ -30,6 +30,11 @@ namespace Entmoot.Game.Sideswipe
 		/// </summary>
 		public Vector2 Extents;
 
+		/// <summary>
+		/// Whether or not this entity is solid in the world, meaning other things will collide with this entity.
+		/// </summary>
+		public bool IsSolid;
+
 		#endregion Fields
 
 		#region Methods
@@ -38,7 +43,8 @@ namespace Entmoot.Game.Sideswipe
 		{
 			return (this.Position.Equals(other.Position) &&
 				this.Rotation.Equals(other.Rotation) &&
-				this.Extents.Equals(other.Extents));
+				this.Extents.Equals(other.Extents) &&
+				this.IsSolid.Equals(other.IsSolid));
 		}
 
 		public void Interpolate(SpatialComponent otherA, SpatialComponent otherB, float amount)
@@ -46,6 +52,7 @@ namespace Entmoot.Game.Sideswipe
 			Vector2.Lerp(ref otherA.Position, ref otherB.Position, amount, out this.Position);
 			this.Rotation = MathHelper.Lerp(otherA.Rotation, otherB.Rotation, amount);
 			Vector2.Lerp(ref otherA.Extents, ref otherB.Extents, amount, out this.Extents);
+			this.IsSolid = otherB.IsSolid;
 		}
 
 		public void Serialize(IWriter writer)
@@ -55,6 +62,7 @@ namespace Entmoot.Game.Sideswipe
 			writer.Write(this.Rotation);
 			writer.Write(this.Extents.X);
 			writer.Write(this.Extents.Y);
+			writer.Write(this.IsSolid);
 		}
 
 		public void Deserialize(IReader reader)
@@ -64,6 +72,7 @@ namespace Entmoot.Game.Sideswipe
 			this.Rotation = reader.ReadSingle();
 			this.Extents.X = reader.ReadSingle();
 			this.Extents.Y = reader.ReadSingle();
+			this.IsSolid = reader.ReadBoolean();
 		}
 
 		public void ResetToDefaults()
@@ -71,6 +80,7 @@ namespace Entmoot.Game.Sideswipe
 			this.Position = Vector2.Zero;
 			this.Rotation = 0;
 			this.Extents = Vector2.Zero;
+			this.IsSolid = false;
 		}
 
 		#endregion Methods

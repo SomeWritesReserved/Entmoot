@@ -59,6 +59,7 @@ namespace Entmoot.Game.Sideswipe
 				ref SpriteComponent spriteComponent = ref platformEntity.AddComponent<SpriteComponent>();
 				spatialComponent.Position = new Vector2(0, -7);
 				spatialComponent.Extents = new Vector2(700, 14);
+				spatialComponent.IsSolid = true;
 			}
 			{
 				// Platform 1
@@ -67,6 +68,7 @@ namespace Entmoot.Game.Sideswipe
 				ref SpriteComponent spriteComponent = ref platformEntity.AddComponent<SpriteComponent>();
 				spatialComponent.Position = new Vector2(250, 120);
 				spatialComponent.Extents = new Vector2(150, 14);
+				spatialComponent.IsSolid = true;
 			}
 			{
 				// Platform 2
@@ -75,6 +77,7 @@ namespace Entmoot.Game.Sideswipe
 				ref SpriteComponent spriteComponent = ref platformEntity.AddComponent<SpriteComponent>();
 				spatialComponent.Position = new Vector2(-270, 220);
 				spatialComponent.Extents = new Vector2(160, 14);
+				spatialComponent.IsSolid = true;
 			}
 			{
 				// Platform 3
@@ -83,6 +86,7 @@ namespace Entmoot.Game.Sideswipe
 				ref SpriteComponent spriteComponent = ref platformEntity.AddComponent<SpriteComponent>();
 				spatialComponent.Position = new Vector2(10, 300);
 				spatialComponent.Extents = new Vector2(120, 14);
+				spatialComponent.IsSolid = true;
 			}
 		}
 
