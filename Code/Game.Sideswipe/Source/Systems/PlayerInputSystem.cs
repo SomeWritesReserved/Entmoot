@@ -8,6 +8,25 @@ namespace Entmoot.Game.Sideswipe
 {
 	public class PlayerInputSystem : IServerSystem, IServerCommandProcessorSystem<PlayerCommandData>, IClientSystem, IClientPredictedSystem<PlayerCommandData>
 	{
+		#region Fields
+
+		/// <summary>
+		/// The amount of "oomphf" to give a player when the player moves left or right. Increasing this increases acceleration and speed.
+		/// </summary>
+		public const float MoveImpulseAccelerationAmount = 50.0f;
+
+		/// <summary>
+		/// The amount of "oomphf" to give a player when the player moves left or right while sprinting. Increasing this increases acceleration and speed.
+		/// </summary>
+		public const float SprintImpulseAccelerationAmount = 100.0f;
+
+		/// <summary>
+		/// The amount of "oomphf" to give a player when the player jumps. Increasing this increases acceleration and speed.
+		/// </summary>
+		public const float JumpImpulseAccelerationAmount = 2500.0f;
+
+		#endregion Fields
+
 		#region Methods
 
 		/// <summary>
@@ -58,16 +77,16 @@ namespace Entmoot.Game.Sideswipe
 
 			if ((commandData.PlayerInput & PlayerInputButtons.Sprint) == PlayerInputButtons.Sprint)
 			{
-				moveAcceleration *= PlayerCommandData.SprintImpulseAccelerationAmount;
+				moveAcceleration *= PlayerInputSystem.SprintImpulseAccelerationAmount;
 			}
 			else
 			{
-				moveAcceleration *= PlayerCommandData.MoveImpulseAccelerationAmount;
+				moveAcceleration *= PlayerInputSystem.MoveImpulseAccelerationAmount;
 			}
 
 			Vector2 jumpAcceleration = Vector2.Zero;
-			if ((commandData.PlayerInput & PlayerInputButtons.Jump) == PlayerInputButtons.Jump) { jumpAcceleration += Vector2.UnitY; }
-			jumpAcceleration *= PlayerCommandData.JumpImpulseAccelerationAmount;
+			if ((commandData.PlayerInput & PlayerInputButtons.Jump) == PlayerInputButtons.Jump && physicsComponent.IsOnGround) { jumpAcceleration += Vector2.UnitY; }
+			jumpAcceleration *= PlayerInputSystem.JumpImpulseAccelerationAmount;
 
 			Vector2 totalAcceleration = moveAcceleration + jumpAcceleration;
 
