@@ -15,6 +15,11 @@ namespace Entmoot.Game.Sideswipe
 		/// </summary>
 		private readonly List<Entity> cachedSolidEntities = new List<Entity>(128);
 
+		/// <summary>
+		/// This is a list of entities that were already collided with by the main entity this frame. This will be cleared and reused every time a new entity starts to move.
+		/// </summary>
+		private readonly List<Entity> cachedAlreadyCollidedEntities = new List<Entity>(5);
+
 		#endregion Fields
 
 		#region Methods
@@ -85,42 +90,62 @@ namespace Entmoot.Game.Sideswipe
 			ref SpatialComponent spatialComponent = ref entity.GetComponent<SpatialComponent>();
 			ref PhysicsComponent physicsComponent = ref entity.GetComponent<PhysicsComponent>();
 
-			float elapsedTime = (1.0f / 60.0f);
+			physicsComponent.Acceleration += new Vector2(0, -50.0f);
 
-			physicsComponent.Acceleration += new Vector2(0, -1000.0f);
-			Vector2 frameVelocity = (physicsComponent.Velocity * elapsedTime) + (physicsComponent.Acceleration * elapsedTime * elapsedTime / 2);
-			spatialComponent.Position = this.tryMoveAndCollide(spatialComponent.Position, spatialComponent.Extents, frameVelocity);
+			this.cachedAlreadyCollidedEntities.Clear();
+			Vector2 newPosition = spatialComponent.Position;
+			Vector2 newVelocity = physicsComponent.Velocity;
+			for (int i = 0; i < 5; i++)
+			{
+				if (newVelocity == Vector2.Zero) { break; }
+				if (!this.tryMoveAndCollide(entity, newPosition, spatialComponent.Extents, newVelocity, out newPosition, out newVelocity))
+				{
+					break;
+				}
+			}
+			spatialComponent.Position = newPosition;
 
-			physicsComponent.Velocity += physicsComponent.Acceleration * elapsedTime;
+			physicsComponent.Velocity = newVelocity + physicsComponent.Acceleration;
 			physicsComponent.Velocity *= 0.9f;
 			physicsComponent.Acceleration = Vector2.Zero;
 		}
 
-		private Vector2 tryMoveAndCollide(Vector2 position, Vector2 extents, Vector2 velocity)
+		private bool tryMoveAndCollide(Entity movingEntity, Vector2 position, Vector2 extents, Vector2 velocity, out Vector2 newPosition, out Vector2 newVelocity)
 		{
 			foreach (Entity solidEntity in this.cachedSolidEntities)
 			{
+				if (solidEntity.ID == movingEntity.ID) { continue; }
 				if (!solidEntity.HasComponent<SpatialComponent>()) { continue; }
+				if (this.cachedAlreadyCollidedEntities.Contains(solidEntity)) { continue; }
 
 				ref SpatialComponent spatialComponent = ref solidEntity.GetComponent<SpatialComponent>();
 
-				if (this.checkCollide(position, extents, velocity, spatialComponent.Position, spatialComponent.Extents, Vector2.Zero, out float firstCollideTime, out float lastCollidTime))
+				if (this.checkCollide(position, extents, velocity, spatialComponent.Position, spatialComponent.Extents, Vector2.Zero,
+					out float firstCollideTime, out Vector2 normal, out Vector2 tangent))
 				{
-					return position + velocity * (firstCollideTime - 0.001f);
+					if (firstCollideTime < 0.0001f) { firstCollideTime = 0.0f; }
+					this.cachedAlreadyCollidedEntities.Add(solidEntity);
+					newPosition = position + (velocity * firstCollideTime - normal * 0.001f);
+					newVelocity = Vector2.Dot(velocity, tangent) * tangent;
+					return true;
 				}
 			}
 
-			return position + velocity;
+			newPosition = position + velocity;
+			newVelocity = velocity;
+			return false;
 		}
 
 		private bool checkCollide(Vector2 positionA, Vector2 extentsA, Vector2 velocityA,
 			Vector2 positionB, Vector2 extentsB, Vector2 velocityB,
-			out float firstCollideTime, out float lastCollideTime)
+			out float firstCollideTime, out Vector2 normal, out Vector2 tangent)
 		{
+			normal = Vector2.Zero;
+			tangent = Vector2.Zero;
+
 			if (this.checkOverlap(positionA, extentsA, positionB, extentsB))
 			{
 				firstCollideTime = 0.0f;
-				lastCollideTime = 0.0f;
 				return true;
 			}
 
@@ -128,18 +153,36 @@ namespace Entmoot.Game.Sideswipe
 			Vector2 relativeVelocity = velocityB - velocityA;
 
 			firstCollideTime = 0.0f;
-			lastCollideTime = 1.0f;
+			float lastCollideTime = 1.0f;
 
 			if (relativeVelocity.X < 0.0f)
 			{
 				if ((positionB.X + extentsB.X * 0.5f) < (positionA.X - extentsA.X * 0.5f)) { return false; }
-				if ((positionA.X + extentsA.X * 0.5f) < (positionB.X - extentsB.X * 0.5f)) { firstCollideTime = Math.Max(((positionA.X + extentsA.X * 0.5f) - (positionB.X - extentsB.X * 0.5f)) / relativeVelocity.X, firstCollideTime); }
+				if ((positionA.X + extentsA.X * 0.5f) < (positionB.X - extentsB.X * 0.5f))
+				{
+					float thisCollideTime = ((positionA.X + extentsA.X * 0.5f) - (positionB.X - extentsB.X * 0.5f)) / relativeVelocity.X;
+					if (thisCollideTime > firstCollideTime)
+					{
+						firstCollideTime = thisCollideTime;
+						normal = Vector2.UnitX;
+						tangent = Vector2.UnitY;
+					}
+				}
 				if ((positionB.X + extentsB.X * 0.5f) > (positionA.X - extentsA.X * 0.5f)) { lastCollideTime = Math.Min(((positionA.X - extentsA.X * 0.5f) - (positionB.X + extentsB.X * 0.5f)) / relativeVelocity.X, lastCollideTime); }
 			}
 			if (relativeVelocity.X > 0.0f)
 			{
 				if ((positionB.X - extentsB.X * 0.5f) > (positionA.X + extentsA.X * 0.5f)) { return false; }
-				if ((positionB.X + extentsB.X * 0.5f) < (positionA.X - extentsA.X * 0.5f)) { firstCollideTime = Math.Max(((positionA.X - extentsA.X * 0.5f) - (positionB.X + extentsB.X * 0.5f)) / relativeVelocity.X, firstCollideTime); }
+				if ((positionB.X + extentsB.X * 0.5f) < (positionA.X - extentsA.X * 0.5f))
+				{
+					float thisCollideTime = ((positionA.X - extentsA.X * 0.5f) - (positionB.X + extentsB.X * 0.5f)) / relativeVelocity.X;
+					if (thisCollideTime > firstCollideTime)
+					{
+						firstCollideTime = thisCollideTime;
+						normal = -Vector2.UnitX;
+						tangent = Vector2.UnitY;
+					}
+				}
 				if ((positionA.X + extentsA.X * 0.5f) > (positionB.X - extentsB.X * 0.5f)) { lastCollideTime = Math.Min(((positionA.X + extentsA.X * 0.5f) - (positionB.X - extentsB.X * 0.5f)) / relativeVelocity.X, lastCollideTime); }
 			}
 			if (firstCollideTime > lastCollideTime) { return false; }
@@ -147,13 +190,31 @@ namespace Entmoot.Game.Sideswipe
 			if (relativeVelocity.Y < 0.0f)
 			{
 				if ((positionB.Y + extentsB.Y * 0.5f) < (positionA.Y - extentsA.Y * 0.5f)) { return false; }
-				if ((positionA.Y + extentsA.Y * 0.5f) < (positionB.Y - extentsB.Y * 0.5f)) { firstCollideTime = Math.Max(((positionA.Y + extentsA.Y * 0.5f) - (positionB.Y - extentsB.Y * 0.5f)) / relativeVelocity.Y, firstCollideTime); }
+				if ((positionA.Y + extentsA.Y * 0.5f) < (positionB.Y - extentsB.Y * 0.5f))
+				{
+					float thisCollideTime = ((positionA.Y + extentsA.Y * 0.5f) - (positionB.Y - extentsB.Y * 0.5f)) / relativeVelocity.Y;
+					if (thisCollideTime > firstCollideTime)
+					{
+						firstCollideTime = thisCollideTime;
+						normal = Vector2.UnitY;
+						tangent = Vector2.UnitX;
+					}
+				}
 				if ((positionB.Y + extentsB.Y * 0.5f) > (positionA.Y - extentsA.Y * 0.5f)) { lastCollideTime = Math.Min(((positionA.Y - extentsA.Y * 0.5f) - (positionB.Y + extentsB.Y * 0.5f)) / relativeVelocity.Y, lastCollideTime); }
 			}
 			if (relativeVelocity.Y > 0.0f)
 			{
 				if ((positionB.Y - extentsB.Y * 0.5f) > (positionA.Y + extentsA.Y * 0.5f)) { return false; }
-				if ((positionB.Y + extentsB.Y * 0.5f) < (positionA.Y - extentsA.Y * 0.5f)) { firstCollideTime = Math.Max(((positionA.Y - extentsA.Y * 0.5f) - (positionB.Y + extentsB.Y * 0.5f)) / relativeVelocity.Y, firstCollideTime); }
+				if ((positionB.Y + extentsB.Y * 0.5f) < (positionA.Y - extentsA.Y * 0.5f))
+				{
+					float thisCollideTime = ((positionA.Y - extentsA.Y * 0.5f) - (positionB.Y + extentsB.Y * 0.5f)) / relativeVelocity.Y;
+					if (thisCollideTime > firstCollideTime)
+					{
+						firstCollideTime = thisCollideTime;
+						normal = -Vector2.UnitY;
+						tangent = Vector2.UnitX;
+					}
+				}
 				if ((positionA.Y + extentsA.Y * 0.5f) > (positionB.Y - extentsB.Y * 0.5f)) { lastCollideTime = Math.Min(((positionA.Y + extentsA.Y * 0.5f) - (positionB.Y - extentsB.Y * 0.5f)) / relativeVelocity.Y, lastCollideTime); }
 			}
 			if (firstCollideTime > lastCollideTime) { return false; }
