@@ -25,20 +25,36 @@ namespace Entmoot.Game.Sideswipe
 		/// </summary>
 		public Vector2 Acceleration;
 
+		/// <summary>
+		/// The number of frames this entity has been off the ground.
+		/// </summary>
+		public int OffGroundCount;
+
 		#endregion Fields
+
+		#region Properties
+
+		/// <summary>
+		/// Whether or not this entity is on the "ground" (on top of some other entity).
+		/// </summary>
+		public bool IsOnGround => this.OffGroundCount == 0;
+
+		#endregion Properties
 
 		#region Methods
 
 		public bool Equals(PhysicsComponent other)
 		{
 			return (this.Velocity.Equals(other.Velocity) &&
-				this.Acceleration.Equals(other.Acceleration));
+				this.Acceleration.Equals(other.Acceleration) &&
+				this.OffGroundCount == other.OffGroundCount);
 		}
 
 		public void Interpolate(PhysicsComponent otherA, PhysicsComponent otherB, float amount)
 		{
 			Vector2.Lerp(ref otherA.Velocity, ref otherB.Velocity, amount, out this.Velocity);
 			Vector2.Lerp(ref otherA.Acceleration, ref otherB.Acceleration, amount, out this.Acceleration);
+			this.OffGroundCount = otherB.OffGroundCount;
 		}
 
 		public void Serialize(IWriter writer)
@@ -47,6 +63,7 @@ namespace Entmoot.Game.Sideswipe
 			writer.Write(this.Velocity.Y);
 			writer.Write(this.Acceleration.X);
 			writer.Write(this.Acceleration.Y);
+			writer.Write(this.OffGroundCount);
 		}
 
 		public void Deserialize(IReader reader)
@@ -55,12 +72,14 @@ namespace Entmoot.Game.Sideswipe
 			this.Velocity.Y = reader.ReadSingle();
 			this.Acceleration.X = reader.ReadSingle();
 			this.Acceleration.Y = reader.ReadSingle();
+			this.OffGroundCount = reader.ReadInt32();
 		}
 
 		public void ResetToDefaults()
 		{
 			this.Velocity = Vector2.Zero;
 			this.Acceleration = Vector2.Zero;
+			this.OffGroundCount = 0;
 		}
 
 		#endregion Methods
