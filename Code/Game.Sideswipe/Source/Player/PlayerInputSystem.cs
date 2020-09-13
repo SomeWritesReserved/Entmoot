@@ -13,17 +13,12 @@ namespace Entmoot.Game.Sideswipe
 		/// <summary>
 		/// The amount of "oomphf" to give a player when the player moves left or right. Increasing this increases acceleration and speed.
 		/// </summary>
-		public const float MoveImpulseAccelerationAmount = 50.0f;
-
-		/// <summary>
-		/// The amount of "oomphf" to give a player when the player moves left or right while sprinting. Increasing this increases acceleration and speed.
-		/// </summary>
-		public const float SprintImpulseAccelerationAmount = 100.0f;
+		public const float MoveImpulseAccelerationAmount = 1.0f;
 
 		/// <summary>
 		/// The amount of "oomphf" to give a player when the player jumps. Increasing this increases acceleration and speed.
 		/// </summary>
-		public const float JumpImpulseAccelerationAmount = 2500.0f;
+		public const float JumpImpulseAccelerationAmount = 8.0f;
 
 		#endregion Fields
 
@@ -68,24 +63,31 @@ namespace Entmoot.Game.Sideswipe
 			ref SpatialComponent spatialComponent = ref commandingEntity.GetComponent<SpatialComponent>();
 			ref PhysicsComponent physicsComponent = ref commandingEntity.GetComponent<PhysicsComponent>();
 
+			float maxSpeed = 4.0f;
+			if ((commandData.PlayerInput & PlayerInputButtons.Sprint) == PlayerInputButtons.Sprint)
+			{
+				maxSpeed = 6.0f;
+			}
+
+			bool passedMaxSpeed = Math.Abs(physicsComponent.Velocity.X) >= maxSpeed;
+
 			Vector2 moveAcceleration = Vector2.Zero;
-			if ((commandData.PlayerInput & PlayerInputButtons.MoveLeft) == PlayerInputButtons.MoveLeft) { moveAcceleration -= Vector2.UnitX; }
-			if ((commandData.PlayerInput & PlayerInputButtons.MoveRight) == PlayerInputButtons.MoveRight) { moveAcceleration += Vector2.UnitX; }
+			if ((commandData.PlayerInput & PlayerInputButtons.MoveLeft) == PlayerInputButtons.MoveLeft && !passedMaxSpeed) { moveAcceleration -= Vector2.UnitX * PlayerInputSystem.MoveImpulseAccelerationAmount; }
+			if ((commandData.PlayerInput & PlayerInputButtons.MoveRight) == PlayerInputButtons.MoveRight && !passedMaxSpeed) { moveAcceleration += Vector2.UnitX * PlayerInputSystem.MoveImpulseAccelerationAmount; }
+			if ((((commandData.PlayerInput & PlayerInputButtons.MoveLeft) != PlayerInputButtons.MoveLeft &&
+				(commandData.PlayerInput & PlayerInputButtons.MoveRight) != PlayerInputButtons.MoveRight) || passedMaxSpeed) &&
+				physicsComponent.IsOnGround &&
+				physicsComponent.Velocity.X != 0)
+			{
+				float oppositeDirectionSign = -Math.Sign(physicsComponent.Velocity.X);
+				moveAcceleration.X = oppositeDirectionSign * Math.Min(Math.Abs(physicsComponent.Velocity.X), PlayerInputSystem.MoveImpulseAccelerationAmount);
+			}
 
 			float targetRotation = Vector2.Dot(Vector2.UnitX, moveAcceleration) * 0.1f;
 			spatialComponent.Rotation = MathHelper.Lerp(spatialComponent.Rotation, targetRotation, 0.2f);
 
-			if ((commandData.PlayerInput & PlayerInputButtons.Sprint) == PlayerInputButtons.Sprint)
-			{
-				moveAcceleration *= PlayerInputSystem.SprintImpulseAccelerationAmount;
-			}
-			else
-			{
-				moveAcceleration *= PlayerInputSystem.MoveImpulseAccelerationAmount;
-			}
-
 			Vector2 jumpAcceleration = Vector2.Zero;
-			if ((commandData.PlayerInput & PlayerInputButtons.Jump) == PlayerInputButtons.Jump && physicsComponent.IsOnGround) { jumpAcceleration += Vector2.UnitY; }
+			if ((commandData.PlayerInput & PlayerInputButtons.Jump) == PlayerInputButtons.Jump && physicsComponent.OffGroundCount < 5) { jumpAcceleration += Vector2.UnitY; }
 			jumpAcceleration *= PlayerInputSystem.JumpImpulseAccelerationAmount;
 
 			Vector2 totalAcceleration = moveAcceleration + jumpAcceleration;
@@ -98,7 +100,7 @@ namespace Entmoot.Game.Sideswipe
 		/// </summary>
 		public void PredictClientCommand(EntityArray entityArray, Entity commandingEntity, PlayerCommandData commandData)
 		{
-			this.ProcessClientCommand(entityArray, commandingEntity, commandData, null);
+			//this.ProcessClientCommand(entityArray, commandingEntity, commandData, null);
 		}
 
 		#endregion Methods
