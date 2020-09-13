@@ -3,13 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30413.136
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Engine", "Engine\Engine.csproj", "{7A74552D-7A70-47C2-9D58-4CF84E935C28}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Engine", "Engine\Engine.csproj", "{7A74552D-7A70-47C2-9D58-4CF84E935C28}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Engine.UnitTests", "Engine.UnitTests\Engine.UnitTests.csproj", "{8B286B7E-36C8-4441-A527-700D94F7C30D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Engine.UnitTests", "Engine.UnitTests\Engine.UnitTests.csproj", "{8B286B7E-36C8-4441-A527-700D94F7C30D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Debug.NetTestWinForms", "Debug.NetTestWinForms\Debug.NetTestWinForms.csproj", "{6662A302-8920-4B7C-A514-5CAB39F01208}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Debug.NetTestWinForms", "Debug.NetTestWinForms\Debug.NetTestWinForms.csproj", "{6662A302-8920-4B7C-A514-5CAB39F01208}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Debug.NetTest3D", "Debug.NetTest3D\Debug.NetTest3D.csproj", "{70156EA7-D0C5-46A5-9D54-758E5CEB50F8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Debug.NetTest3D", "Debug.NetTest3D\Debug.NetTest3D.csproj", "{70156EA7-D0C5-46A5-9D54-758E5CEB50F8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Framework.MonoGame", "Framework.MonoGame\Framework.MonoGame.csproj", "{B5A0F793-95A7-42ED-99C7-19AA3B94C4A0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Framework.MonoGame.UnitTests", "Framework.MonoGame.UnitTests\Framework.MonoGame.UnitTests.csproj", "{42F8CB51-33BD-4687-92FE-85DD50D6F40A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +37,14 @@ Global
 		{70156EA7-D0C5-46A5-9D54-758E5CEB50F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{70156EA7-D0C5-46A5-9D54-758E5CEB50F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{70156EA7-D0C5-46A5-9D54-758E5CEB50F8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B5A0F793-95A7-42ED-99C7-19AA3B94C4A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5A0F793-95A7-42ED-99C7-19AA3B94C4A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5A0F793-95A7-42ED-99C7-19AA3B94C4A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5A0F793-95A7-42ED-99C7-19AA3B94C4A0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{42F8CB51-33BD-4687-92FE-85DD50D6F40A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42F8CB51-33BD-4687-92FE-85DD50D6F40A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42F8CB51-33BD-4687-92FE-85DD50D6F40A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42F8CB51-33BD-4687-92FE-85DD50D6F40A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
