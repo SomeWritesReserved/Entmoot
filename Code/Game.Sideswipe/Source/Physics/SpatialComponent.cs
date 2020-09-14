@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Entmoot.Engine;
+using Entmoot.Framework.MonoGame;
 using Microsoft.Xna.Framework;
 
 namespace Entmoot.Game.Sideswipe
@@ -36,6 +37,12 @@ namespace Entmoot.Game.Sideswipe
 		public bool IsSolid;
 
 		#endregion Fields
+
+		#region Properties
+
+		public Box2D Box2D => new Box2D(this.Position, this.Extents.X, this.Extents.Y);
+
+		#endregion Properties
 
 		#region Methods
 

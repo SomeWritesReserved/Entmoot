@@ -91,18 +91,41 @@ namespace Entmoot.Game.Sideswipe
 			ref SpatialComponent spatialComponent = ref entity.GetComponent<SpatialComponent>();
 			ref PhysicsComponent physicsComponent = ref entity.GetComponent<PhysicsComponent>();
 
-			// Gravity
+			// Gravity and acceleration
 			physicsComponent.Acceleration += new Vector2(0, -0.5f);
-
-			this.cachedAlreadyCollidedEntities.Clear();
-
 			physicsComponent.Velocity += physicsComponent.Acceleration;
-			spatialComponent.Position += physicsComponent.Velocity;
+			Vector2 frameVelocity = physicsComponent.Velocity;
+
+			bool isOnGround = false;
+
+			// Collisions
+			this.cachedAlreadyCollidedEntities.Clear();
+			for (int i = 0; i < 2; i++)
+			{
+				foreach (Entity solidEntity in this.cachedSolidEntities)
+				{
+					if (this.cachedAlreadyCollidedEntities.Contains(solidEntity)) { continue; }
+
+					SpatialComponent solidSpatialComponent = solidEntity.GetComponent<SpatialComponent>();
+					if (Collision2D.CollideBoxBox(spatialComponent.Box2D, frameVelocity, solidSpatialComponent.Box2D, 0.00001f,
+						out float collisionTime, out Vector2 collisionNormal, out Vector2 collisionEdge))
+					{
+						spatialComponent.Position += frameVelocity * collisionTime;
+						frameVelocity *= (1.0f - collisionTime);
+						frameVelocity = collisionEdge * Vector2.Dot(frameVelocity, collisionEdge);
+						this.cachedAlreadyCollidedEntities.Add(solidEntity);
+						isOnGround |= collisionNormal == Vector2.UnitY;
+						break;
+					}
+				}
+			}
+
+			spatialComponent.Position += frameVelocity;
 			physicsComponent.Velocity *= 0.95f;
 			physicsComponent.Acceleration = Vector2.Zero;
-			if (spatialComponent.Position.Y <= 0)
+
+			if (isOnGround)
 			{
-				spatialComponent.Position.Y = 0;
 				physicsComponent.Velocity.Y = 0;
 				physicsComponent.OffGroundCount = 0;
 			}
