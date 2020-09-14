@@ -200,7 +200,7 @@ namespace Entmoot.Game.Sideswipe
 					ref CameraComponent cameraComponent = ref clientEntity.AddComponent<CameraComponent>();
 
 					// This is where we define a player's starting position, size, and sprite
-					spatialComponent.Position = new Vector2(0, 31);
+					spatialComponent.Position = new Vector2(0, 70);
 					spatialComponent.Extents = new Vector2(32, 60);
 					spatialComponent.Rotation = 0;
 					spriteComponent.SpriteColor = Color.Aquamarine;
