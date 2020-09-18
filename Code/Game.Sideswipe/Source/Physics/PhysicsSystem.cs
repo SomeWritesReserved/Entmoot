@@ -115,6 +115,12 @@ namespace Entmoot.Game.Sideswipe
 						frameVelocity = collisionEdge * Vector2.Dot(frameVelocity, collisionEdge);
 						this.cachedAlreadyCollidedEntities.Add(solidEntity);
 						isOnGround |= collisionNormal == Vector2.UnitY;
+
+						// If we hit something we need to clip the real velocity (not just the frame's velocity)
+						// to make sure the object doesn't try to continue in that direction anymore (we could even
+						// bounce here if there is restitution).
+						physicsComponent.Velocity = collisionEdge * Vector2.Dot(physicsComponent.Velocity, collisionEdge);
+
 						break;
 					}
 				}
