@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Entmoot.Engine;
+using Entmoot.Framework.MonoGame;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -61,7 +62,7 @@ namespace Entmoot.Debug.NetTest3D
 						this.BasicEffect.DiffuseColor = colorComponent.Color.ToVector3();
 					}
 
-					ShapeRenderHelper.RenderBox(this.GraphicsDeviceManager.GraphicsDevice, this.BasicEffect, spatialComponent.Position, spatialComponent.Rotation);
+					Renderer3D.RenderBox(this.GraphicsDeviceManager.GraphicsDevice, this.BasicEffect, spatialComponent.Position, spatialComponent.Rotation);
 				}
 			}
 		}

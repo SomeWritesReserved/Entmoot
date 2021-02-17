@@ -26,6 +26,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Engine\Engine.csproj" />
+    <ProjectReference Include="..\Framework.MonoGame\Framework.MonoGame.csproj" />
   </ItemGroup>
 
   <ItemGroup>

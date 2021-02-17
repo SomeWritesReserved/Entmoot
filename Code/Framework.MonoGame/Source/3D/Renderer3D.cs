@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace Entmoot.Debug.NetTest3D
+namespace Entmoot.Framework.MonoGame
 {
-	public static class ShapeRenderHelper
+	public static class Renderer3D
 	{
 		#region Fields
 
@@ -18,7 +16,7 @@ namespace Entmoot.Debug.NetTest3D
 
 		#region Constructors
 
-		static ShapeRenderHelper()
+		static Renderer3D()
 		{
 			const float x0 = 0.0f;
 			const float x1 = 1.0f / 4.0f;
@@ -32,7 +30,7 @@ namespace Entmoot.Debug.NetTest3D
 			//   2
 			// 1 3 5 6
 			//   4
-			ShapeRenderHelper.boxRenderVertices = new VertexPositionNormalTexture[]
+			Renderer3D.boxRenderVertices = new VertexPositionNormalTexture[]
 			{
 				new VertexPositionNormalTexture(new Vector3(1, 1, -1), Vector3.Right, new Vector2(x1, y1)),
 				new VertexPositionNormalTexture(new Vector3(1, -1, -1), Vector3.Right, new Vector2(x1, y2)),
@@ -87,8 +85,15 @@ namespace Entmoot.Debug.NetTest3D
 		{
 			effect.World = Matrix.CreateFromQuaternion(rotation) * Matrix.CreateTranslation(position);
 			effect.CurrentTechnique.Passes[0].Apply();
-			graphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList, ShapeRenderHelper.boxRenderVertices, 0, ShapeRenderHelper.boxRenderVertices.Length / 3);
+			graphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList, Renderer3D.boxRenderVertices, 0, Renderer3D.boxRenderVertices.Length / 3);
+		}
 
+		public static void RenderBox<TEffect>(GraphicsDevice graphicsDevice, TEffect effect, Box3D box)
+			where TEffect : Effect, IEffectMatrices
+		{
+			effect.World = Matrix.CreateScale(box.Size * 0.5f) * Matrix.CreateTranslation(box.Center);
+			effect.CurrentTechnique.Passes[0].Apply();
+			graphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList, Renderer3D.boxRenderVertices, 0, Renderer3D.boxRenderVertices.Length / 3);
 		}
 
 		#endregion Methods
