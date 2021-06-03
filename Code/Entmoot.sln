@@ -11,9 +11,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Debug.NetTestWinForms", "De
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Debug.NetTest3D", "Debug.NetTest3D\Debug.NetTest3D.csproj", "{70156EA7-D0C5-46A5-9D54-758E5CEB50F8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Framework.MonoGame", "Framework.MonoGame\Framework.MonoGame.csproj", "{B5A0F793-95A7-42ED-99C7-19AA3B94C4A0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Framework.MonoGame", "Framework.MonoGame\Framework.MonoGame.csproj", "{B5A0F793-95A7-42ED-99C7-19AA3B94C4A0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Framework.MonoGame.UnitTests", "Framework.MonoGame.UnitTests\Framework.MonoGame.UnitTests.csproj", "{42F8CB51-33BD-4687-92FE-85DD50D6F40A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Framework.MonoGame.UnitTests", "Framework.MonoGame.UnitTests\Framework.MonoGame.UnitTests.csproj", "{42F8CB51-33BD-4687-92FE-85DD50D6F40A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Game.Fps", "Game.Fps\Game.Fps.csproj", "{E4A6B7FE-8F52-43A9-890F-E94B629BA4AE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{42F8CB51-33BD-4687-92FE-85DD50D6F40A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{42F8CB51-33BD-4687-92FE-85DD50D6F40A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{42F8CB51-33BD-4687-92FE-85DD50D6F40A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E4A6B7FE-8F52-43A9-890F-E94B629BA4AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E4A6B7FE-8F52-43A9-890F-E94B629BA4AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E4A6B7FE-8F52-43A9-890F-E94B629BA4AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E4A6B7FE-8F52-43A9-890F-E94B629BA4AE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
