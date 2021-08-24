@@ -32,8 +32,6 @@ namespace Entmoot.Game.Zombtown
 		{
 			this.graphicsDeviceManager = new GraphicsDeviceManager(this);
 			this.graphicsDeviceManager.GraphicsProfile = GraphicsProfile.HiDef;
-			this.graphicsDeviceManager.PreferredBackBufferWidth = 1024;
-			this.graphicsDeviceManager.PreferredBackBufferHeight = 768;
 			this.Content.RootDirectory = "Assets";
 		}
 
@@ -45,6 +43,10 @@ namespace Entmoot.Game.Zombtown
 
 		protected override void Initialize()
 		{
+			this.graphicsDeviceManager.PreferredBackBufferWidth = 1024;
+			this.graphicsDeviceManager.PreferredBackBufferHeight = 768;
+			this.graphicsDeviceManager.ApplyChanges();
+
 			Log<LogGameRendering>.StartNew();
 
 			const int maxClients = 1;
@@ -62,6 +64,23 @@ namespace Entmoot.Game.Zombtown
 
 			this.networkServer = new NetworkServer("Entmoot.Game.Zombtown", maxClients, maxMessageSize, port);
 			this.gameServer = new GameServer<PlayerCommandData>(this.networkServer.ClientNetworkConnections, maxEntityHistory, entityCapacity, componentsDefinition, serverSystems, this.updateCommandingEntityID);
+
+			// Create the city blocks
+			for (int roadIndex = 0; roadIndex < 100; roadIndex++)
+			{
+				this.gameServer.EntityArray.TryCreateEntity(out Entity roadEntity);
+				ref SpatialComponent spatialComponent = ref roadEntity.AddComponent<SpatialComponent>();
+				ref SpriteComponent spriteComponent = ref roadEntity.AddComponent<SpriteComponent>();
+				int x = roadIndex % 10;
+				int y = roadIndex / 10;
+				spatialComponent.Position = new Vector2(x, y) * 10;
+				spatialComponent.Radius = 5;
+				spriteComponent.SetSprite("RoadTurn.png", 255);
+				if (roadIndex % 2 == (y % 2 == 0 ? 0 : 1))
+				{
+					spatialComponent.Rotation = MathHelper.Pi;
+				}
+			}
 
 			this.networkClient = new NetworkClient("Entmoot.Game.Zombtown", maxMessageSize);
 			this.gameClient = new GameClient<PlayerCommandData>(this.networkClient, maxEntityHistory, entityCapacity, componentsDefinition, clientSystems);
@@ -137,7 +156,7 @@ namespace Entmoot.Game.Zombtown
 					spatialComponent.Position = new Vector2(56, 23);
 					spatialComponent.Radius = 1;
 					spatialComponent.Rotation = 0.78f;
-					spriteComponent.SetSprite("Character.png");
+					spriteComponent.SetSprite("Character.png", 128);
 					return clientEntity.ID;
 				}
 			}

@@ -12,6 +12,7 @@ namespace Entmoot.Game.Zombtown
 		#region Fields
 
 		public int SpriteId;
+		public byte SpriteDepth;
 
 		#endregion Fields
 
@@ -19,32 +20,38 @@ namespace Entmoot.Game.Zombtown
 
 		public bool Equals(SpriteComponent other)
 		{
-			return (this.SpriteId == other.SpriteId);
+			return (this.SpriteId == other.SpriteId &&
+				this.SpriteDepth == other.SpriteDepth);
 		}
 
 		public void Interpolate(SpriteComponent otherA, SpriteComponent otherB, float amount)
 		{
 			this.SpriteId = otherB.SpriteId;
+			this.SpriteDepth = otherB.SpriteDepth;
 		}
 
 		public void Serialize(IWriter writer)
 		{
 			writer.Write(this.SpriteId);
+			writer.Write(this.SpriteDepth);
 		}
 
 		public void Deserialize(IReader reader)
 		{
 			this.SpriteId = reader.ReadInt32();
+			this.SpriteDepth = reader.ReadByte();
 		}
 
 		public void ResetToDefaults()
 		{
 			this.SpriteId = 0;
+			this.SpriteDepth = 0;
 		}
 
-		public void SetSprite(string name)
+		public void SetSprite(string name, byte spriteDepth)
 		{
 			this.SpriteId = name.GetHashCode();
+			this.SpriteDepth = spriteDepth;
 		}
 
 		#endregion Methods
