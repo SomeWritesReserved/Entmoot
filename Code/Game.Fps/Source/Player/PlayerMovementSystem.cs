@@ -62,33 +62,13 @@ namespace Entmoot.Game.Fps
 				Vector3.Transform(ref playerImpulse, ref lookMoveRotation, out playerImpulse);
 			}
 
-			const float movementForce = 30.0f;
-			const float friction = 4.0f;
-			const float stopspeed = 5.0f;
-
 			// [TODO]: this logic to apply friction and such needs to be done elsewhere? It should happen every frame, not just when clients send commands
 			// but how do we still step players forward in movement when a command comes in? We can't just sum acceleration and apply it all at once.
 			// However, a client will send commands for every frame so perhaps we do only do friction here?
 
-			// Friction to slow player
-			{
-				float speed = movementComponent.Velocity.Length();
-				if (speed > 0.1f /*&& isOnGround*/)
-				{
-					float control = (speed < stopspeed) ? stopspeed : speed;
-					float drop = control * friction * (1 / 60.0f);
-					float newSpeed = speed - drop;
-					if (newSpeed < 0) { newSpeed = 0.0f; }
-					newSpeed /= speed;
-					movementComponent.Velocity *= newSpeed;
-				}
-			}
-
 			// Impulse force to move player
 			{
-				Vector3 frameAcceleration = playerImpulse * movementForce * (1 / 60.0f);
-
-				movementComponent.Velocity += frameAcceleration;
+				movementComponent.Velocity = (playerImpulse + movementComponent.Velocity) * 0.85f;
 				spatialComponent.Position += movementComponent.Velocity;
 
 				spatialComponent.Rotation = commandData.LookAngles;
