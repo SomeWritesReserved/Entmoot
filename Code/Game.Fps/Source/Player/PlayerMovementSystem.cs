@@ -80,7 +80,7 @@ namespace Entmoot.Game.Fps
 		/// </summary>
 		public void PredictClientCommand(EntityArray entityArray, Entity commandingEntity, PlayerCommandData commandData)
 		{
-			// Todo:
+			this.ProcessClientCommand(entityArray, commandingEntity, commandData, null);
 		}
 
 		#endregion Methods

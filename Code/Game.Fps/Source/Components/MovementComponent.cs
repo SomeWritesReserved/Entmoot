@@ -36,18 +36,21 @@ namespace Entmoot.Game.Fps
 
 		public void Interpolate(MovementComponent otherA, MovementComponent otherB, float amount)
 		{
-			// This component is not networked, clients need not know about it, the positions of entities will always be interpolated, never extrapolated based on velocity
+			Vector3.Lerp(ref otherA.Velocity, ref otherB.Velocity, amount, out this.Velocity);
 		}
 
 		public void Serialize(IWriter writer)
 		{
-			// This component is not networked, clients need not know about it, the positions of entities will always be interpolated, never extrapolated based on velocity
-			// [TODO]: if this isn't networked, then clients will never get a correct velocity/acceleration from the server which means their prediction could be forever wrong
+			writer.Write(this.Velocity.X);
+			writer.Write(this.Velocity.Y);
+			writer.Write(this.Velocity.Z);
 		}
 
 		public void Deserialize(IReader reader)
 		{
-			// This component is not networked, clients need not know about it, the positions of entities will always be interpolated, never extrapolated based on velocity
+			this.Velocity.X = reader.ReadSingle();
+			this.Velocity.Y = reader.ReadSingle();
+			this.Velocity.Z = reader.ReadSingle();
 		}
 
 		public void ResetToDefaults()
