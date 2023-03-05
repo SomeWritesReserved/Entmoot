@@ -1,29 +1,21 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-    <UseWindowsForms>true</UseWindowsForms>
-    <AssemblyName>Entmoot.Debug.NetTestWinForms</AssemblyName>
-    <RootNamespace>Entmoot.Debug.NetTestWinForms</RootNamespace>
-    <Authors>SomeWritesReserved</Authors>
-    <Company>SomeWritesReserved</Company>
-    <Product>Entmoot</Product>
-    <Copyright>2017</Copyright>
-    <UseWPF>true</UseWPF>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net7.0-windows</TargetFramework>
+		<AssemblyName>Entmoot.Debug.NetTestWinForms</AssemblyName>
+		<RootNamespace>Entmoot.Debug.NetTestWinForms</RootNamespace>
+		<Authors>SomeWritesReserved</Authors>
+		<Company>SomeWritesReserved</Company>
+		<Product>Entmoot</Product>
+		<Copyright>2017</Copyright>
+		<OutputPath>bin</OutputPath>
+		<OutputType>WinExe</OutputType>
+		<UseWPF>true</UseWPF>
+		<UseWindowsForms>true</UseWindowsForms>
+	</PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <OutputPath>bin</OutputPath>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <OutputPath>bin</OutputPath>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Engine\Engine.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Engine\Engine.csproj" />
+	</ItemGroup>
 
 </Project>
