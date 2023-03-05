@@ -98,7 +98,7 @@ namespace Entmoot.Debug.NetTest3D
 
 			this.networkClient = new NetworkClient("1", 4000);
 			this.gameClient = new GameClient<CommandData>(this.networkClient, 20, 30,
-				componentsDefinition, new IClientSystem[] {new ClientCommandSystem(), new PhysicsSystem(), this.renderSystem });
+				componentsDefinition, new IClientSystem[] { new ClientCommandSystem(), new PhysicsSystem(), this.renderSystem });
 		}
 
 		#endregion Constructors
@@ -274,6 +274,11 @@ namespace Entmoot.Debug.NetTest3D
 				this.stringBuilder.Append(Log<LogNetworkServer>.History.Sum((d) => d.ReceivedBytes) / 2);
 				this.stringBuilder.Append("\n SentBytes/s ");
 				this.stringBuilder.Append(Log<LogNetworkServer>.History.Sum((d) => d.SentBytes) / 2);
+				this.stringBuilder.Append("\n SerializeMS ");
+				if (Log<LogServerUpdateSerialization>.History?.Any() == true)
+				{
+					this.stringBuilder.AppendFormat("{0:0.000}", Log<LogServerUpdateSerialization>.History.Average((d) => d.SerializationTime.DurationMs));
+				}
 				this.stringBuilder.Append("\n Clients     ");
 				this.stringBuilder.Append(Log<LogNetworkServer>.Data.ConnectedClients);
 				this.stringBuilder.Append("\n Connecting  ");
@@ -287,6 +292,11 @@ namespace Entmoot.Debug.NetTest3D
 			this.stringBuilder.Append(Log<LogNetworkClient>.History.Sum((d) => d.ReceivedBytes) / 2);
 			this.stringBuilder.Append("\n SentBytes/s ");
 			this.stringBuilder.Append(Log<LogNetworkClient>.History.Sum((d) => d.SentBytes) / 2);
+			this.stringBuilder.Append("\n DeserialzMS ");
+			if (Log<LogServerUpdateDeserialization>.History?.Any() == true)
+			{
+				this.stringBuilder.AppendFormat("{0:0.000}", Log<LogServerUpdateDeserialization>.History.Average((d) => d.DeserializationTime.DurationMs));
+			}
 
 			BlendState blendState = this.GraphicsDevice.BlendState;
 			DepthStencilState depthStencilState = this.GraphicsDevice.DepthStencilState;

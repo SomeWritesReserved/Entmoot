@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -69,6 +70,47 @@ namespace Entmoot.Engine
 				dataHistory.Enqueue(Data);
 			}
 			Data = default(T);
+		}
+
+		#endregion Methods
+	}
+
+	/// <summary>
+	/// A timer that could be used during logging to time blocks of code.
+	/// </summary>
+	public struct LogTimer
+	{
+		#region Fields
+
+		/// <summary>
+		/// The start timestamp of this timer (in arbitrary stopwatch units).
+		/// </summary>
+		private long startTimestamp;
+
+		/// <summary>
+		/// The total time, in milliseconds, this timer took.
+		/// </summary>
+		public double DurationMs;
+
+		#endregion Fields
+
+		#region Methods
+
+		/// <summary>
+		/// Starts (or restarts) this timer and clears any existing duration.
+		/// </summary>
+		public void Start()
+		{
+			this.startTimestamp = Stopwatch.GetTimestamp();
+			this.DurationMs = 0;
+		}
+
+		/// <summary>
+		/// Stops this timer and sets the duration.
+		/// </summary>
+		public void Stop()
+		{
+			this.DurationMs = Stopwatch.GetElapsedTime(this.startTimestamp).TotalMilliseconds;
 		}
 
 		#endregion Methods

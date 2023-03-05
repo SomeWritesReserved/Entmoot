@@ -29,10 +29,13 @@ namespace Entmoot.Engine
 		/// </summary>
 		public static void Serialize(IWriter writer, EntitySnapshot previousEntitySnapshot, EntitySnapshot latestEntitySnapshot, int latestClientTickReceived, int clientCommandingEntityID)
 		{
+			Log<LogServerUpdateSerialization>.StartNew();
+			Log<LogServerUpdateSerialization>.Data.SerializationTime.Start();
 			writer.Write(latestClientTickReceived);
 			writer.Write(clientCommandingEntityID);
 			writer.Write((previousEntitySnapshot == null) ? -1 : previousEntitySnapshot.ServerFrameTick);
 			latestEntitySnapshot.Serialize(previousEntitySnapshot, writer);
+			Log<LogServerUpdateSerialization>.Data.SerializationTime.Stop();
 		}
 
 		/// <summary>
@@ -61,6 +64,8 @@ namespace Entmoot.Engine
 		/// </summary>
 		public static bool DeserializeIfNewer(IReader reader, EntitySnapshot[] previousEntitySnapshots, EntitySnapshot latestEntitySnapshot, out int latestClientTickAcknowledgedByServer, out int clientCommandingEntityID)
 		{
+			Log<LogServerUpdateDeserialization>.StartNew();
+			Log<LogServerUpdateDeserialization>.Data.DeserializationTime.Start();
 			latestClientTickAcknowledgedByServer = reader.ReadInt32();
 			clientCommandingEntityID = reader.ReadInt32();
 			int previousServerFrameTick = reader.ReadInt32();
@@ -73,7 +78,9 @@ namespace Entmoot.Engine
 					break;
 				}
 			}
-			return latestEntitySnapshot.DeserializeIfNewer(previousEntitySnapshot, reader);
+			bool result = latestEntitySnapshot.DeserializeIfNewer(previousEntitySnapshot, reader);
+			Log<LogServerUpdateDeserialization>.Data.DeserializationTime.Stop();
+			return result;
 		}
 
 		#endregion Methods
@@ -139,5 +146,31 @@ namespace Entmoot.Engine
 		}
 
 		#endregion Methods
+	}
+
+	/// <summary>
+	/// Log data for ServerUpdateSerializer serialization.
+	/// </summary>
+	public struct LogServerUpdateSerialization
+	{
+		#region Fields
+
+		/// <summary>The amount of time it takes for the server to fully serialize a server update.</summary>
+		public LogTimer SerializationTime;
+
+		#endregion Fields
+	}
+
+	/// <summary>
+	/// Log data for ServerUpdateSerializer deserialization.
+	/// </summary>
+	public struct LogServerUpdateDeserialization
+	{
+		#region Fields
+
+		/// <summary>The amount of time it takes for the client to fully deserialize a server update.</summary>
+		public LogTimer DeserializationTime;
+
+		#endregion Fields
 	}
 }
