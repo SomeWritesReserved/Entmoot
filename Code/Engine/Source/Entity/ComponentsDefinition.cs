@@ -19,6 +19,18 @@ namespace Entmoot.Engine
 
 		#endregion Fields
 
+		#region Properties
+
+		/// <summary>
+		/// Returns the number of currently registered components in this definition.
+		/// </summary>
+		public int Count
+		{
+			get { return this.componentArrayCreators.Count; }
+		}
+
+		#endregion Properties
+
 		#region Methods
 
 		/// <summary>
