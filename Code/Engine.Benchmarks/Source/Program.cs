@@ -68,6 +68,10 @@ namespace Engine.Benchmarks
 							}
 						}
 					}
+					catch (TargetInvocationException targetInvocationException)
+					{
+						Console.WriteLine($"  ...failed with exception {targetInvocationException.InnerException.GetType().Name}.");
+					}
 					catch (Exception exception)
 					{
 						Console.WriteLine($"  ...failed with exception {exception.GetType().Name}.");
