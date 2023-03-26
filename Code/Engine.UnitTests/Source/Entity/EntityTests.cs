@@ -398,13 +398,16 @@ namespace Entmoot.Engine.UnitTests
 			EntityArray sourceEntityArray = EntityTests.CreateStandardEntityArray();
 			EntityArray destinationEntityArray = new EntityArray(3, EntityTests.CreateComponentsDefinition());
 			byte[] serializedBytes = new byte[512];
+			int messageLength;
 			{
 				OutgoingMessage outgoingMessage = new OutgoingMessage(serializedBytes);
 				sourceEntityArray.Serialize(null, outgoingMessage);
 				serializedBytes = outgoingMessage.ToArray();
+				messageLength = outgoingMessage.Length;
 			}
 			{
 				IncomingMessage incomingMessage = new IncomingMessage(serializedBytes);
+				incomingMessage.Length = messageLength;
 				destinationEntityArray.Deserialize(null, incomingMessage);
 			}
 			EntityTests.AssertStandardEntityArray(destinationEntityArray);
@@ -413,7 +416,11 @@ namespace Entmoot.Engine.UnitTests
 		[Test]
 		public void EntityArray_Serialize_Overwrite()
 		{
+			// Deserialization won't completely overwrite an entity array, instead it will use a previous entity array as a baseline, for fast delta compression.
+			// We still want to test that the parts that needs overwritten are, so we need to have previous entity arrays in this test.
+			EntityArray previousSourceEntityArray = new EntityArray(3, EntityTests.CreateComponentsDefinition());
 			EntityArray sourceEntityArray = EntityTests.CreateStandardEntityArray();
+			EntityArray previousDestinationEntityArray = new EntityArray(3, EntityTests.CreateComponentsDefinition());
 			EntityArray destinationEntityArray = new EntityArray(3, EntityTests.CreateComponentsDefinition());
 			destinationEntityArray.BeginUpdate();
 			destinationEntityArray.TryCreateEntity(out Entity entity0);
@@ -434,16 +441,49 @@ namespace Entmoot.Engine.UnitTests
 			destinationEntityArray.RemoveEntity(entity0);
 			destinationEntityArray.EndUpdate();
 			byte[] serializedBytes = new byte[512];
+			int messageLength;
 			{
 				OutgoingMessage outgoingMessage = new OutgoingMessage(serializedBytes);
-				sourceEntityArray.Serialize(null, outgoingMessage);
+				sourceEntityArray.Serialize(previousSourceEntityArray, outgoingMessage);
 				serializedBytes = outgoingMessage.ToArray();
+				messageLength = outgoingMessage.Length;
 			}
 			{
 				IncomingMessage incomingMessage = new IncomingMessage(serializedBytes);
-				destinationEntityArray.Deserialize(null, incomingMessage);
+				incomingMessage.Length = messageLength;
+				destinationEntityArray.Deserialize(previousDestinationEntityArray, incomingMessage);
 			}
 			EntityTests.AssertStandardEntityArray(destinationEntityArray);
+		}
+
+		[Test]
+		public void EntityArray_Serialize_RemoveEntity()
+		{
+			// Simulate removing an entity, this requires use of previous entity arrays to compare to for delta compression. This is because serialized
+			// updates can never remove an entity unless there is a previous entity array to compare to that says the entity used to exist but no longer does.
+			EntityArray previousSourceEntityArray = EntityTests.CreateStandardEntityArray();
+			EntityArray sourceEntityArray = EntityTests.CreateStandardEntityArray();
+			EntityArray previousDestinationEntityArray = EntityTests.CreateStandardEntityArray();
+			EntityArray destinationEntityArray = new EntityArray(3, EntityTests.CreateComponentsDefinition());
+			sourceEntityArray.BeginUpdate();
+			sourceEntityArray.RemoveEntity(0);
+			sourceEntityArray.EndUpdate();
+			byte[] serializedBytes = new byte[512];
+			int messageLength;
+			{
+				OutgoingMessage outgoingMessage = new OutgoingMessage(serializedBytes);
+				sourceEntityArray.Serialize(previousSourceEntityArray, outgoingMessage);
+				serializedBytes = outgoingMessage.ToArray();
+				messageLength = outgoingMessage.Length;
+			}
+			{
+				IncomingMessage incomingMessage = new IncomingMessage(serializedBytes);
+				incomingMessage.Length = messageLength;
+				destinationEntityArray.Deserialize(previousDestinationEntityArray, incomingMessage);
+			}
+			Assert.IsFalse(destinationEntityArray.TryGetEntity(0, out _));
+			Assert.IsFalse(destinationEntityArray.TryGetEntity(1, out _));
+			Assert.IsTrue(destinationEntityArray.TryGetEntity(2, out _));
 		}
 
 		[Test]
@@ -550,6 +590,12 @@ namespace Entmoot.Engine.UnitTests
 			return componentsDefinition;
 		}
 
+		/// <summary>
+		/// Creates a fixed entity array with a capacity of 3 with position, health, and string components.
+		/// Entity0 has position and string components.
+		/// Entity1 does not exist.
+		/// Entity2 has position and health components.
+		/// </summary>
 		public static EntityArray CreateStandardEntityArray()
 		{
 			EntityArray entityArray = new EntityArray(3, EntityTests.CreateComponentsDefinition());
@@ -563,18 +609,19 @@ namespace Entmoot.Engine.UnitTests
 			entity1.AddComponent<PositionComponent2D>().PositionY = 61.9f;
 			entity2.AddComponent<PositionComponent2D>().PositionX = 62.5f;
 			entity2.AddComponent<PositionComponent2D>().PositionY = 62.9f;
-			//entity0.AddComponent<HealthComponent>().HealthAmount = 70;
 			entity1.AddComponent<HealthComponent>().HealthAmount = 71;
 			entity2.AddComponent<HealthComponent>().HealthAmount = 72;
 			entity0.AddComponent<StringComponent>().StringValue = "entity0";
 			entity1.AddComponent<StringComponent>().StringValue = "entity1";
-			//entity2.AddComponent<StringComponent>().StringValue = "entity2";
 			entityArray.RemoveEntity(entity1);
 			entityArray.EndUpdate();
 			EntityTests.AssertStandardEntityArray(entityArray);
 			return entityArray;
 		}
 
+		/// <summary>
+		/// Asserts that the specified entity array equals the array given by <see cref="CreateStandardEntityArray"/>.
+		/// </summary>
 		public static void AssertStandardEntityArray(EntityArray entityArray)
 		{
 			Assert.IsTrue(entityArray.TryGetEntity(0, out Entity entity0));

@@ -97,6 +97,14 @@ namespace Entmoot.Debug.NetTest3D
 			{
 				this.newEntity.AddComponent<ColorComponent>().Color = new Color(1.0f, 0, 0);
 			}
+			else if (this.tick == 900)
+			{
+				this.newEntity.RemoveComponent<ColorComponent>();
+			}
+			else if (this.tick == 1100)
+			{
+				this.newEntity.AddComponent<ColorComponent>().Color = new Color(0, 1.0f, 0);
+			}
 
 			foreach (Entity entity in entityArray)
 			{

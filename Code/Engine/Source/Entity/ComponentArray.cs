@@ -65,6 +65,10 @@ namespace Entmoot.Engine
 		/// </summary>
 		bool HasComponent(Entity entity);
 
+		/// Adds this specific type of component to the given entity (if it doesn't already have one).
+		/// This is safe to call even if this component type has already been added to the entity.
+		void AddComponent(Entity entity);
+
 		/// <summary>
 		/// Removes this specific type of component from the given entity.
 		/// </summary>
@@ -86,14 +90,20 @@ namespace Entmoot.Engine
 		void Interpolate(IComponentArray otherA, IComponentArray otherB, float amount);
 
 		/// <summary>
-		/// Writes the state of all component data to a binary source, only writing data that has changed from a previous component array.
+		/// Returns whether or not an entity's component has changed between this component array and a previous component array
+		/// by calling <see cref="IComponent{TComponent}.Equals(TComponent)"/>. Returns true if <paramref name="previousComponentArray"/> is null.
 		/// </summary>
-		void Serialize(IComponentArray previousComponentArray, IWriter writer);
+		bool HasEntityChanged(int entityID, IComponentArray previousComponentArray);
 
 		/// <summary>
-		/// Reads and overwrites the current state of all component data from a binary source, basing incoming data on a previous component array's data.
+		/// Writes the state of an entity's component data to a binary source.
 		/// </summary>
-		void Deserialize(IComponentArray previousComponentArray, IReader reader);
+		void SerializeEntity(int entityID, IWriter writer);
+		
+		/// <summary>
+		/// Reads and overwrites the current state of an entity's component data from a binary source.
+		/// </summary>
+		void DeserializeEntity(int entityID, IReader reader);
 
 		#endregion Methods
 	}
@@ -109,9 +119,7 @@ namespace Entmoot.Engine
 		/// <summary>Stores the array of individual components that will be indexed into by entity ID to get the component value.</summary>
 		private readonly TComponent[] components;
 		/// <summary>Stores whether or not this component type has been added to a given entity ID.</summary>
-		private readonly StateArray componentStates;
-		/// <summary>Used during serialization/deserialization to show which components have been excluded from serialization because they haven't changed (delta compression) or don't exist.</summary>
-		private readonly StateArray serializedStates;
+		private readonly bool[] componentStates;
 
 		#endregion Fields
 
@@ -123,8 +131,7 @@ namespace Entmoot.Engine
 		public ComponentArray(int capacity)
 		{
 			this.Capacity = capacity;
-			this.componentStates = new StateArray(this.Capacity);
-			this.serializedStates = new StateArray(this.Capacity);
+			this.componentStates = new bool[this.Capacity];
 			this.components = new TComponent[this.Capacity];
 			for (int entityID = 0; entityID < this.Capacity; entityID++)
 			{
@@ -178,6 +185,15 @@ namespace Entmoot.Engine
 		}
 
 		/// <summary>
+		/// Adds this specific type of component to the given entity (if it doesn't already have one).
+		/// This is safe to call even if this component type has already been added to the entity.
+		/// </summary>
+		void IComponentArray.AddComponent(Entity entity)
+		{
+			this.AddComponent(entity);
+		}
+
+		/// <summary>
 		/// Removes this specific type of component from the given entity.
 		/// </summary>
 		public void RemoveComponent(Entity entity)
@@ -192,7 +208,7 @@ namespace Entmoot.Engine
 		public void CopyTo(ComponentArray<TComponent> other)
 		{
 			Array.Copy(this.components, other.components, this.Capacity);
-			this.componentStates.CopyTo(other.componentStates);
+			Array.Copy(this.componentStates, other.componentStates, this.Capacity);
 		}
 
 		/// <summary>
@@ -225,7 +241,7 @@ namespace Entmoot.Engine
 		/// </summary>
 		public void Interpolate(ComponentArray<TComponent> otherA, ComponentArray<TComponent> otherB, float amount)
 		{
-			otherB.componentStates.CopyTo(this.componentStates);
+			Array.Copy(otherB.componentStates, this.componentStates, this.Capacity);
 			for (int entityID = 0; entityID < this.Capacity; entityID++)
 			{
 				if (otherA.componentStates[entityID] && otherB.componentStates[entityID])
@@ -248,61 +264,53 @@ namespace Entmoot.Engine
 		}
 
 		/// <summary>
-		/// Writes the state of all component data to a binary source, only writing data that has changed from a previous component array.
+		/// Returns whether or not an entity's component has changed between this component array and a previous component array
+		/// by calling <see cref="IComponent{TComponent}.Equals(TComponent)"/>. Returns true if <paramref name="previousComponentArray"/> is null.
 		/// </summary>
-		public void Serialize(ComponentArray<TComponent> previousComponentArray, IWriter writer)
+		public bool HasEntityChanged(int entityID, ComponentArray<TComponent> previousComponentArray)
 		{
-			// Only serialize components that are attached and that have changed compared to the previous component state
-			for (int entityID = 0; entityID < this.Capacity; entityID++)
-			{
-				this.serializedStates[entityID] = this.componentStates[entityID] &&
-					(previousComponentArray == null || !previousComponentArray.components[entityID].Equals(this.components[entityID]));
-			}
-
-			this.componentStates.Serialize(writer);
-			this.serializedStates.Serialize(writer);
-			for (int entityID = 0; entityID < this.Capacity; entityID++)
-			{
-				if (!this.serializedStates[entityID]) { continue; }
-				this.components[entityID].Serialize(writer);
-			}
+			return previousComponentArray == null || !previousComponentArray.components[entityID].Equals(this.components[entityID]);
 		}
 
 		/// <summary>
-		/// Writes the state of all component data to a binary source, only writing data that has changed from a previous component array.
+		/// Returns whether or not an entity's component has changed between this component array and a previous component array
+		/// by calling <see cref="IComponent{TComponent}.Equals(TComponent)"/>. Returns true if <paramref name="previousComponentArray"/> is null.
 		/// </summary>
-		void IComponentArray.Serialize(IComponentArray previousComponentArray, IWriter writer)
+		bool IComponentArray.HasEntityChanged(int entityID, IComponentArray previousComponentArray)
 		{
-			this.Serialize((ComponentArray<TComponent>)previousComponentArray, writer);
+			return this.HasEntityChanged(entityID, (ComponentArray<TComponent>)previousComponentArray);
 		}
 
 		/// <summary>
-		/// Reads and overwrites the current state of all component data from a binary source, basing incoming data on a previous component array's data.
+		/// Writes the state of an entity's component data to a binary source.
 		/// </summary>
-		public void Deserialize(ComponentArray<TComponent> previousComponentArray, IReader reader)
+		public void SerializeEntity(int entityID, IWriter writer)
 		{
-			this.componentStates.Deserialize(reader);
-			this.serializedStates.Deserialize(reader);
-			for (int entityID = 0; entityID < this.Capacity; entityID++)
-			{
-				if (this.serializedStates[entityID])
-				{
-					this.components[entityID].Deserialize(reader);
-				}
-				else if (previousComponentArray != null)
-				{
-					// Components not explicitly sent are assumed to be the same as previously (the case where the component does not exist is a don't-care)
-					this.components[entityID] = previousComponentArray.components[entityID];
-				}
-			}
+			this.components[entityID].Serialize(writer);
 		}
 
 		/// <summary>
-		/// Reads and overwrites the current state of all component data from a binary source, basing incoming data on a previous component array's data.
+		/// Writes the state of an entity's component data to a binary source.
 		/// </summary>
-		void IComponentArray.Deserialize(IComponentArray previousComponentArray, IReader reader)
+		void IComponentArray.SerializeEntity(int entityID, IWriter writer)
 		{
-			this.Deserialize((ComponentArray<TComponent>)previousComponentArray, reader);
+			this.SerializeEntity(entityID, writer);
+		}
+
+		/// <summary>
+		/// Reads and overwrites the current state of an entity's component data from a binary source.
+		/// </summary>
+		public void DeserializeEntity(int entityID, IReader reader)
+		{
+			this.components[entityID].Deserialize(reader);
+		}
+
+		/// <summary>
+		/// Reads and overwrites the current state of an entity's component data from a binary source.
+		/// </summary>
+		void IComponentArray.DeserializeEntity(int entityID, IReader reader)
+		{
+			this.DeserializeEntity(entityID, reader);
 		}
 
 		#endregion Methods

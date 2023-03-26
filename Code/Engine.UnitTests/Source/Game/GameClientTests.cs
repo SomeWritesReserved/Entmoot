@@ -1023,7 +1023,9 @@ namespace Entmoot.Engine.UnitTests
 
 				OutgoingMessage outgoingMessage = new OutgoingMessage(new byte[1024]);
 				ServerUpdateSerializer.Serialize(outgoingMessage, null, this.serverEntitySnapshot, mockServerUpdate.LatestClientTickReceived, mockServerUpdate.CommandingEntityID);
-				return new IncomingMessage(outgoingMessage.ToArray());
+				IncomingMessage incomingMessage = new IncomingMessage(outgoingMessage.ToArray());
+				incomingMessage.Length = outgoingMessage.Length;
+				return incomingMessage;
 			}
 
 			OutgoingMessage INetworkConnection.GetOutgoingMessageToSend()

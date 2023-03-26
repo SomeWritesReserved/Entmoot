@@ -299,7 +299,9 @@ namespace Entmoot.Debug.NetTestWinForms
 		{
 			byte[] data = this.GetNextIncomingPacket();
 			if (data == null) { return null; }
-			return new IncomingMessage(data);
+			IncomingMessage incomingMessage = new IncomingMessage(data);
+			incomingMessage.Length = data.Length;
+			return incomingMessage;
 		}
 
 		public byte[] GetNextIncomingPacket()

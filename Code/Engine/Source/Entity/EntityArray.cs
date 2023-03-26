@@ -174,10 +174,52 @@ namespace Entmoot.Engine
 		/// </summary>
 		public void Serialize(EntityArray previousEntityArray, IWriter writer)
 		{
-			for (int i = 0; i < this.entityStates.Length; i++) { writer.Write((byte)this.entityStates[i]); }
-			for (int componentTypeID = 0; componentTypeID < this.componentArrays.Length; componentTypeID++)
+			for (int entityID = 0; entityID < this.entityStates.Length; entityID++)
 			{
-				this.componentArrays[componentTypeID].Serialize(previousEntityArray?.componentArrays[componentTypeID], writer);
+				if (entityStates[entityID] == EntityState.NoEntity && previousEntityArray != null && previousEntityArray.entityStates[entityID] == EntityState.Active)
+				{
+					// Special case for a newly removed entity, should this be an event instead?
+					writer.Write((ushort)entityID);
+					writer.Write((ushort)0);
+					writer.Write((ushort)0);
+				}
+				else if (entityStates[entityID] == EntityState.Active)
+				{
+					int previousComponentsMask = 0;
+					int componentsMask = 0;
+					int serializedComponentsMask = 0;
+					for (int componentTypeID = 0; componentTypeID < this.componentArrays.Length; componentTypeID++)
+					{
+						if (previousEntityArray != null && previousEntityArray.componentArrays[componentTypeID].HasComponent(new Entity(previousEntityArray, entityID)))
+						{
+							previousComponentsMask |= (1 << componentTypeID);
+						}
+						if (this.componentArrays[componentTypeID].HasComponent(new Entity(this, entityID)))
+						{
+							componentsMask |= (1 << componentTypeID);
+							if (this.componentArrays[componentTypeID].HasEntityChanged(entityID, previousEntityArray?.componentArrays[componentTypeID]))
+							{
+								serializedComponentsMask |= (1 << componentTypeID);
+							}
+						}
+					}
+
+					if (serializedComponentsMask != 0 || componentsMask != previousComponentsMask)
+					{
+						writer.Write((ushort)entityID);
+						writer.Write((ushort)componentsMask);
+						writer.Write((ushort)serializedComponentsMask);
+					}
+
+					for (int componentTypeID = 0; componentTypeID < this.componentArrays.Length; componentTypeID++)
+					{
+						int componentTypeMask = (1 << componentTypeID);
+						if ((serializedComponentsMask & componentTypeMask) == componentTypeMask)
+						{
+							this.componentArrays[componentTypeID].SerializeEntity(entityID, writer);
+						}
+					}
+				}
 			}
 		}
 
@@ -186,10 +228,44 @@ namespace Entmoot.Engine
 		/// </summary>
 		public void Deserialize(EntityArray previousEntityArray, IReader reader)
 		{
-			for (int i = 0; i < this.entityStates.Length; i++) { this.entityStates[i] = (EntityState)reader.ReadByte(); }
-			for (int componentTypeID = 0; componentTypeID < this.componentArrays.Length; componentTypeID++)
+			if (previousEntityArray != null)
 			{
-				this.componentArrays[componentTypeID].Deserialize(previousEntityArray?.componentArrays[componentTypeID], reader);
+				// Since updates are partial, we assume the entity and component states from the previous update
+				previousEntityArray.CopyTo(this);
+			}
+
+			while (reader.BytesLeft > 0)
+			{
+				ushort entityID = reader.ReadUInt16();
+				ushort componentsMask = reader.ReadUInt16();
+				ushort serializedComponentsMask = reader.ReadUInt16();
+
+				if (componentsMask == 0 && serializedComponentsMask == 0)
+				{
+					// Special case, newly removed entity
+					this.entityStates[entityID] = EntityState.NoEntity;
+				}
+				else
+				{
+					this.entityStates[entityID] = EntityState.Active;
+
+					for (int componentTypeID = 0; componentTypeID < this.componentArrays.Length; componentTypeID++)
+					{
+						int componentTypeMask = (1 << componentTypeID);
+						if ((componentsMask & componentTypeMask) == componentTypeMask)
+						{
+							this.componentArrays[componentTypeID].AddComponent(new Entity(this, entityID));
+							if ((serializedComponentsMask & componentTypeMask) == componentTypeMask)
+							{
+								this.componentArrays[componentTypeID].DeserializeEntity(entityID, reader);
+							}
+						}
+						else
+						{
+							this.componentArrays[componentTypeID].RemoveComponent(new Entity(this, entityID));
+						}
+					}
+				}
 			}
 		}
 
